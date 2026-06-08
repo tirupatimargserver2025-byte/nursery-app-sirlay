@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 Tirumala Green House Nursery</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gd:#1a4731;--gm:#2d7a4f;--gl:#4caf78;--gp:#e8f5ee;--gg:#a8e6c0;
+  --bd:#0d3b6e;--bm:#1565c0;--bl:#42a5f5;--bp:#e3f2fd;
+  --or:#f57c00;--ol:#fff3e0;--rd:#e53935;--rl:#ffebee;
+  --pu:#6a1b9a;--pl:#f3e5f5;
+  --g1:#f7faf8;--g2:#e0e8f0;--g5:#6b7f99;--g8:#1e2d3d;
+  --sh:0 4px 24px rgba(26,71,49,0.13);--r:16px;--rs:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Baloo 2',sans-serif;background:var(--gd);min-height:100vh;color:var(--g8);}
+.screen{display:none;min-height:100vh;}
+
+/* LOGIN */
+#loginScreen{display:flex;align-items:center;justify-content:center;padding:24px;
+  background:linear-gradient(135deg,var(--gd),#0a2318);}
+.lbox{background:white;border-radius:24px;padding:32px 24px;width:100%;max-width:380px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);text-align:center;}
+.llogo{font-size:60px;margin-bottom:8px;}
+.ltitle{font-size:24px;font-weight:800;color:var(--gd);margin-bottom:2px;}
+.lsub{font-size:13px;color:var(--g5);margin-bottom:20px;}
+.pin-inp{letter-spacing:8px;font-size:22px!important;font-weight:700;text-align:center;}
+.lbtn{width:100%;padding:14px;background:linear-gradient(135deg,var(--gl),var(--gm));
+  color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;}
+.lbtn:disabled{opacity:0.6;cursor:not-allowed;}
+.lerr{background:var(--rl);color:var(--rd);border-radius:8px;padding:10px 14px;
+  font-size:13px;font-weight:600;margin-top:12px;display:none;}
+.lerr.show{display:block;}
+.linfo{background:var(--gp);color:var(--gm);border-radius:8px;padding:8px 12px;
+  font-size:12px;font-weight:600;margin-bottom:14px;}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,var(--gd),var(--gm));padding:14px 16px;
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.3);}
+.htop{display:flex;align-items:center;gap:10px;}
+.hico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.htop h1{font-size:16px;font-weight:800;color:white;line-height:1.2;}
+.htop h1 span{display:block;font-size:11px;font-weight:500;color:var(--gg);}
+.dbadge{margin-left:auto;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);
+  color:white;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.sbar{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+.sbadge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid rgba(255,255,255,0.3);}
+.sbadge.admin{background:rgba(255,215,0,0.2);color:#ffd700;}
+.sbadge.manager{background:rgba(66,165,245,0.2);color:#90caf9;}
+.sbadge.supervisor{background:rgba(76,175,120,0.2);color:var(--gg);}
+.logbtn{background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);
+  border-radius:20px;padding:4px 12px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;}
+.backbtn{display:flex;align-items:center;gap:6px;color:var(--gg);background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:4px 12px;
+  font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;width:fit-content;}
+
+/* MENU */
+.mwrap{max-width:520px;margin:0 auto;padding:14px 12px 80px;}
+.role-banner{border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.role-banner.admin{background:linear-gradient(135deg,#f57f17,#f9a825);}
+.role-banner.manager{background:linear-gradient(135deg,var(--bm),var(--bl));}
+.role-banner.supervisor{background:linear-gradient(135deg,var(--gm),var(--gl));}
+.role-banner .rico{font-size:32px;}
+.role-banner .rtext h3{font-size:15px;font-weight:800;color:white;}
+.role-banner .rtext p{font-size:11px;color:rgba(255,255,255,0.8);}
+.msec-title{font-size:12px;font-weight:700;color:var(--gg);text-transform:uppercase;
+  letter-spacing:1px;margin-bottom:10px;padding-left:4px;}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.mcard{background:white;border-radius:var(--r);padding:18px 14px;cursor:pointer;
+  transition:all 0.2s;box-shadow:var(--sh);text-align:center;border:2px solid transparent;}
+.mcard:hover{transform:translateY(-3px);}
+.mcard:active{transform:translateY(0);}
+.mcard .ico{font-size:36px;margin-bottom:8px;}
+.mcard .ttl{font-size:13px;font-weight:800;color:var(--g8);margin-bottom:3px;}
+.mcard .dsc{font-size:11px;color:var(--g5);line-height:1.3;}
+.mcard.seed{border-color:#a8e6c0;}.mcard.water{border-color:#90caf9;}
+.mcard.attend{border-color:#ffcc80;}.mcard.assign{border-color:#f48fb1;}
+.mcard.report{border-color:#ce93d8;}.mcard.admin-c{border-color:#ffd54f;}
+.mcard.soon{opacity:0.5;cursor:not-allowed;}
+.cbadge{display:inline-block;background:#f1f8e9;color:#2e7d32;border:1px solid #a5d6a7;
+  border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;margin-top:4px;}
+
+/* CARDS */
+.wrap{max-width:520px;margin:0 auto;padding:0 0 80px;}
+.card{background:white;border-radius:var(--r);padding:14px;margin:10px 10px 0;box-shadow:var(--sh);}
+.ctitle{font-size:12px;font-weight:700;color:var(--gd);text-transform:uppercase;
+  letter-spacing:0.8px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.ctitle::before{content:'';display:block;width:4px;height:14px;background:var(--gl);border-radius:2px;}
+.ctitle.blue::before{background:var(--bl);}
+.ctitle.orange::before{background:var(--or);}
+.ctitle.purple::before{background:var(--pu);}
+label{display:block;font-size:11px;font-weight:700;color:var(--g5);
+  margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;}
+input,select,textarea{width:100%;padding:9px 12px;border:2px solid var(--g2);
+  border-radius:var(--rs);font-family:inherit;font-size:14px;color:var(--g8);
+  background:var(--g1);transition:all 0.2s;outline:none;-webkit-appearance:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
+  box-shadow:0 0 0 3px rgba(76,175,120,0.12);}
+.fr{margin-bottom:10px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
+
+/* VARIETY */
+.vblock{border:2px solid var(--gg);border-radius:var(--r);margin-bottom:12px;overflow:hidden;}
+.vbh{background:linear-gradient(135deg,var(--gd),var(--gm));padding:9px 14px;
+  display:flex;align-items:center;justify-content:space-between;}
+.vbt{color:white;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.vn{background:var(--gg);color:var(--gd);width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
+.vbb{background:var(--gp);padding:12px;}
+.tplants{background:var(--gd);color:white;border-radius:8px;padding:8px 12px;
+  display:flex;align-items:center;justify-content:space-between;margin:6px 0 12px;}
+.tplants .lbl{font-size:11px;color:var(--gg);}
+.tplants .val{font-size:20px;font-weight:800;}
+.lstitle{font-size:11px;font-weight:700;color:#5c3d1e;text-transform:uppercase;
+  letter-spacing:0.8px;margin-bottom:8px;padding-bottom:5px;
+  border-bottom:2px dashed #ffe0a0;display:flex;align-items:center;justify-content:space-between;}
+.lrow{background:white;border:1.5px solid #ffe0a0;border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+.lrtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.lrn{background:var(--or);color:white;width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;}
+
+/* ASSIGNMENT */
+.akaam-block{border:2px solid #ffcc80;border-radius:var(--r);margin-bottom:12px;overflow:hidden;}
+.akbh{background:linear-gradient(135deg,#e65100,#f57c00);padding:9px 14px;
+  display:flex;align-items:center;justify-content:space-between;}
+.akbt{color:white;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.akn{background:#ffcc80;color:#bf360c;width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
+.akbb{background:#fff8f0;padding:12px;}
+.labour-tag{display:inline-flex;align-items:center;gap:4px;background:white;
+  border:1.5px solid #ffcc80;border-radius:20px;padding:4px 10px;margin:3px;
+  font-size:13px;font-weight:600;color:#5c3d1e;}
+.labour-tag button{background:none;border:none;color:#e53935;cursor:pointer;font-size:14px;padding:0;line-height:1;}
+.tags-wrap{display:flex;flex-wrap:wrap;min-height:36px;background:white;
+  border:2px solid var(--g2);border-radius:var(--rs);padding:6px;margin-bottom:8px;}
+.labour-search-wrap{display:flex;gap:6px;margin-bottom:8px;}
+.labour-dropdown{position:relative;}
+.ldrop-list{position:absolute;top:100%;left:0;right:0;background:white;
+  border:2px solid var(--gl);border-radius:var(--rs);max-height:150px;overflow-y:auto;
+  z-index:50;box-shadow:var(--sh);display:none;}
+.ldrop-list.show{display:block;}
+.ldrop-item{padding:8px 12px;cursor:pointer;font-size:13px;font-weight:600;border-bottom:1px solid var(--g2);}
+.ldrop-item:hover{background:var(--gp);}
+
+/* ATTENDANCE */
+.att-item{background:var(--g1);border:2px solid var(--g2);border-radius:var(--rs);
+  padding:10px 12px;margin-bottom:8px;transition:all 0.2s;}
+.att-item.present{border-color:var(--gl);background:var(--gp);}
+.att-item.absent{border-color:#ffcdd2;background:#fff5f5;}
+.att-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.att-name{font-size:14px;font-weight:700;color:var(--g8);}
+.att-kaam{font-size:11px;color:var(--g5);font-weight:600;}
+.sbtns{display:flex;gap:6px;}
+.sbtn{padding:5px 10px;border:2px solid var(--g2);border-radius:20px;
+  font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;background:white;transition:all 0.2s;}
+.sbtn.pa{border-color:var(--gl);background:var(--gl);color:white;}
+.sbtn.aa{border-color:var(--rd);background:var(--rd);color:white;}
+.att-det{display:none;margin-top:8px;}.att-det.show{display:block;}
+
+/* WATER */
+.ttog{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.tbtn{padding:10px 8px;border:2px solid var(--g2);border-radius:var(--rs);background:var(--g1);
+  font-family:inherit;font-size:13px;font-weight:700;color:var(--g5);cursor:pointer;text-align:center;transition:all 0.2s;}
+.tbtn.aw{border-color:var(--bl);background:var(--bp);color:var(--bm);}
+.tbtn.as{border-color:#66bb6a;background:#e8f5e9;color:#2e7d32;}
+.cblock{border:2px solid #c8e6c9;border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
+.cbh{background:linear-gradient(135deg,#2e7d32,#388e3c);padding:9px 14px;
+  display:flex;align-items:center;justify-content:space-between;}
+.cbt{color:white;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.cn{background:#a5d6a7;color:#1b5e20;width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
+.cbb{background:#f1f8e9;padding:12px;}
+.wlblock{border:2px solid #ffe0b2;border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
+.wlbh{background:linear-gradient(135deg,#e65100,#f57c00);padding:9px 14px;
+  display:flex;align-items:center;justify-content:space-between;}
+.wlbt{color:white;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.wln{background:#ffcc80;color:#bf360c;width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
+.wlbb{background:#fff8f0;padding:12px;}
+.wsec{display:none;}.wsec.show{display:block;}
+.watsec{display:block;}.watsec.hide{display:none;}
+.ipill{background:var(--bp);border:1px solid #90caf9;color:var(--bm);
+  padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:10px;display:block;}
+
+/* REPORT */
+.rep-card{background:white;border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--sh);}
+.rep-title{font-size:14px;font-weight:800;color:var(--g8);margin-bottom:4px;}
+.rep-sub{font-size:12px;color:var(--g5);margin-bottom:12px;}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+.stat-item{background:var(--g1);border-radius:10px;padding:10px;text-align:center;}
+.stat-item .sv{font-size:22px;font-weight:800;color:var(--gm);display:block;}
+.stat-item .sl{font-size:10px;color:var(--g5);text-transform:uppercase;}
+.rep-row{display:flex;align-items:center;justify-content:space-between;
+  padding:8px 0;border-bottom:1px solid var(--g2);font-size:13px;}
+.rep-row:last-child{border-bottom:none;}
+.rep-row .rn{font-weight:700;color:var(--g8);}
+.rep-row .rv{color:var(--g5);}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;margin-left:6px;}
+.tag.p{background:#e8f5e9;color:#2e7d32;}.tag.a{background:var(--rl);color:var(--rd);}
+.tag.sup{background:var(--gp);color:var(--gm);}.tag.mgr{background:var(--bp);color:var(--bm);}
+.tag.adm{background:#fff8e1;color:#f57f17;}
+
+/* ADMIN */
+.admin-row{display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0;border-bottom:1px solid var(--g2);}
+.admin-row:last-child{border-bottom:none;}
+.admin-info .an{font-size:14px;font-weight:700;color:var(--g8);}
+.admin-info .ar{font-size:11px;color:var(--g5);}
+.toggle-btn{padding:6px 14px;border:none;border-radius:20px;font-family:inherit;
+  font-size:12px;font-weight:700;cursor:pointer;}
+.toggle-btn.active{background:var(--rl);color:var(--rd);}
+.toggle-btn.inactive{background:var(--gp);color:var(--gm);}
+
+/* BUTTONS */
+.rmbtn{background:rgba(255,255,255,0.2);color:white;border:none;border-radius:6px;
+  width:26px;height:26px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.rmbtn:hover{background:var(--rd);}
+.rmbtn2{background:var(--rl);color:var(--rd);border:none;border-radius:6px;
+  width:26px;height:26px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.rmbtn2:hover{background:var(--rd);color:white;}
+.abtn{width:100%;padding:9px;border:2px dashed;border-radius:var(--rs);background:transparent;
+  font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:6px;}
+.ag{border-color:var(--gl);color:var(--gm);}.ag:hover{background:var(--gp);border-style:solid;}
+.ao{border-color:var(--or);color:#bf360c;background:#fff8f0;}.ao:hover{background:var(--ol);border-style:solid;}
+.ac{border-color:#66bb6a;color:#2e7d32;background:#f1f8e9;}.ac:hover{background:#c8e6c9;border-style:solid;}
+.apr{border-color:var(--pu);color:var(--pu);}.apr:hover{background:var(--pl);border-style:solid;}
+
+/* SUMMARY */
+.sumcard{background:linear-gradient(135deg,var(--gd),#0a2318);border-radius:var(--r);
+  padding:14px;margin:10px 10px 0;color:white;box-shadow:0 8px 32px rgba(26,71,49,0.3);}
+.sumtitle{font-size:11px;font-weight:700;color:var(--gg);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;}
+.sg4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;}
+.sg3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.si{background:rgba(255,255,255,0.07);border-radius:10px;padding:8px 4px;text-align:center;}
+.si .val{font-size:18px;font-weight:800;color:var(--gg);display:block;}
+.si .lbl{font-size:10px;color:rgba(255,255,255,0.55);text-transform:uppercase;}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.chip{background:rgba(168,230,192,0.15);border:1px solid rgba(168,230,192,0.3);
+  color:var(--gg);padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+
+/* SUBMIT */
+.subbtn{display:flex;align-items:center;justify-content:center;gap:8px;
+  width:calc(100% - 20px);margin:10px 10px 0;padding:15px;
+  background:linear-gradient(135deg,var(--gl),var(--gm));color:white;border:none;
+  border-radius:var(--r);font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;
+  box-shadow:0 4px 20px rgba(76,175,120,0.4);transition:all 0.2s;}
+.subbtn:hover{transform:translateY(-2px);}.subbtn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);
+  background:var(--gd);color:white;padding:12px 22px;border-radius:40px;font-size:13px;
+  font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,0.3);z-index:999;transition:transform 0.3s;
+  white-space:nowrap;max-width:92vw;text-align:center;}
+.toast.show{transform:translateX(-50%) translateY(0);}.toast.error{background:var(--rd);}
+.toast.success{background:var(--gm);}
+
+/* SUCCESS */
+.sucscreen{display:none;position:fixed;inset:0;background:var(--gd);z-index:200;
+  align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:32px;}
+.sucscreen.show{display:flex;}
+.sucico{font-size:72px;margin-bottom:16px;animation:pop 0.5s ease;}
+@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+.sucscreen h2{color:white;font-size:24px;font-weight:800;margin-bottom:8px;}
+.sucscreen p{color:var(--gg);font-size:14px;margin-bottom:24px;line-height:1.7;white-space:pre-line;}
+.sucbtns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.nebtn{background:var(--gl);color:white;border:none;border-radius:var(--r);
+  padding:12px 24px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;}
+.menbtn{background:rgba(255,255,255,0.12);color:white;border:1px solid rgba(255,255,255,0.2);
+  border-radius:var(--r);padding:12px 24px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;}
+
+/* EXCEL ATTENDANCE TABLE */
+.att-table{width:100%;border-collapse:collapse;font-size:13px;}
+.att-table th{background:var(--gd);color:white;padding:8px 6px;text-align:left;font-size:11px;font-weight:700;white-space:nowrap;}
+.att-table td{padding:6px 4px;border-bottom:1px solid var(--g2);vertical-align:middle;}
+.att-table tr:hover td{background:var(--g1);}
+.att-table tr.row-present td{background:#f1f8f4;}
+.att-table tr.row-half td{background:#fffde7;}
+.att-table tr.row-absent td{background:#fff5f5;}
+.att-table input[type=number]{width:60px;padding:4px 6px;font-size:12px;border:1.5px solid var(--g2);border-radius:6px;text-align:center;}
+.att-table input[type=text]{width:90px;padding:4px 6px;font-size:12px;border:1.5px solid var(--g2);border-radius:6px;}
+.st-btn{padding:3px 7px;border:1.5px solid var(--g2);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;background:white;transition:all 0.15s;margin:1px;}
+.st-btn.sp{border-color:var(--gl);background:var(--gl);color:white;}
+.st-btn.sh{border-color:#ffa726;background:#ffa726;color:white;}
+.st-btn.sa{border-color:var(--rd);background:var(--rd);color:white;}
+.att-total-row{background:var(--gd)!important;color:white;font-weight:700;}
+.att-total-row td{color:white!important;border:none!important;}
+
+</style>
+</head>
+<body>
+
+<!-- ════ LOGIN ════ -->
+<div class="screen" id="loginScreen" style="display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#1a4731,#0a2318);">
+  <div class="lbox">
+    <div class="llogo">🌱</div>
+    <div class="ltitle">TGH Nursery Sirlay</div>
+    <div class="lsub">Tirumala Green House Nursery, Sirlay</div>
+    <div class="linfo" id="loadInfo">⏳ Loading...</div>
+    <div class="fr"><label>👷 Apna Naam Chunein</label>
+      <select id="loginName"><option value="">-- Naam Chunein --</option></select></div>
+    <div class="fr"><label>🔐 PIN Dalein</label>
+      <input type="password" inputmode="numeric" maxlength="6" class="pin-inp" id="loginPin" placeholder="••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="lbtn" id="loginBtn" onclick="doLogin()">🔓 Login Karein</button>
+    <div class="lerr" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ════ MENU ════ -->
+<div class="screen" id="menuScreen">
+  <div class="hdr">
+    <div class="htop">
+      <div class="hico" id="menuIco">🌱</div>
+      <h1 id="menuTitle">TGH Nursery Sirlay <span>Tirumala Green House Nursery, Sirlay</span></h1>
+      <div class="dbadge" id="dateTop"></div>
+    </div>
+    <div class="sbar">
+      <span class="sbadge" id="supBadge">👷</span>
+      <button class="logbtn" onclick="doLogout()">↩ Logout</button>
+    </div>
+  </div>
+  <div class="mwrap">
+    <div class="role-banner" id="roleBanner">
+      <div class="rico" id="roleIco">👷</div>
+      <div class="rtext"><h3 id="roleTitle">Supervisor</h3><p id="roleDesc">Kaam ki entry karo</p></div>
+    </div>
+
+    <!-- Supervisor Menu -->
+    <div id="supMenu">
+      <div class="msec-title">🌅 Subah Ka Kaam</div>
+      <div class="mgrid">
+        <div class="mcard assign" onclick="openMod('assign')">
+          <div class="ico">📋</div><div class="ttl">Morning Assignment</div>
+          <div class="dsc">Labour kahan kaam karega</div>
+        </div>
+        <div class="mcard soon">
+          <div class="ico">👷</div><div class="ttl">Attendance</div>
+          <div class="dsc">Manager ke paas hai</div>
+          <span class="cbadge">Manager Only</span>
+        </div>
+      </div>
+      <div class="msec-title">📊 Kaam Ki Entry</div>
+      <div class="mgrid">
+        <div class="mcard seed" onclick="openMod('seed')">
+          <div class="ico">🌱</div><div class="ttl">Seed Sowing</div>
+          <div class="dsc">Variety, PKT, Tray, Labour</div>
+        </div>
+        <div class="mcard water" onclick="openMod('water')">
+          <div class="ico">💧</div><div class="ttl">Watering & Spraying</div>
+          <div class="dsc">Chemical, dose, pump</div>
+        </div>
+        <div class="mcard soon"><div class="ico">🪴</div><div class="ttl">Potting</div><div class="dsc">Pot size, qty</div><span class="cbadge">Jald Aayega</span></div>
+        <div class="mcard soon"><div class="ico">🚚</div><div class="ttl">Dispatch</div><div class="dsc">Party, qty, vehicle</div><span class="cbadge">Jald Aayega</span></div>
+      </div>
+    </div>
+
+    <!-- Manager Menu -->
+    <div id="mgrMenu" style="display:none;">
+      <div class="msec-title">👷 Attendance</div>
+      <div class="mgrid">
+        <div class="mcard attend" onclick="openMod('attend')">
+          <div class="ico">📝</div><div class="ttl">Daily Entry</div>
+          <div class="dsc">Present / Half Day / Absent + OT</div>
+        </div>
+        <div class="mcard report" onclick="openMod('attReport')">
+          <div class="ico">📊</div><div class="ttl">Attendance Report</div>
+          <div class="dsc">Date range + Labour match check</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Menu -->
+    <div id="adminMenu" style="display:none;">
+      <div class="msec-title">📊 Reports</div>
+      <div class="mgrid">
+        <div class="mcard report" onclick="openMod('report')">
+          <div class="ico">📈</div><div class="ttl">Daily Report</div>
+          <div class="dsc">Aaj ka poora kaam</div>
+        </div>
+        <div class="mcard attend" onclick="openMod('attend')">
+          <div class="ico">👷</div><div class="ttl">Attendance Entry</div>
+          <div class="dsc">Present/Absent/Half Day</div>
+        </div>
+        <div class="mcard attend" onclick="openMod('attReport')">
+          <div class="ico">👥</div><div class="ttl">Attendance Report</div>
+          <div class="dsc">Labour match check</div>
+        </div>
+      </div>
+      <div class="msec-title">⚙️ Admin Controls</div>
+      <div class="mgrid">
+        <div class="mcard admin-c" onclick="openMod('adminUsers')">
+          <div class="ico">👑</div><div class="ttl">User Management</div>
+          <div class="dsc">Supervisor add/remove</div>
+        </div>
+        <div class="mcard admin-c" onclick="openMod('adminLabour')">
+          <div class="ico">👷</div><div class="ttl">Labour Master</div>
+          <div class="dsc">Labour list manage karo</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MORNING ASSIGNMENT ════ -->
+<div class="screen" id="assignScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:#ff8a65;">📋</div>
+      <h1>Morning Assignment <span>Kaun kahan kaam karega</span></h1>
+      <div class="dbadge" id="asBadge"></div></div>
+    <div class="sbar"><span class="sbadge supervisor" id="asSupB">👷</span>
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle orange">Basic Jaankari</div>
+      <div class="g2">
+        <div><label>📅 Date</label><input type="date" id="asDate"></div>
+        <div><label>👷 Supervisor</label><select id="asSup"><option value="">-- Select --</option></select></div>
+      </div>
+      <div class="fr"><label>📍 Area/Zone</label>
+        <select id="asArea"><option value="">-- Select --</option>
+          <option>Saraswati</option><option>Kedar</option><option>Onkar</option>
+          <option>Godavari</option><option>Brahmputra</option><option>NH</option>
+        </select></div>
+    </div>
+    <div class="card">
+      <div class="ctitle orange">Kaam + Labour Assignment</div>
+      <div id="assignCon"></div>
+      <button class="abtn ao" onclick="addAssignKaam()">➕ Nayi Kaam Category Add Karo</button>
+    </div>
+    <div class="sumcard">
+      <div class="sumtitle">📊 Today's Assignment Summary</div>
+      <div class="sg3">
+        <div class="si"><span class="val" id="asSmK">0</span><div class="lbl">Kaam Types</div></div>
+        <div class="si"><span class="val" id="asSmL">0</span><div class="lbl">Total Labour</div></div>
+        <div class="si"><span class="val" id="asSmU">0</span><div class="lbl">Unique Labour</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:10px;">
+      <div class="ctitle orange">📝 Remarks</div>
+      <textarea id="asRem" rows="2" placeholder="Koi khaas baat..."></textarea>
+    </div>
+    <button class="subbtn" id="asSub" onclick="submitAssign()" style="background:linear-gradient(135deg,#ff8a65,#e65100);">📋 Assignment Save Karo</button>
+  </div>
+</div>
+
+<!-- ════ ATTENDANCE ════ -->
+<div class="screen" id="attendScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:#ffb74d;">👷</div>
+      <h1>Attendance <span>Present / Absent Entry</span></h1>
+      <div class="dbadge" id="attBadge"></div></div>
+    <div class="sbar"><span class="sbadge supervisor" id="attSupB">👷</span>
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle orange">Basic Jaankari</div>
+      <div class="fr">
+        <label>📅 Date</label>
+        <input type="date" id="attDate">
+      </div>
+      <input type="hidden" id="attSup">
+      <input type="hidden" id="attArea" value="">
+      <input type="hidden" id="attKaam" value="Daily Attendance">
+      <div style="background:var(--gp);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;color:var(--gm);">
+        👔 Entry by: <span id="attSupShow"></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle orange">👷 Labour List</div>
+      <div class="fr">
+        <div class="labour-search-wrap">
+          <div class="labour-dropdown" style="flex:1;position:relative;">
+            <input type="text" id="attSearch" placeholder="Labour naam type karo ya dhundho..." oninput="filterAttLabour()" onfocus="showAttDrop()" onblur="setTimeout(hideAttDrop,200)">
+            <div class="ldrop-list" id="attDropList"></div>
+          </div>
+          <button onclick="addCustomLabour()" style="background:var(--or);color:white;border:none;border-radius:var(--rs);padding:9px 14px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">+ Naya</button>
+        </div>
+      </div>
+      <div id="attList"></div>
+    </div>
+    <div class="sumcard">
+      <div class="sumtitle">📊 Live Summary</div>
+      <div class="sg3">
+        <div class="si"><span class="val" id="attSmP">0</span><div class="lbl">Present</div></div>
+        <div class="si"><span class="val" id="attSmA">0</span><div class="lbl">Absent</div></div>
+        <div class="si"><span class="val" id="attSmH">₹0</span><div class="lbl">Total Wage</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:10px;"><div class="ctitle orange">📝 Remarks</div>
+      <textarea id="attRem" rows="2" placeholder="Koi khaas baat..."></textarea></div>
+    <button class="subbtn" id="attSub" onclick="submitAttend()" style="background:linear-gradient(135deg,#ffb74d,#e65100);">✅ Attendance Save Karo</button>
+  </div>
+</div>
+
+<!-- ════ SEED SOWING ════ -->
+<div class="screen" id="seedScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--gl);">🌱</div>
+      <h1>Seed Sowing <span>Labour Tracking</span></h1><div class="dbadge" id="sBadge"></div></div>
+    <div class="sbar"><span class="sbadge supervisor" id="sSupB">👷</span>
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">Basic Jaankari</div>
+      <div class="g2">
+        <div><label>📅 Date</label><input type="date" id="sDate"></div>
+        <div><label>👷 Supervisor</label>
+          <input type="text" id="sSupName" readonly style="background:#e8f5ee;font-weight:700;color:var(--gm);">
+          <input type="hidden" id="sSup"></div>
+      </div>
+      <div class="g2">
+        <div><label>📍 Area</label>
+          <select id="sArea"><option value="">-- Select --</option>
+            <option>Saraswati</option><option>Kedar</option><option>Onkar</option>
+            <option>Godavari</option><option>Brahmputra</option><option>NH</option>
+          </select></div>
+        <div><label>⏰ Shift</label>
+          <select id="sShift"><option>Full Day</option><option>Half Day</option></select></div>
+      </div>
+    </div>
+    <div class="card"><div class="ctitle">Variety + Labour Entry</div>
+      <div id="vCon"></div>
+      <button class="abtn ag" onclick="addV()">➕ Nayi Variety Add Karo</button></div>
+    <div class="sumcard">
+      <div class="sumtitle">📊 Live Summary</div>
+      <div class="sg4">
+        <div class="si"><span class="val" id="smV">0</span><div class="lbl">Varieties</div></div>
+        <div class="si"><span class="val" id="smP">0</span><div class="lbl">Plants</div></div>
+        <div class="si"><span class="val" id="smL">0</span><div class="lbl">Labour</div></div>
+        <div class="si"><span class="val" id="smPk">0</span><div class="lbl">Pkts</div></div>
+      </div>
+      <div id="chipRow" class="chips"></div>
+    </div>
+    <div class="card" style="margin-top:10px;"><div class="ctitle">📝 Remarks</div>
+      <textarea id="sRem" rows="2" placeholder="Koi khaas baat..."></textarea></div>
+    <button class="subbtn" id="sSub" onclick="submitSeed()">✅ Entry Save Karo</button>
+  </div>
+</div>
+
+<!-- ════ WATERING ════ -->
+<div class="screen" id="waterScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--bl);">💧</div>
+      <h1>Watering & Spraying <span>Labour Tracking</span></h1><div class="dbadge" id="wBadge"></div></div>
+    <div class="sbar"><span class="sbadge supervisor" id="wSupB">👷</span>
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle blue">Basic Jaankari</div>
+      <div class="g2">
+        <div><label>📅 Date</label><input type="date" id="wDate"></div>
+        <div><label>👷 Supervisor</label><select id="wSup"><option value="">-- Select --</option></select></div>
+      </div>
+      <div class="g2">
+        <div><label>📍 Area</label>
+          <select id="wArea"><option value="">-- Select --</option>
+            <option>Saraswati</option><option>Kedar</option><option>Onkar</option>
+            <option>Godavari</option><option>Brahmputra</option><option>NH</option>
+          </select></div>
+        <div><label>⏰ Shift</label>
+          <select id="wShift"><option>Subah (6am-2pm)</option><option>Dopahar (2pm-10pm)</option><option>Full Day</option></select></div>
+      </div>
+      <div class="g2">
+        <div><label>🕐 Start Time</label><input type="time" id="wST"></div>
+        <div><label>🕐 End Time</label><input type="time" id="wET"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle blue">Kaam Ka Type</div>
+      <div class="ttog">
+        <button class="tbtn aw" id="btnW" onclick="setWT('water')">💧 Watering</button>
+        <button class="tbtn" id="btnS" onclick="setWT('spray')">🌿 Spraying</button>
+      </div>
+      <input type="hidden" id="wKT" value="water">
+      <div class="watsec" id="watSec">
+        <span class="ipill">💧 Seedhi paani se sijaai</span>
+        <div class="g2">
+          <div><label>🚿 Method</label>
+            <select id="wMeth"><option>Haath se (pipe)</option><option>Drip Irrigation</option><option>Sprinkler</option><option>Watering Can</option><option>Other</option></select></div>
+          <div><label>💦 Pani (litre)</label><input type="number" id="wLitre" placeholder="0" min="0" oninput="updWS()"></div>
+        </div>
+        <div class="fr"><label>🌱 Kaunsi Plants</label><input type="text" id="wPlants" placeholder="e.g. Mirchi, Bengan"></div>
+      </div>
+      <div class="wsec" id="spraySec">
+        <span class="ipill">🌿 Chemical/Fertilizer spraying</span>
+        <div class="g2">
+          <div><label>🔫 Sprayer</label>
+            <select id="spType"><option>Haath wala pump</option><option>Power sprayer</option><option>Dono</option></select></div>
+          <div><label>🔢 Pump Count</label><input type="number" id="pCnt" placeholder="0" min="0" oninput="updWS()"></div>
+        </div>
+        <div class="g2">
+          <div><label>💧 Pani/Pump (L)</label><input type="number" id="wPP" placeholder="16" min="0" oninput="updWS()"></div>
+          <div><label>🌱 Area Covered</label><input type="text" id="aCov" placeholder="Zone A, GH-1"></div>
+        </div>
+        <div class="ctitle" style="margin-top:4px;">🧪 Chemicals</div>
+        <div id="cCon"></div>
+        <button class="abtn ac" onclick="addC()">➕ Chemical Add Karo</button>
+      </div>
+    </div>
+    <div class="card"><div class="ctitle blue">👷 Labour Details</div>
+      <div id="wlCon"></div>
+      <button class="abtn ao" onclick="addWL()">➕ Labour Add Karo</button></div>
+    <div class="sumcard">
+      <div class="sumtitle">📊 Live Summary</div>
+      <div class="sg3">
+        <div class="si"><span class="val" id="wsmL">0</span><div class="lbl">Labour</div></div>
+        <div class="si"><span class="val" id="wsmPu">—</span><div class="lbl">Pumps</div></div>
+        <div class="si"><span class="val" id="wsmW">0L</span><div class="lbl">Pani</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:10px;"><div class="ctitle blue">📝 Remarks</div>
+      <textarea id="wRem" rows="2" placeholder="Koi khaas baat..."></textarea></div>
+    <button class="subbtn" id="wSub" onclick="submitWater()" style="background:linear-gradient(135deg,var(--bl),var(--bm));">✅ Entry Save Karo</button>
+  </div>
+</div>
+
+<!-- ════ REPORT ════ -->
+<div class="screen" id="reportScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--pu);">📊</div>
+      <h1 id="repTitle">Reports <span>Data Overview</span></h1><div class="dbadge" id="repBadge"></div></div>
+    <div class="sbar"><span class="sbadge manager" id="repSupB">👔</span>
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle purple">📅 Date Filter</div>
+      <div class="g2">
+        <div><label>From Date</label><input type="date" id="repFrom"></div>
+        <div><label>To Date</label><input type="date" id="repTo"></div>
+      </div>
+      <button id="repBtn" onclick="repBtnClick()" style="width:100%;padding:10px;background:var(--pu);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">🔍 Report Dekho</button>
+    </div>
+    <div id="reportContent"></div>
+  </div>
+</div>
+
+<!-- ════ ADMIN ════ -->
+<div class="screen" id="adminScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:#f9a825;">👑</div>
+      <h1>Admin Panel <span>User Management</span></h1></div>
+    <div class="sbar"><span class="sbadge adm" id="adminSupB">👑 Admin</span>
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle" style="color:#f57f17;">👥 Sabhi Users</div>
+      <div id="userList"></div>
+    </div>
+    <div class="card" style="margin-top:10px;">
+      <div class="ctitle" style="color:#f57f17;">➕ Naya User Add Karo</div>
+      <div class="fr"><label>👤 Naam</label><input type="text" id="newUserName" placeholder="Supervisor ka naam..."></div>
+      <div class="g2">
+        <div><label>🔐 PIN</label><input type="number" id="newUserPin" placeholder="4-6 digit PIN"></div>
+        <div><label>🎭 Role</label>
+          <select id="newUserRole">
+            <option>Supervisor</option><option>Manager</option><option>Admin</option>
+          </select></div>
+      </div>
+      <button onclick="addUser()" style="width:100%;padding:10px;background:#f9a825;color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">➕ User Add Karo</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="sucscreen" id="sucScreen">
+  <div class="sucico" id="sucIco">✅</div>
+  <h2>Save Ho Gayi!</h2>
+  <p id="sucMsg"></p>
+  <div class="sucbtns">
+    <button class="nebtn" onclick="newEntry()">+ Nayi Entry</button>
+    <button class="menbtn" onclick="goMenuS()">🏠 Menu</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycby0fQccHQWGaZByfVSXtLv7ezIiEZDFOJ-EsTkukhmXBSpl2yG3JetFuekDtz-2omPOxA/exec';
+const SHEET_ID = '1nItPv5Jk4baU4Rg6fgQMYchRK7exQk-KDsRkHLl34Ew';
+
+let SUP_DATA = {}; // {name: {pin, role}}
+let LABOUR_LIST = []; // [{name, wage}]
+let VDATA = {};
+let curUser = null; // {name, role}
+let curMod = null;
+let vCnt=0, lCnt={}, cCnt=0, wlCnt=0, akCnt=0;
+let akLabours = {}; // {akid: [names]}
+
+// ════ INIT ════
+window.onload = () => {
+  const t = new Date();
+  const iso = t.toISOString().split('T')[0];
+  const fmt = t.toLocaleDateString('hi-IN',{weekday:'short',day:'numeric',month:'short'});
+  ['dateTop','asBadge','attBadge','sBadge','wBadge','repBadge'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.textContent=fmt;
+  });
+  ['asDate','attDate','sDate','wDate','repFrom','repTo'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value=iso;
+  });
+  const now = t.toTimeString().slice(0,5);
+  if(document.getElementById('wST')) document.getElementById('wST').value=now;
+  loadAll();
+};
+
+// ════ SHOW SCREEN ════
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s=>{s.style.display='none';});
+  const el = document.getElementById(id);
+  if(id==='loginScreen') el.style.display='flex';
+  else el.style.display='block';
+  window.scrollTo(0,0);
+}
+
+// ════ LOAD DATA ════
+function loadAll() {
+  // Load Supervisors
+  fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Supervisors')
+    .then(r=>r.text()).then(txt=>{
+      try {
+        const json=JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+        SUP_DATA={};
+        const names=[];
+        json.table.rows.forEach(row=>{
+          if(!row.c[0]||!row.c[0].v) return;
+          const nm=row.c[0].v.toString().trim();
+          // Skip header row
+          if(nm==='Supervisor Naam'||nm==='Naam'||nm==='Name') return;
+          const pin=row.c[1]?row.c[1].v.toString().trim():'';
+          const st=row.c[2]?row.c[2].v.toString().trim().toLowerCase():'active';
+          const role=row.c[3]?row.c[3].v.toString().trim():'Supervisor';
+          if(nm && st==='active'){
+            SUP_DATA[nm]={pin,role};
+            names.push(nm);
+          }
+        });
+        const sel=document.getElementById('loginName');
+        sel.innerHTML='<option value="">-- Naam Chunein --</option>';
+        names.forEach(n=>sel.innerHTML+='<option value="'+n+'">'+n+'</option>');
+        document.getElementById('loadInfo').textContent='✅ '+names.length+' users ready!';
+        setTimeout(()=>{document.getElementById('loadInfo').style.display='none';},2000);
+      } catch(e){document.getElementById('loadInfo').textContent='⚠️ Load error!';}
+    }).catch(()=>{document.getElementById('loadInfo').textContent='⚠️ Network error!';});
+
+  // Load Master List
+  fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Master%20List')
+    .then(r=>r.text()).then(txt=>{
+      try {
+        const json=JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+        VDATA={};
+        json.table.rows.forEach(row=>{
+          if(!row.c[0]||!row.c[0].v) return;
+          const veg=row.c[0].v.toString().trim();
+          // Skip header
+          if(veg==='Vegetable'||veg==='vegetable') return;
+          const variety=row.c[1]?row.c[1].v.toString().trim():'';
+          if(veg&&variety){if(!VDATA[veg])VDATA[veg]=[];if(VDATA[veg].indexOf(variety)===-1)VDATA[veg].push(variety);}
+        });
+      } catch(e){}
+    }).catch(()=>{});
+
+  // Load Labour Master
+  fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Labour%20Master')
+    .then(r=>r.text()).then(txt=>{
+      try {
+        const json=JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+        LABOUR_LIST=[];
+        json.table.rows.forEach(row=>{
+          if(!row.c[0]||!row.c[0].v) return;
+          const nm=row.c[0].v.toString().trim();
+          // Skip header
+          if(nm==='Labour Naam'||nm==='Naam'||nm==='Name') return;
+          LABOUR_LIST.push({name:nm, wage:row.c[1]?parseFloat(row.c[1].v)||0:0});
+        });
+      } catch(e){}
+    }).catch(()=>{});
+}
+
+// ════ LOGIN ════
+function doLogin() {
+  const name=document.getElementById('loginName').value;
+  const pin=document.getElementById('loginPin').value;
+  if(!name){showErr('❗ Pehle apna naam chunein!');return;}
+  if(!pin){showErr('❗ PIN daalna zaroori hai!');return;}
+
+  if(Object.keys(SUP_DATA).length>0) {
+    if(!SUP_DATA[name]){showErr('❌ Supervisor nahi mila!');return;}
+    if(SUP_DATA[name].pin.toString().trim()!==pin.toString().trim()){showErr('❌ Galat PIN!');return;}
+    loginOk(name, SUP_DATA[name].role);
+  } else {
+    // Fallback
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Supervisors')
+      .then(r=>r.text()).then(txt=>{
+        try {
+          const json=JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+          let found=false;
+          json.table.rows.forEach(row=>{
+            if(!row.c[0]||!row.c[0].v) return;
+            const nm=row.c[0].v.toString().trim();
+            // Skip header row
+            if(nm==='Supervisor Naam'||nm==='Naam') return;
+            const p=row.c[1]?row.c[1].v.toString().trim():'';
+            const role=row.c[3]?row.c[3].v.toString().trim():'Supervisor';
+            if(nm===name && p===pin){found=true;loginOk(name,role);}
+          });
+          if(!found) showErr('❌ Galat naam ya PIN!');
+        } catch(e){showErr('⚠️ Error! Dobara try karo.');}
+      });
+  }
+}
+
+function loginOk(name, role) {
+  curUser={name,role};
+  document.getElementById('loginPin').value='';
+  document.getElementById('loginErr').classList.remove('show');
+
+  // Set role badge
+  const badge=document.getElementById('supBadge');
+  badge.className='sbadge '+role.toLowerCase();
+  badge.textContent=(role==='Admin'?'👑':role==='Manager'?'👔':'👷')+' '+name+' ('+role+')';
+
+  // Set role banner
+  const rb=document.getElementById('roleBanner');
+  rb.className='role-banner '+role.toLowerCase();
+  if(role==='Admin'){
+    document.getElementById('roleIco').textContent='👑';
+    document.getElementById('roleTitle').textContent='Admin — '+name;
+    document.getElementById('roleDesc').textContent='Poora system control karo';
+  } else if(role==='Manager'){
+    document.getElementById('roleIco').textContent='👔';
+    document.getElementById('roleTitle').textContent='Manager — '+name;
+    document.getElementById('roleDesc').textContent='Saari reports dekho';
+  } else {
+    document.getElementById('roleIco').textContent='👷';
+    document.getElementById('roleTitle').textContent='Supervisor — '+name;
+    document.getElementById('roleDesc').textContent='Kaam ki entry karo';
+  }
+
+  // Show correct menu
+  document.getElementById('supMenu').style.display = (role==='Supervisor'?'block':'none');
+  document.getElementById('mgrMenu').style.display  = (role==='Manager'?'block':'none');
+  document.getElementById('adminMenu').style.display= (role==='Admin'?'block':'none');
+
+  // Fill supervisor dropdowns
+  const supNames = Object.keys(SUP_DATA).filter(n=>SUP_DATA[n] && SUP_DATA[n].role==='Supervisor');
+  ['asSup','attSup','sSup','wSup'].forEach(id=>{
+    const sel=document.getElementById(id); if(!sel) return;
+    sel.innerHTML='<option value="">-- Select --</option>';
+    supNames.forEach(n=>sel.innerHTML+='<option value="'+n+'">'+n+'</option>');
+    if(role==='Supervisor') setSel(id,name);
+  });
+
+  show('menuScreen');
+}
+
+function showErr(m){const e=document.getElementById('loginErr');e.textContent=m;e.classList.add('show');}
+
+function doLogout(){
+  if(!confirm('Logout karna chahte hain?'))return;
+  curUser=null;
+  document.getElementById('loginPin').value='';
+  document.getElementById('loginName').value='';
+  document.getElementById('loginErr').classList.remove('show');
+  document.getElementById('loadInfo').style.display='block';
+  document.getElementById('loadInfo').textContent='⏳ Loading...';
+  show('loginScreen');
+  loadAll();
+}
+
+function setSel(id,val){
+  const s=document.getElementById(id);
+  if(!s||!s.options||!val) return;
+  for(let i=0;i<s.options.length;i++){
+    if(s.options[i].value===val){s.selectedIndex=i;break;}
+  }
+}
+function goMenu(){show('menuScreen');}
+
+// ════ OPEN MODULE ════
+function openMod(mod) {
+  curMod=mod;
+  if(mod==='assign') {
+    setSel('asSup',curUser.name);
+    document.getElementById('asSupB').textContent='👷 '+curUser.name;
+    if(!document.querySelector('[id^="ak-"]')){akCnt=0;addAssignKaam();}
+    show('assignScreen');
+  } else if(mod==='attend') {
+    document.getElementById('attSup').value=curUser.name;
+    document.getElementById('attSupShow').textContent=curUser.name;
+    document.getElementById('attSupB').textContent='👔 '+curUser.name;
+    document.getElementById('attList').innerHTML='';
+    renderAttLabour();
+    show('attendScreen');
+  } else if(mod==='seed') {
+    // Auto set supervisor
+    document.getElementById('sSup').value=curUser.name;
+    document.getElementById('sSupName').value='👷 '+curUser.name;
+    document.getElementById('sSupB').textContent='👷 '+curUser.name;
+    if(!document.querySelector('[id^="vb-"]')){vCnt=0;addV();}
+    show('seedScreen');
+  } else if(mod==='water') {
+    setSel('wSup',curUser.name);
+    document.getElementById('wSupB').textContent='👷 '+curUser.name;
+    if(!document.querySelector('[id^="wlb-"]')){wlCnt=0;addWL();}
+    show('waterScreen');
+  } else if(mod==='attReport') {
+    document.getElementById('repSupB').textContent=(curUser.role==='Manager'?'👔':'👑')+' '+curUser.name;
+    document.getElementById('repTitle').textContent='👷 Attendance Report';
+    show('reportScreen');
+    loadAttReport();
+  } else if(mod==='report'||mod==='seedReport'||mod==='waterReport') {
+    document.getElementById('repSupB').textContent=(curUser.role==='Manager'?'👔':'👑')+' '+curUser.name;
+    document.getElementById('repTitle').textContent='📊 Daily Report';
+    show('reportScreen');
+  } else if(mod==='adminUsers') {
+    loadUserList();
+    show('adminScreen');
+  }
+}
+
+// ════ MORNING ASSIGNMENT ════
+function addAssignKaam() {
+  akCnt++; const akid=akCnt;
+  akLabours[akid]=[];
+  const d=document.createElement('div');
+  d.className='akaam-block'; d.id='ak-'+akid;
+  d.innerHTML='<div class="akbh"><div class="akbt"><div class="akn">'+akid+'</div> Kaam '+akid+'</div>'+(akid>1?'<button class="rmbtn" onclick="remAK('+akid+')">✕</button>':'')+
+  '</div><div class="akbb">'+
+  '<div class="fr"><label>🔨 Kaam Ka Type</label>'+
+  '<select id="akt-'+akid+'">'+
+  '<option>Seed Sowing</option><option>Watering</option><option>Spraying</option>'+
+  '<option>Potting</option><option>Weeding</option><option>Cutting/Pruning</option>'+
+  '<option>Grafting</option><option>Dispatch/Loading</option><option>Cleaning</option><option>General Work</option><option>Other</option>'+
+  '</select></div>'+
+  '<div class="fr"><label>👷 Labour Add Karo</label>'+
+  '<div style="display:flex;gap:6px;position:relative;">'+
+  '<input type="text" id="aks-'+akid+'" placeholder="Naam type karo..." oninput="filterAKLabour('+akid+')" onfocus="showAKDrop('+akid+')" onblur="setTimeout(()=>hideAKDrop('+akid+'),200)" style="flex:1;">'+
+  '<div id="akdrop-'+akid+'" class="ldrop-list"></div>'+
+  '<button onclick="addAKCustom('+akid+')" style="background:var(--or);color:white;border:none;border-radius:var(--rs);padding:9px 12px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">+</button>'+
+  '</div></div>'+
+  '<div class="fr"><label>👥 Selected Labour</label><div class="tags-wrap" id="aktags-'+akid+'"></div></div>'+
+  '</div>';
+  document.getElementById('assignCon').appendChild(d);
+  updAKSum();
+}
+
+function remAK(akid){document.getElementById('ak-'+akid).remove();delete akLabours[akid];updAKSum();}
+
+function filterAKLabour(akid) {
+  const q=document.getElementById('aks-'+akid).value.toLowerCase();
+  const drop=document.getElementById('akdrop-'+akid);
+  // Show all when no query, filter when query exists
+  const list = q ? LABOUR_LIST.filter(l=>l.name.toLowerCase().includes(q)) : LABOUR_LIST;
+  if(list.length===0){
+    drop.innerHTML='<div class="ldrop-item" style="color:var(--g5);">Koi labour nahi — neeche naam type karke + dabao</div>';
+    drop.className='ldrop-list show';
+    return;
+  }
+  drop.innerHTML=list.map(l=>'<div class="ldrop-item" onmousedown="addAKLabour('+akid+',\''+l.name+'\')">'+l.name+' '+(l.wage?'(₹'+l.wage+')':'')+'</div>').join('');
+  drop.className='ldrop-list show';
+}
+function showAKDrop(akid){filterAKLabour(akid);}
+function hideAKDrop(akid){document.getElementById('akdrop-'+akid).className='ldrop-list';}
+
+function addAKCustom(akid){
+  const val=document.getElementById('aks-'+akid).value.trim();
+  if(val) addAKLabour(akid,val);
+}
+
+function addAKLabour(akid, name) {
+  if(!akLabours[akid]) akLabours[akid]=[];
+  if(akLabours[akid].indexOf(name)!==-1){toast('⚠️ Yeh labour pehle se add hai!','error');return;}
+  akLabours[akid].push(name);
+  const tags=document.getElementById('aktags-'+akid);
+  const span=document.createElement('span');
+  span.className='labour-tag'; span.id='tag-'+akid+'-'+name.replace(/\s/g,'_');
+  span.innerHTML=name+'<button onclick="remAKLabour('+akid+',\''+name+'\')">×</button>';
+  tags.appendChild(span);
+  document.getElementById('aks-'+akid).value='';
+  hideAKDrop(akid);
+  updAKSum();
+}
+
+function remAKLabour(akid, name) {
+  akLabours[akid]=akLabours[akid].filter(n=>n!==name);
+  const tag=document.getElementById('tag-'+akid+'-'+name.replace(/\s/g,'_'));
+  if(tag) tag.remove();
+  updAKSum();
+}
+
+function updAKSum(){
+  const aks=document.querySelectorAll('[id^="ak-"]');
+  document.getElementById('asSmK').textContent=aks.length;
+  let total=0; const unique=new Set();
+  Object.values(akLabours).forEach(arr=>{arr.forEach(n=>{total++;unique.add(n);});});
+  document.getElementById('asSmL').textContent=total;
+  document.getElementById('asSmU').textContent=unique.size;
+}
+
+function submitAssign(){
+  const date=document.getElementById('asDate').value;
+  const supervisor=document.getElementById('asSup').value;
+  const area=document.getElementById('asArea').value;
+  const rem=document.getElementById('asRem').value;
+  if(!date||!supervisor||!area){toast('❗ Date, Supervisor aur Area zaroori hai!','error');return;}
+
+  const assignments=[];
+  document.querySelectorAll('[id^="ak-"]').forEach(el=>{
+    const akid=el.id.split('-')[1];
+    const kaam=document.getElementById('akt-'+akid)?.value||'';
+    const labs=akLabours[akid]||[];
+    if(kaam&&labs.length>0) assignments.push({kaam,labours:labs});
+  });
+  if(!assignments.length){toast('❗ Kam se kam ek kaam mein labour add karo!','error');return;}
+
+  const btn=document.getElementById('asSub');
+  btn.disabled=true; btn.innerHTML='⏳ Save Ho Raha Hai...';
+  const payload={module:'assignment',date,supervisor,area,remarks:rem,assignments};
+  fetch(API,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
+    .then(()=>{
+      const total=Object.values(akLabours).reduce((s,a)=>s+a.length,0);
+      showSuc('assign','📋 Assignment save ho gayi!\n\n'+assignments.map(a=>a.kaam+': '+a.labours.join(', ')).join('\n')+'\n\nTotal Labour: '+total);
+    }).catch(()=>showSuc('assign','Entry save ho gayi!'));
+}
+
+// ════ ATTENDANCE ════
+function renderAttLabour() {
+  const con=document.getElementById('attList');
+  con.innerHTML=''; // Clear table
+  LABOUR_LIST.forEach(l=>addAttItem(l.name, l.wage));
+  buildAttDrop();
+  updAttSum();
+}
+
+function addAttItem(name, wage) {
+  // Check if table exists, create if not
+  let table = document.getElementById('attTable');
+  let tbody = document.getElementById('attTbody');
+  if(!table) {
+    const con = document.getElementById('attList');
+    con.innerHTML = '<div style="overflow-x:auto;"><table class="att-table" id="attTable">'+
+      '<thead><tr>'+
+      '<th style="width:140px;">👤 Labour</th>'+
+      '<th style="width:90px;">Status</th>'+
+      '<th style="width:55px;">💰 Wage</th>'+
+      '<th style="width:55px;">⏱️ OT Hr</th>'+
+      '<th style="width:55px;">💰 OT ₹</th>'+
+      '<th style="width:70px;">📝 Note</th>'+
+      '</tr></thead>'+
+      '<tbody id="attTbody"></tbody>'+
+      '<tfoot><tr class="att-total-row" id="attTotalRow">'+
+      '<td colspan="2">Total: <span id="attSmP2">0P</span> <span id="attSmA2">0A</span></td>'+
+      '<td id="attTotalWage">₹0</td>'+
+      '<td id="attTotalOT">0</td>'+
+      '<td id="attTotalOTW">₹0</td>'+
+      '<td></td></tr></tfoot>'+
+      '</table></div>';
+    tbody = document.getElementById('attTbody');
+  }
+  
+  const sid = name.replace(/[^a-zA-Z0-9]/g,'_');
+  if(document.getElementById('atr-'+sid)) return;
+  
+  const tr = document.createElement('tr');
+  tr.id = 'atr-'+sid;
+  tr.setAttribute('data-name', name);
+  tr.innerHTML = 
+    '<td style="font-weight:700;font-size:12px;">'+name+'<br><span style="font-size:10px;color:var(--g5);">₹'+(wage||0)+'/day</span></td>'+
+    '<td style="white-space:nowrap;">'+
+      '<button class="st-btn" id="pb-'+sid+'" onclick="setAttBySid(\''+sid+'\',\'present\')" style="margin-right:4px;">✅P</button>'+
+      '<button class="st-btn" id="hb-'+sid+'" onclick="setAttBySid(\''+sid+'\',\'halfday\')" style="margin-right:4px;">🌤H</button>'+
+      '<button class="st-btn" id="ab-'+sid+'" onclick="setAttBySid(\''+sid+'\',\'absent\')">❌A</button>'+
+    '</td>'+
+    '<td><input type="number" id="aw-'+sid+'" value="'+(wage||0)+'" min="0" style="width:55px;" oninput="updAttSum()"></td>'+
+    '<td><input type="number" id="aot-'+sid+'" value="0" min="0" step="0.5" style="width:55px;" oninput="updAttSum()"></td>'+
+    '<td><input type="number" id="aow-'+sid+'" value="0" min="0" style="width:55px;" oninput="updAttSum()"></td>'+
+    '<td><input type="text" id="an-'+sid+'" placeholder="..." style="width:65px;"></td>';
+  tbody.appendChild(tr);
+}
+
+function buildAttDrop(){
+  const drop=document.getElementById('attDropList');
+  drop.innerHTML=LABOUR_LIST.map(l=>'<div class="ldrop-item" onmousedown="selectAttLabour(\''+l.name+'\','+l.wage+')">'+l.name+'</div>').join('');
+}
+
+function filterAttLabour(){
+  const q=document.getElementById('attSearch').value.toLowerCase();
+  const drop=document.getElementById('attDropList');
+  const filtered=q?LABOUR_LIST.filter(l=>l.name.toLowerCase().includes(q)):LABOUR_LIST;
+  if(filtered.length===0){
+    drop.innerHTML='<div class="ldrop-item" style="color:var(--g5);">Koi labour nahi — naam type karke + Naya dabao</div>';
+    drop.className='ldrop-list show';
+    return;
+  }
+  drop.innerHTML=filtered.map(l=>'<div class="ldrop-item" onmousedown="selectAttLabour(\''+l.name+'\','+l.wage+')">'+l.name+(l.wage?' (₹'+l.wage+')':'')+'</div>').join('');
+  drop.className='ldrop-list'+(filtered.length>0?' show':'');
+}
+function showAttDrop(){filterAttLabour();}
+function hideAttDrop(){document.getElementById('attDropList').className='ldrop-list';}
+function selectAttLabour(name,wage){addAttItem(name,wage);document.getElementById('attSearch').value='';hideAttDrop();}
+
+function addCustomLabour(){
+  const name=document.getElementById('attSearch').value.trim();
+  if(!name){toast('❗ Naam type karo!','error');return;}
+  // Ask for wage
+  const wageStr=prompt(name+' ki daily wage kitni hai? (₹)','0');
+  if(wageStr===null) return;
+  const wage=parseFloat(wageStr)||0;
+  addAttItem(name,wage);
+  document.getElementById('attSearch').value='';
+  // Save to Labour Master with wage
+  fetch(API,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify({module:'addLabour',name,wage,type:'Daily'})})
+    .then(()=>{
+      LABOUR_LIST.push({name,wage});
+      toast('✅ '+name+' (₹'+wage+') Labour Master mein add ho gaya!','success');
+    }).catch(()=>toast('⚠️ Sheet mein save nahi hua','error'));
+}
+
+function setAttBySid(sid, status){
+  // Find name from tr data-name attribute
+  const tr=document.getElementById('atr-'+sid);
+  if(!tr) return;
+  const name=tr.getAttribute('data-name')||sid.replace(/_/g,' ');
+  setAtt(name, status);
+}
+
+function setAtt(name, status){
+  // Clean name for ID
+  const sid = name.replace(/[^a-zA-Z0-9]/g,'_');
+  const tr  = document.getElementById('atr-'+sid);
+  const pb  = document.getElementById('pb-'+sid);
+  const hb  = document.getElementById('hb-'+sid);
+  const ab  = document.getElementById('ab-'+sid);
+  const wageEl = document.getElementById('aw-'+sid);
+
+  if(!tr){ console.log('TR not found for:', name, sid); return; }
+
+  // Reset all buttons
+  [pb,hb,ab].forEach(b=>{ if(b) b.className='st-btn'; });
+  tr.className='';
+  tr.removeAttribute('data-status');
+
+  // Get full wage from LABOUR_LIST
+  const labObj = LABOUR_LIST.find(l=>l.name===name);
+  const fullWage = labObj ? parseFloat(labObj.wage)||0 : parseFloat(wageEl?.value)||0;
+
+  if(status==='present'){
+    tr.className='row-present';
+    tr.setAttribute('data-status','present');
+    if(pb) pb.className='st-btn sp';
+    if(wageEl) wageEl.value=fullWage;
+  } else if(status==='halfday'){
+    tr.className='row-half';
+    tr.setAttribute('data-status','halfday');
+    if(hb) hb.className='st-btn sh';
+    if(wageEl) wageEl.value=Math.round(fullWage/2);
+  } else {
+    tr.className='row-absent';
+    tr.setAttribute('data-status','absent');
+    if(ab) ab.className='st-btn sa';
+    if(wageEl) wageEl.value=0;
+  }
+  updAttSum();
+}
+
+function updAttSum(){
+  let p=0,h=0,a=0,wage=0,otH=0,otW=0;
+  document.querySelectorAll('[id^="atr-"]').forEach(tr=>{
+    const sid=tr.id.replace('atr-','');
+    const st=tr.getAttribute('data-status')||'';
+    if(st==='present') p++;
+    else if(st==='halfday') h++;
+    else if(st==='absent'){a++;return;}
+    else return;
+    wage+=parseFloat(document.getElementById('aw-'+sid)?.value)||0;
+    otH+=parseFloat(document.getElementById('aot-'+sid)?.value)||0;
+    otW+=parseFloat(document.getElementById('aow-'+sid)?.value)||0;
+  });
+  const pEl=document.getElementById('attSmP'); if(pEl) pEl.textContent=p+' Full + '+h+' Half';
+  const aEl=document.getElementById('attSmA'); if(aEl) aEl.textContent=a;
+  const hEl=document.getElementById('attSmH'); if(hEl) hEl.textContent='₹'+(wage+otW);
+  const p2=document.getElementById('attSmP2'); if(p2) p2.textContent=p+'P '+h+'H';
+  const a2=document.getElementById('attSmA2'); if(a2) a2.textContent=a+'A';
+  const tw=document.getElementById('attTotalWage'); if(tw) tw.textContent='₹'+wage;
+  const tot=document.getElementById('attTotalOT'); if(tot) tot.textContent=otH+'hr';
+  const tow=document.getElementById('attTotalOTW'); if(tow) tow.textContent='₹'+otW;
+}
+
+function submitAttend(){
+  const date=document.getElementById('attDate').value;
+  const supervisor=document.getElementById('attSup').value||curUser.name;
+  const area=document.getElementById('attArea')?.value||'';
+  const kaam='Daily Attendance';
+  const rem=document.getElementById('attRem')?.value||'';
+  if(!date){toast('❗ Date zaroori hai!','error');return;}
+
+  const labours=[];
+  document.querySelectorAll('[id^="atr-"]').forEach(tr=>{
+    const sid=tr.id.replace('atr-','');
+    // Get name from first cell
+    const firstCell=tr.querySelector('td');
+    if(!firstCell) return;
+    // Get name from data attribute
+    const name=tr.getAttribute('data-name')||firstCell.textContent.split('₹')[0].replace('👤','').trim();
+    if(!name) return;
+    const ds=tr.getAttribute('data-status')||'';
+    let status='';
+    if(ds==='present') status='Present';
+    else if(ds==='halfday') status='Half Day';
+    else if(ds==='absent') status='Absent';
+    if(!status) return;
+    const wage=parseFloat(document.getElementById('aw-'+sid)?.value)||0;
+    const otHours=parseFloat(document.getElementById('aot-'+sid)?.value)||0;
+    const otWage=parseFloat(document.getElementById('aow-'+sid)?.value)||0;
+    const note=document.getElementById('an-'+sid)?.value||'';
+    labours.push({name,status,hours:status==='Half Day'?4:8,wage,otHours,otWage,note});
+  });
+
+  if(!labours.length){toast('❗ Kam se kam ek labour mark karo!','error');return;}
+  const btn=document.getElementById('attSub');
+  btn.disabled=true; btn.innerHTML='⏳ Save Ho Raha Hai...';
+
+  const p=labours.filter(l=>l.status==='Present');
+  const ab=labours.filter(l=>l.status==='Absent');
+  const totalWage=p.reduce((s,l)=>s+parseFloat(l.wage||0),0);
+
+  fetch(API,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify({module:'attendance',date,supervisor,area,kaam,remarks:rem,labours})})
+    .then(()=>showSuc('attend','✅ Present: '+p.length+'\n❌ Absent: '+ab.length+'\n💰 Total Wage: ₹'+totalWage))
+    .catch(()=>showSuc('attend','Entry save ho gayi!'));
+}
+
+// ════ SEED SOWING ════
+function addV(){
+  vCnt++; const vid=vCnt; lCnt[vid]=0;
+  const d=document.createElement('div'); d.className='vblock'; d.id='vb-'+vid;
+  d.innerHTML='<div class="vbh"><div class="vbt"><div class="vn">'+vid+'</div> Variety '+vid+'</div>'+(vid>1?'<button class="rmbtn" onclick="remV('+vid+')">✕</button>':'')+
+  '</div><div class="vbb">'+
+  '<div class="fr"><label>🥬 Vegetable</label><select id="vg-'+vid+'" onchange="loadVars('+vid+')"><option value="">-- Vegetable Chunein --</option>'+
+  Object.keys(VDATA).map(v=>'<option value="'+v+'">'+v+'</option>').join('')+'</select></div>'+
+  '<div class="fr"><label>🌱 Variety</label><select id="vr-'+vid+'" disabled onchange="updSS()"><option value="">-- Pehle Vegetable Chunein --</option></select></div>'+
+  '<div class="g2"><div><label>🔢 Lot No.</label><input type="text" id="vl-'+vid+'" placeholder="L-001"></div>'+
+  '<div><label>📦 Total PKT</label><input type="number" id="vp-'+vid+'" placeholder="0" min="0" oninput="calcP('+vid+')"></div></div>'+
+  '<div class="g3"><div><label>🪣 Trays</label><input type="number" id="vt-'+vid+'" placeholder="0" min="0" oninput="calcP('+vid+')"></div>'+
+  '<div><label>🥤 Cup/Tray</label><input type="number" id="vc-'+vid+'" placeholder="0" min="0" oninput="calcP('+vid+')"></div>'+
+  '<div><label>🌿 Seeds/Cup</label><input type="number" id="vs-'+vid+'" placeholder="1" min="1" oninput="calcP('+vid+')"></div></div>'+
+  '<div class="tplants"><span class="lbl">Total Plants</span><span class="val" id="tv-'+vid+'">0</span></div>'+
+  '<div class="lstitle">👷 Is Variety Pe Labour <span id="ll-'+vid+'">0 labour</span></div>'+
+  '<div id="lc-'+vid+'"></div>'+
+  '<button class="abtn ao" onclick="addSL('+vid+')">➕ Labour Add Karo</button></div>';
+  document.getElementById('vCon').appendChild(d);
+  addSL(vid); updSS();
+}
+function remV(vid){document.getElementById('vb-'+vid).remove();delete lCnt[vid];updSS();}
+
+function loadVars(vid){
+  const veg=document.getElementById('vg-'+vid).value;
+  const sel=document.getElementById('vr-'+vid);
+  sel.innerHTML='<option value="">-- Variety Chunein --</option>';
+  if(veg&&VDATA[veg]){VDATA[veg].forEach(v=>sel.innerHTML+='<option>'+v+'</option>');sel.disabled=false;}
+  else sel.disabled=true;
+  updSS();
+}
+
+function calcP(vid){
+  const t=parseInt(document.getElementById('vt-'+vid)?.value)||0;
+  const c=parseInt(document.getElementById('vc-'+vid)?.value)||0;
+  const s=parseInt(document.getElementById('vs-'+vid)?.value)||1;
+  document.getElementById('tv-'+vid).textContent=(t*c*s).toLocaleString();
+  updSS();
+}
+
+function addSL(vid){
+  lCnt[vid]=(lCnt[vid]||0)+1; const lid=lCnt[vid];
+  const d=document.createElement('div'); d.className='lrow'; d.id='lr-'+vid+'-'+lid;
+  d.innerHTML='<div class="lrtop"><div style="display:flex;align-items:center;gap:6px;"><div class="lrn">'+lid+'</div><span style="font-size:12px;font-weight:700;color:#5c3d1e;">Labour '+lid+'</span></div>'+
+  (lid>1?'<button class="rmbtn2" onclick="remSL('+vid+','+lid+')">✕</button>':'')+
+  '</div><div class="fr"><label>👤 Naam</label><input type="text" id="ln-'+vid+'-'+lid+'" placeholder="Naam..." oninput="updSS()" list="labourNames"></div>'+
+  '<div class="g2"><div><label>📦 PKT</label><input type="number" id="lp-'+vid+'-'+lid+'" placeholder="0" min="0" oninput="updSS()"></div>'+
+  '<div><label>🪣 Tray</label><input type="number" id="lt-'+vid+'-'+lid+'" placeholder="0" min="0" oninput="updSS()"></div></div>';
+  document.getElementById('lc-'+vid).appendChild(d);
+  document.getElementById('ll-'+vid).textContent=document.querySelectorAll('[id^="lr-'+vid+'-"]').length+' labour';
+  updSS();
+}
+function remSL(vid,lid){document.getElementById('lr-'+vid+'-'+lid).remove();document.getElementById('ll-'+vid).textContent=document.querySelectorAll('[id^="lr-'+vid+'-"]').length+' labour';updSS();}
+
+function updSS(){
+  const vbs=document.querySelectorAll('[id^="vb-"]');
+  document.getElementById('smV').textContent=vbs.length;
+  let pl=0,lb=0,pk=0; const chips=[];
+  vbs.forEach(vb=>{
+    const vid=vb.id.split('-')[1];
+    const t=parseInt(document.getElementById('vt-'+vid)?.value)||0;
+    const c=parseInt(document.getElementById('vc-'+vid)?.value)||0;
+    const s=parseInt(document.getElementById('vs-'+vid)?.value)||1;
+    pl+=t*c*s;
+    const vr=document.getElementById('vr-'+vid)?.value||'';
+    const vg=document.getElementById('vg-'+vid)?.value||'';
+    if(vr) chips.push(vg.split(' ').pop()+' • '+vr);
+    vb.querySelectorAll('[id^="lr-"]').forEach(lr=>{
+      lb++;
+      const pts=lr.id.split('-'); const lid=pts[pts.length-1]; const v=pts[pts.length-2];
+      pk+=parseInt(document.getElementById('lp-'+v+'-'+lid)?.value)||0;
+    });
+  });
+  document.getElementById('smP').textContent=pl.toLocaleString();
+  document.getElementById('smL').textContent=lb;
+  document.getElementById('smPk').textContent=pk;
+  document.getElementById('chipRow').innerHTML=chips.map(c=>'<div class="chip">'+c+'</div>').join('');
+}
+
+function submitSeed(){
+  const date=document.getElementById('sDate').value;
+  const supervisor=document.getElementById('sSup').value;
+  const area=document.getElementById('sArea').value;
+  const shift=document.getElementById('sShift').value;
+  const rem=document.getElementById('sRem').value;
+  if(!date||!supervisor||!area){toast('❗ Date, Supervisor aur Area zaroori hai!','error');return;}
+  const entries=[];
+  for(const vb of document.querySelectorAll('[id^="vb-"]')){
+    const vid=vb.id.split('-')[1];
+    const veg=document.getElementById('vg-'+vid)?.value||'';
+    const vr=document.getElementById('vr-'+vid)?.value||'';
+    if(!veg||!vr){toast('❗ Variety '+vid+' mein vegetable aur variety chunein!','error');return;}
+    const t=parseInt(document.getElementById('vt-'+vid)?.value)||0;
+    const c=parseInt(document.getElementById('vc-'+vid)?.value)||0;
+    const s=parseInt(document.getElementById('vs-'+vid)?.value)||1;
+    const totalPkt=parseInt(document.getElementById('vp-'+vid)?.value)||0;
+    const labs=[];
+    let labourPkt=0;
+    vb.querySelectorAll('[id^="lr-"]').forEach(lr=>{
+      const pts=lr.id.split('-'); const lid=pts[pts.length-1]; const v=pts[pts.length-2];
+      const nm=document.getElementById('ln-'+v+'-'+lid)?.value||'';
+      const lp=parseInt(document.getElementById('lp-'+v+'-'+lid)?.value)||0;
+      const lt=parseInt(document.getElementById('lt-'+v+'-'+lid)?.value)||0;
+      if(nm){labs.push({name:nm,pkt:lp,tray:lt});labourPkt+=lp;}
+    });
+    // PKT validation
+    if(totalPkt>0 && labs.length>0 && labourPkt!==totalPkt){
+      toast('❌ Variety '+vid+' ('+vr+'): Total PKT '+totalPkt+' hai lekin Labour PKT sum '+labourPkt+' hai! Match karo.','error');
+      return;
+    }
+    entries.push({vegetable:veg,variety:vr,lot:document.getElementById('vl-'+vid)?.value||'',
+      pkt:totalPkt,tray:t,cup:c,seeds:s,totalPlants:t*c*s,labours:labs});
+  }
+  if(!entries.length){toast('❗ Kam se kam ek variety add karo!','error');return;}
+  const btn=document.getElementById('sSub');
+  btn.disabled=true; btn.innerHTML='⏳ Save Ho Raha Hai...';
+  fetch(API,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({date,supervisor,area,shift,remarks:rem,entries})})
+    .then(()=>{
+      const tp=entries.reduce((s,e)=>s+e.totalPlants,0);
+      showSuc('seed','🌱 '+entries.length+' varieties\n🌿 '+tp.toLocaleString()+' total plants\n👷 '+entries.reduce((s,e)=>s+e.labours.length,0)+' labour');
+    }).catch(()=>showSuc('seed','Entry save ho gayi!'));
+}
+
+// ════ WATERING ════
+function setWT(type){
+  document.getElementById('wKT').value=type;
+  document.getElementById('btnW').className='tbtn'+(type==='water'?' aw':'');
+  document.getElementById('btnS').className='tbtn'+(type==='spray'?' as':'');
+  document.getElementById('watSec').className='watsec'+(type==='water'?'':' hide');
+  document.getElementById('spraySec').className='wsec'+(type==='spray'?' show':'');
+  if(type==='spray'&&!document.querySelector('[id^="cb-"]')) addC();
+  updWS();
+}
+function addC(){
+  cCnt++; const cid=cCnt;
+  const d=document.createElement('div'); d.className='cblock'; d.id='cb-'+cid;
+  d.innerHTML='<div class="cbh"><div class="cbt"><div class="cn">'+cid+'</div> Chemical '+cid+'</div>'+(cid>1?'<button class="rmbtn" onclick="remC('+cid+')">✕</button>':'')+
+  '</div><div class="cbb"><div class="fr"><label>🧪 Naam</label><input type="text" id="cn-'+cid+'" placeholder="e.g. Imidacloprid, DAP"></div>'+
+  '<div class="g3"><div><label>📏 Dose</label><input type="number" id="cd-'+cid+'" placeholder="0" step="0.1"></div>'+
+  '<div><label>📐 Unit</label><select id="cu-'+cid+'"><option>ml/pump</option><option>gm/pump</option><option>ml/litre</option><option>gm/litre</option><option>ml total</option><option>gm total</option></select></div>'+
+  '<div><label>🎯 Purpose</label><select id="cp-'+cid+'"><option>Pesticide</option><option>Fungicide</option><option>Fertilizer</option><option>Growth Promoter</option><option>Weedicide</option><option>Other</option></select></div></div>'+
+  '<div class="fr"><label>🌱 Plants</label><input type="text" id="cpl-'+cid+'" placeholder="e.g. Mirchi, All seedlings"></div></div>';
+  document.getElementById('cCon').appendChild(d);
+}
+function remC(cid){document.getElementById('cb-'+cid).remove();}
+function addWL(){
+  wlCnt++; const lid=wlCnt;
+  const d=document.createElement('div'); d.className='wlblock'; d.id='wlb-'+lid;
+  d.innerHTML='<div class="wlbh"><div class="wlbt"><div class="wln">'+lid+'</div> Labour '+lid+'</div>'+(lid>1?'<button class="rmbtn" onclick="remWL('+lid+')">✕</button>':'')+
+  '</div><div class="wlbb"><div class="fr"><label>👤 Naam</label><input type="text" id="wln-'+lid+'" placeholder="Naam..." oninput="updWS()" list="labourNames"></div>'+
+  '<div class="g2"><div><label>⏱️ Ghante</label><input type="number" id="wlh-'+lid+'" placeholder="0" min="0" step="0.5" oninput="updWS()"></div>'+
+  '<div><label>🔧 Kaam</label><select id="wlt-'+lid+'"><option>Watering</option><option>Spraying</option><option>Pump chalana</option><option>Pipe pakadna</option><option>Dono</option></select></div></div>'+
+  '<div class="fr"><label>🪣 Pumps</label><input type="number" id="wlp-'+lid+'" placeholder="0" min="0" oninput="updWS()"></div></div>';
+  document.getElementById('wlCon').appendChild(d);
+  updWS();
+}
+function remWL(lid){document.getElementById('wlb-'+lid).remove();updWS();}
+function updWS(){
+  document.getElementById('wsmL').textContent=document.querySelectorAll('[id^="wlb-"]').length;
+  const type=document.getElementById('wKT').value;
+  if(type==='spray'){const p=parseInt(document.getElementById('pCnt')?.value)||0;const w=parseInt(document.getElementById('wPP')?.value)||0;document.getElementById('wsmPu').textContent=p;document.getElementById('wsmW').textContent=(p*w)+'L';}
+  else{document.getElementById('wsmPu').textContent='—';document.getElementById('wsmW').textContent=(parseInt(document.getElementById('wLitre')?.value)||0)+'L';}
+}
+function submitWater(){
+  const date=document.getElementById('wDate').value;
+  const supervisor=document.getElementById('wSup').value;
+  const area=document.getElementById('wArea').value;
+  const shift=document.getElementById('wShift').value;
+  const kaamType=document.getElementById('wKT').value;
+  const rem=document.getElementById('wRem').value;
+  if(!date||!supervisor||!area){toast('❗ Date, Supervisor aur Area zaroori hai!','error');return;}
+  const labs=[];
+  document.querySelectorAll('[id^="wlb-"]').forEach(el=>{
+    const lid=el.id.split('-')[1];
+    const nm=document.getElementById('wln-'+lid)?.value||'';
+    if(nm) labs.push({name:nm,hours:document.getElementById('wlh-'+lid)?.value||0,task:document.getElementById('wlt-'+lid)?.value||'',pumps:document.getElementById('wlp-'+lid)?.value||0});
+  });
+  let payload={module:'watering_spraying',date,supervisor,area,shift,kaamType,remarks:rem,labours:labs,startTime:document.getElementById('wST')?.value||'',endTime:document.getElementById('wET')?.value||''};
+  if(kaamType==='spray'){
+    const chems=[];
+    document.querySelectorAll('[id^="cb-"]').forEach(el=>{const cid=el.id.split('-')[1];const nm=document.getElementById('cn-'+cid)?.value||'';if(nm) chems.push({name:nm,dose:document.getElementById('cd-'+cid)?.value||0,unit:document.getElementById('cu-'+cid)?.value||'',purpose:document.getElementById('cp-'+cid)?.value||'',plants:document.getElementById('cpl-'+cid)?.value||''});});
+    payload.pumpCount=document.getElementById('pCnt')?.value||0;payload.waterPerPump=document.getElementById('wPP')?.value||0;payload.areaCovered=document.getElementById('aCov')?.value||'';payload.sprayerType=document.getElementById('spType')?.value||'';payload.chemicals=chems;
+  } else {payload.waterMethod=document.getElementById('wMeth')?.value||'';payload.waterLitre=document.getElementById('wLitre')?.value||0;payload.waterPlants=document.getElementById('wPlants')?.value||'';}
+  const btn=document.getElementById('wSub');
+  btn.disabled=true; btn.innerHTML='⏳ Save Ho Raha Hai...';
+  fetch(API,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
+    .then(()=>showSuc('water','💧 '+(kaamType==='spray'?'Spraying':'Watering')+'\n👷 Labour: '+labs.length+(kaamType==='spray'?'\n🪣 Pumps: '+payload.pumpCount:'\n💦 Pani: '+payload.waterLitre+'L')))
+    .catch(()=>showSuc('water','Entry save ho gayi!'));
+}
+
+// ════ REPORTS ════
+function loadAttReport(){
+  const from=document.getElementById('repFrom').value;
+  const to=document.getElementById('repTo').value;
+  const con=document.getElementById('reportContent');
+  con.innerHTML='<div class="card" style="margin-top:10px;text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;">Loading...</div></div>';
+
+  // Load Attendance Records
+  const ts=Date.now();
+  Promise.all([
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Attendance%20Records&headers=1&t='+ts).then(r=>r.text()),
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Labour%20Master&headers=1&t='+ts).then(r=>r.text()),
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Morning%20Assignment&headers=1&t='+ts).then(r=>r.text())
+  ]).then(([attTxt, masterTxt, assignTxt])=>{
+    // Parse attendance
+    let attRows=[];
+    try{
+      const j=JSON.parse(attTxt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+      attRows=j.table.rows.filter(r=>r.c&&r.c[0]&&r.c[0].v&&r.c[0].v!=='Date');
+    }catch(e){}
+
+    // Parse master list
+    let allLabours=[];
+    try{
+      const j=JSON.parse(masterTxt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+      allLabours=j.table.rows.filter(r=>r.c&&r.c[0]&&r.c[0].v&&r.c[0].v!=='Labour Naam').map(r=>r.c[0].v.toString().trim());
+    }catch(e){}
+
+    // Parse assignments
+    let assignRows=[];
+    try{
+      const j=JSON.parse(assignTxt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+      assignRows=j.table.rows.filter(r=>r.c&&r.c[0]&&r.c[0].v&&r.c[0].v!=='Date');
+    }catch(e){}
+
+    // Filter by date range
+    const filtAtt=attRows.filter(r=>{
+      if(!r.c||!r.c[0]||!r.c[0].v) return false;
+      // gviz returns Date(yyyy,mm,dd) format - convert to string
+      let d=r.c[0].v.toString();
+      if(d.startsWith('Date(')) {
+        const parts=d.replace('Date(','').replace(')','').split(',');
+        const yr=parts[0]; const mo=String(parseInt(parts[1])+1).padStart(2,'0'); const dy=String(parts[2]).padStart(2,'0');
+        d=yr+'-'+mo+'-'+dy;
+      }
+      r._dateStr=d; // cache
+      return d>=from && d<=to;
+    });
+
+    // Group by date
+    const byDate={};
+    filtAtt.forEach(r=>{
+      const date=r._dateStr||(r.c[0]?.v?.toString()||'');
+      const sup=r.c[1]?.v?.toString()||'';
+      const labour=r.c[4]?.v?.toString()||'';
+      const status=r.c[5]?.v?.toString()||'';
+      const wage=parseFloat(r.c[7]?.v)||0;
+      const otH=parseFloat(r.c[8]?.v)||0;
+      const otW=parseFloat(r.c[9]?.v)||0;
+      if(!byDate[date]) byDate[date]={present:[],half:[],absent:[],wage:0,otW:0};
+      if(status==='Present') byDate[date].present.push(labour);
+      else if(status==='Half Day') byDate[date].half.push(labour);
+      else if(status==='Absent') byDate[date].absent.push(labour);
+      byDate[date].wage+=wage;
+      byDate[date].otW+=otW;
+    });
+
+    // Find assigned but not in attendance
+    const assignedByDate={};
+    assignRows.forEach(r=>{
+      if(!r.c||!r.c[0]||!r.c[0].v) return;
+      let date=r.c[0].v.toString();
+      if(date.startsWith('Date(')){
+        const parts=date.replace('Date(','').replace(')','').split(',');
+        const yr=parts[0]; const mo=String(parseInt(parts[1])+1).padStart(2,'0'); const dy=String(parts[2]).padStart(2,'0');
+        date=yr+'-'+mo+'-'+dy;
+      }
+      const labs=(r.c[4]?.v||'').split(',').map(s=>s.trim()).filter(Boolean);
+      if(!assignedByDate[date]) assignedByDate[date]=[];
+      labs.forEach(l=>{ if(!assignedByDate[date].includes(l)) assignedByDate[date].push(l); });
+    });
+
+    let html='';
+
+    // Summary card
+    const totalP=Object.values(byDate).reduce((s,d)=>s+d.present.length,0);
+    const totalH=Object.values(byDate).reduce((s,d)=>s+d.half.length,0);
+    const totalA=Object.values(byDate).reduce((s,d)=>s+d.absent.length,0);
+    const totalW=Object.values(byDate).reduce((s,d)=>s+d.wage,0);
+    const totalOTW=Object.values(byDate).reduce((s,d)=>s+d.otW,0);
+
+    html+='<div class="rep-card"><div class="rep-title">📊 Summary: '+from+' to '+to+'</div>'+
+      '<div class="stat-grid">'+
+      '<div class="stat-item"><span class="sv" style="color:var(--gm);">'+totalP+'</span><div class="sl">Present</div></div>'+
+      '<div class="stat-item"><span class="sv" style="color:#f57c00;">'+totalH+'</span><div class="sl">Half Day</div></div>'+
+      '<div class="stat-item"><span class="sv" style="color:var(--rd);">'+totalA+'</span><div class="sl">Absent</div></div>'+
+      '</div>'+
+      '<div style="background:var(--gp);border-radius:10px;padding:10px;margin-top:8px;">'+
+      '<div style="display:flex;justify-content:space-between;font-weight:700;font-size:13px;">'+
+      '<span>💰 Total Wage: ₹'+totalW+'</span><span>⏱️ OT Wage: ₹'+totalOTW+'</span>'+
+      '<span style="color:var(--gm);">Grand Total: ₹'+(totalW+totalOTW)+'</span></div></div></div>';
+
+    // Date-wise detail with match check
+    Object.keys(byDate).sort().reverse().forEach(date=>{
+      const d=byDate[date];
+      const assigned=assignedByDate[date]||[];
+      const presentAll=[...d.present,...d.half];
+      const missing=assigned.filter(l=>!presentAll.includes(l));
+      const extra=presentAll.filter(l=>assigned.length>0&&!assigned.includes(l));
+
+      html+='<div class="rep-card">'+
+        '<div class="rep-title">📅 '+date+'</div>'+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">'+
+        '<span class="tag p">✅ Present: '+d.present.length+'</span>'+
+        '<span class="tag" style="background:#fff8e1;color:#f57c00;">🌤 Half: '+d.half.length+'</span>'+
+        '<span class="tag a">❌ Absent: '+d.absent.length+'</span>'+
+        '<span class="tag sup">💰 ₹'+(d.wage+d.otW)+'</span>'+
+        '</div>';
+
+      if(d.present.length>0) html+='<div style="font-size:12px;color:var(--gm);margin-bottom:4px;"><b>Present:</b> '+d.present.join(', ')+'</div>';
+      if(d.half.length>0) html+='<div style="font-size:12px;color:#f57c00;margin-bottom:4px;"><b>Half Day:</b> '+d.half.join(', ')+'</div>';
+      if(d.absent.length>0) html+='<div style="font-size:12px;color:var(--rd);margin-bottom:4px;"><b>Absent:</b> '+d.absent.join(', ')+'</div>';
+
+      // Match check
+      if(missing.length>0){
+        html+='<div style="background:var(--rl);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:12px;font-weight:700;color:var(--rd);">'+
+          '⚠️ LABOUR ENTRY NOT MATCH! Yeh assigned the lekin entry nahi: <b>'+missing.join(', ')+'</b></div>';
+      }
+      if(extra.length>0){
+        html+='<div style="background:#fff3e0;border-radius:8px;padding:8px 12px;margin-top:6px;font-size:12px;font-weight:700;color:#e65100;">'+
+          '⚠️ Yeh labour assigned nahi the lekin entry aayi: <b>'+extra.join(', ')+'</b></div>';
+      }
+      html+='</div>';
+    });
+
+    if(Object.keys(byDate).length===0){
+      html='<div class="rep-card" style="text-align:center;color:var(--g5);padding:30px;">Is date range mein koi attendance record nahi mila.</div>';
+    }
+
+    con.innerHTML=html;
+  }).catch(err=>{
+    con.innerHTML='<div class="rep-card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Data load nahi hua. Internet check karo.</div>';
+  });
+}
+
+function repBtnClick(){
+  const title=document.getElementById('repTitle')?.textContent||'';
+  if(title.includes('Attendance')) loadAttReport();
+  else loadReport();
+}
+
+function loadReport(){
+  const from=document.getElementById('repFrom').value;
+  const to=document.getElementById('repTo').value;
+  const con=document.getElementById('reportContent');
+  con.innerHTML='<div class="card" style="margin-top:10px;text-align:center;padding:20px;"><div style="font-size:40px;margin-bottom:10px;">⏳</div><div style="font-weight:700;color:var(--gd);font-size:15px;">Report Load Ho Rahi Hai...</div></div>';
+  
+  // Load from multiple sheets
+  const sheets=['Variety Records','Attendance Records','Spraying Records','Watering Records','Morning Assignment'];
+  const results={};
+  let loaded=0;
+  
+  sheets.forEach(sheet=>{
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(sheet)+'&tq='+encodeURIComponent('select * where A >= date \''+from+'\' and A <= date \''+to+'\''))
+      .then(r=>r.text())
+      .then(txt=>{
+        try{
+          const json=JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+          results[sheet]=json.table.rows||[];
+        }catch(e){results[sheet]=[];}
+        loaded++;
+        if(loaded===sheets.length) renderReport(results, from, to);
+      }).catch(()=>{results[sheet]=[];loaded++;if(loaded===sheets.length) renderReport(results,from,to);});
+  });
+}
+
+function renderReport(data, from, to){
+  const con=document.getElementById('reportContent');
+  let html='';
+  
+  // Variety Records
+  const vRows=data['Variety Records']||[];
+  const totalPlants=vRows.reduce((s,r)=>s+(parseFloat(r.c?.[11]?.v)||0),0);
+  html+='<div class="rep-card"><div class="rep-title">🌱 Seed Sowing</div><div class="rep-sub">'+from+' se '+to+'</div>'+
+    '<div class="stat-grid">'+
+    '<div class="stat-item"><span class="sv">'+vRows.length+'</span><div class="sl">Entries</div></div>'+
+    '<div class="stat-item"><span class="sv">'+totalPlants.toLocaleString()+'</span><div class="sl">Total Plants</div></div>'+
+    '<div class="stat-item"><span class="sv">'+new Set(vRows.map(r=>r.c?.[1]?.v)).size+'</span><div class="sl">Supervisors</div></div>'+
+    '</div>';
+  if(vRows.length>0){
+    html+='<div style="overflow-x:auto;"><table class="att-table"><thead><tr><th>Date</th><th>Supervisor</th><th>Variety</th><th>PKT</th><th>Plants</th></tr></thead><tbody>';
+    vRows.slice(0,20).forEach(r=>{
+      if(!r.c) return;
+      html+='<tr><td>'+(r.c[0]?.v||'')+' </td><td>'+(r.c[1]?.v||'')+'</td><td>'+(r.c[5]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+'</td><td>'+(r.c[11]?.v||0)+'</td></tr>';
+    });
+    html+='</tbody></table></div>';
+    if(vRows.length>20) html+='<div style="text-align:center;color:var(--g5);padding:8px;font-size:12px;">... aur '+(vRows.length-20)+' entries</div>';
+  }
+  html+='</div>';
+
+  // Attendance Records
+  const attRows=data['Attendance Records']||[];
+  const present=attRows.filter(r=>r.c?.[5]?.v==='Present').length;
+  const half=attRows.filter(r=>r.c?.[5]?.v==='Half Day').length;
+  const absent=attRows.filter(r=>r.c?.[5]?.v==='Absent').length;
+  const totalWage=attRows.reduce((s,r)=>s+(parseFloat(r.c?.[7]?.v)||0)+(parseFloat(r.c?.[9]?.v)||0),0);
+  html+='<div class="rep-card"><div class="rep-title">👷 Attendance</div><div class="rep-sub">'+from+' se '+to+'</div>'+
+    '<div class="stat-grid">'+
+    '<div class="stat-item"><span class="sv" style="color:var(--gm);">'+present+'</span><div class="sl">Present</div></div>'+
+    '<div class="stat-item"><span class="sv" style="color:#f57c00;">'+half+'</span><div class="sl">Half Day</div></div>'+
+    '<div class="stat-item"><span class="sv" style="color:var(--rd);">'+absent+'</span><div class="sl">Absent</div></div>'+
+    '</div>'+
+    '<div style="background:var(--gp);border-radius:10px;padding:10px;text-align:center;font-weight:700;color:var(--gm);">💰 Total Wage: ₹'+totalWage+'</div>'+
+    '</div>';
+
+  // Watering + Spraying
+  const spRows=data['Spraying Records']||[];
+  const watRows=data['Watering Records']||[];
+  html+='<div class="rep-card"><div class="rep-title">💧 Watering & Spraying</div><div class="rep-sub">'+from+' se '+to+'</div>'+
+    '<div class="stat-grid">'+
+    '<div class="stat-item"><span class="sv">'+watRows.length+'</span><div class="sl">Watering</div></div>'+
+    '<div class="stat-item"><span class="sv">'+spRows.length+'</span><div class="sl">Spraying</div></div>'+
+    '<div class="stat-item"><span class="sv">'+(watRows.length+spRows.length)+'</span><div class="sl">Total</div></div>'+
+    '</div></div>';
+
+  con.innerHTML=html;
+}
+
+// ════ ADMIN ════
+function loadUserList(){
+  const con=document.getElementById('userList');
+  con.innerHTML='';
+  Object.entries(SUP_DATA).forEach(([name,data])=>{
+    const d=document.createElement('div'); d.className='admin-row';
+    d.innerHTML='<div class="admin-info"><div class="an">'+name+'</div>'+
+      '<div class="ar">PIN: '+data.pin+' <span class="tag '+(data.role==='Admin'?'adm':data.role==='Manager'?'mgr':'sup')+'">'+data.role+'</span></div></div>'+
+      '<button class="toggle-btn '+(data.status==='inactive'?'inactive':'active')+'" onclick="toast(\'Sheet mein jaake status badlo!\',\'error\')">'+
+      (data.status==='inactive'?'Active Karo':'Band Karo')+'</button>';
+    con.appendChild(d);
+  });
+}
+
+function addUser(){
+  const name=document.getElementById('newUserName').value.trim();
+  const pin=document.getElementById('newUserPin').value.trim();
+  const role=document.getElementById('newUserRole').value;
+  if(!name||!pin){toast('❗ Naam aur PIN zaroori hai!','error');return;}
+  toast('✅ User info note karo — Sheet mein manually add karo:\nNaam: '+name+' | PIN: '+pin+' | Role: '+role,'success');
+}
+
+// ════ SUCCESS ════
+function showSuc(mod, msg){
+  const icons={seed:'🌱',water:'💧',attend:'👷',assign:'📋'};
+  document.getElementById('sucIco').textContent=icons[mod]||'✅';
+  document.getElementById('sucMsg').textContent=msg;
+  document.getElementById('sucScreen').classList.add('show');
+  // Reset btn
+  const btns={seed:'sSub',water:'wSub',attend:'attSub',assign:'asSub'};
+  const btn=document.getElementById(btns[mod]);
+  if(btn){btn.disabled=false;btn.innerHTML='✅ Entry Save Karo';}
+}
+
+function newEntry(){
+  document.getElementById('sucScreen').classList.remove('show');
+  if(curMod==='seed'){document.getElementById('vCon').innerHTML='';document.getElementById('sRem').value='';vCnt=0;Object.keys(lCnt).forEach(k=>delete lCnt[k]);addV();updSS();}
+  else if(curMod==='water'){document.getElementById('cCon').innerHTML='';document.getElementById('wlCon').innerHTML='';document.getElementById('wRem').value='';document.getElementById('wLitre').value='';cCnt=0;wlCnt=0;setWT('water');addWL();updWS();}
+  else if(curMod==='attend'){document.getElementById('attList').innerHTML='';document.getElementById('attRem').value='';renderAttLabour();}
+  else if(curMod==='assign'){document.getElementById('assignCon').innerHTML='';document.getElementById('asRem').value='';akCnt=0;akLabours={};addAssignKaam();}
+}
+function goMenuS(){document.getElementById('sucScreen').classList.remove('show');show('menuScreen');}
+
+// ════ UTILS ════
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// Labour datalist for seed/water text inputs
+function buildLabourDatalist(){
+  let dl=document.getElementById('labourNames');
+  if(!dl){dl=document.createElement('datalist');dl.id='labourNames';document.body.appendChild(dl);}
+  // Only show labour names, NOT vegetable names
+  if(LABOUR_LIST.length>0){
+    dl.innerHTML=LABOUR_LIST.map(l=>'<option value="'+l.name+'">').join('');
+  }
+}
+// Build after data loads
+setTimeout(buildLabourDatalist, 3000);
+setInterval(buildLabourDatalist, 5000);
+</script>
+</body>
+</html>
