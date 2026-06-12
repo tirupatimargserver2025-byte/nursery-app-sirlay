@@ -1913,6 +1913,15 @@ function loadSeedReport(){
 
 
 function loadMyReport(){
+  const from=document.getElementById('mrFrom').value;
+  const to=document.getElementById('mrTo').value;
+  const vegFilter=document.getElementById('mrVeg').value;
+  const areaFilter=document.getElementById('mrArea').value;
+  const varFilter=document.getElementById('mrVariety').value.toLowerCase();
+  const myName=curUser.name;
+  const con=document.getElementById('myReportContent');
+  con.innerHTML='<div class="card" style="margin-top:10px;text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;color:var(--gd);">Report load ho rahi hai...</div></div>';
+
   const ts=Date.now();
   Promise.all([
     fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Seed%20Sowing%20Data&headers=1&t='+ts).then(r=>r.text()),
