@@ -383,6 +383,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div class="ico">🌱</div><div class="ttl">Seed Sowing Report</div>
           <div class="dsc">Date range, filter, totals</div>
         </div>
+        <div class="mcard attend" onclick="openMod('labourReport')">
+          <div class="ico">👷</div><div class="ttl">Labour Report</div>
+          <div class="dsc">Labour-wise kaam summary</div>
+        </div>
       </div>
     </div>
 
@@ -760,6 +764,31 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   </div>
 </div>
 
+<!-- LABOUR REPORT -->
+<div class="screen" id="labourReportScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:#ffb74d;">👷</div>
+      <h1>Labour Report <span>Date range + Labour-wise</span></h1></div>
+    <div class="sbar"><span class="sbadge manager" id="lrSupB">👔</span>
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle orange">🔍 Filters</div>
+      <div class="g2">
+        <div><label>📅 From Date</label><input type="date" id="lrFrom"></div>
+        <div><label>📅 To Date</label><input type="date" id="lrTo"></div>
+      </div>
+      <div class="fr">
+        <label>👤 Labour Naam (Optional)</label>
+        <select id="lrLabour"><option value="">-- Sab Labour --</option></select>
+      </div>
+      <button onclick="loadLabourReport()" style="width:100%;padding:11px;background:#f57c00;color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">🔍 Report Dekho</button>
+    </div>
+    <div id="labourReportContent"></div>
+  </div>
+</div>
+
 <!-- SUCCESS -->
 <div class="sucscreen" id="sucScreen">
   <div class="sucico" id="sucIco">✅</div>
@@ -1017,6 +1046,17 @@ function openMod(mod) {
     document.getElementById('repTitle').textContent='👷 Attendance Report';
     show('reportScreen');
     loadAttReport();
+  } else if(mod==='labourReport') {
+    document.getElementById('lrSupB').textContent=(curUser.role==='Manager'?'👔':'👑')+' '+curUser.name;
+    const lrLab=document.getElementById('lrLabour');
+    lrLab.innerHTML='<option value="">-- Sab Labour --</option>';
+    LABOUR_LIST.forEach(l=>lrLab.innerHTML+='<option value="'+l.name+'">'+l.name+'</option>');
+    const t=new Date();
+    document.getElementById('lrTo').value=t.toISOString().split('T')[0];
+    const f=new Date(); f.setDate(f.getDate()-30);
+    document.getElementById('lrFrom').value=f.toISOString().split('T')[0];
+    document.getElementById('labourReportContent').innerHTML='';
+    show('labourReportScreen');
   } else if(mod==='seedReport') {
     document.getElementById('srSupB').textContent=(curUser.role==='Manager'?'👔':'👑')+' '+curUser.name;
     // Fill supervisor dropdown
@@ -1978,6 +2018,195 @@ function loadMyReport(){
     } else {
       html+='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Watering/Spraying — koi record nahi mila.</div>';
     }
+
+    // ═══ LABOUR SUMMARY (from my entries) ═══
+    Promise.all([
+      fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Seed%20Labour%20Data&headers=1&t='+ts).then(r=>r.text()).catch(()=>''),
+      fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=W-S%20Labour&headers=1&t='+ts).then(r=>r.text()).catch(()=>'')
+    ]).then(([seedLabTxt, wsLabTxt])=>{
+      let seedLabRows=parseRows(seedLabTxt);
+      let wsLabRows=parseRows(wsLabTxt);
+      seedLabRows.forEach(r=>{r._date=fixDate(r);});
+      wsLabRows.forEach(r=>{r._date=fixDate(r);});
+
+      const labSummary={};
+      function ensureLab(name){
+        if(!labSummary[name]) labSummary[name]={pkt:0,tray:0,wsCount:0};
+        return labSummary[name];
+      }
+
+      seedLabRows.forEach(r=>{
+        if(!r._date||r._date<from||r._date>to) return;
+        if((r.c[1]?.v||'').toString()!==myName) return;
+        if(vegFilter && (r.c[3]?.v||'').toString()!==vegFilter) return;
+        if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return;
+        if(varFilter && !(r.c[4]?.v||'').toString().toLowerCase().includes(varFilter)) return;
+        const name=(r.c[6]?.v||'').toString().trim();
+        if(!name) return;
+        const s=ensureLab(name);
+        s.pkt+=parseFloat(r.c[7]?.v)||0;
+        s.tray+=parseFloat(r.c[8]?.v)||0;
+      });
+
+      wsLabRows.forEach(r=>{
+        if(!r._date||r._date<from||r._date>to) return;
+        if((r.c[1]?.v||'').toString()!==myName) return;
+        if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return;
+        const name=(r.c[4]?.v||'').toString().trim();
+        if(!name) return;
+        ensureLab(name).wsCount++;
+      });
+
+      const labNames=Object.keys(labSummary).sort();
+      let lhtml='';
+      if(labNames.length>0){
+        let tPkt=0,tTray=0,tWs=0;
+        labNames.forEach(n=>{tPkt+=labSummary[n].pkt;tTray+=labSummary[n].tray;tWs+=labSummary[n].wsCount;});
+        lhtml+='<div class="rep-card"><div class="rep-title">👷 Labour Summary — '+labNames.length+' Labour</div>'+
+          '<div style="overflow-x:auto;"><table class="att-table">'+
+          '<thead><tr><th>Labour</th><th>Seed PKT</th><th>Seed Tray</th><th>W/S Days</th></tr></thead><tbody>';
+        labNames.forEach(n=>{
+          const s=labSummary[n];
+          lhtml+='<tr><td style="font-weight:700;">'+n+'</td><td>'+s.pkt+'</td><td>'+s.tray+'</td><td>'+s.wsCount+'</td></tr>';
+        });
+        lhtml+='<tr style="background:var(--gd);color:white;font-weight:800;"><td>TOTAL</td><td>'+tPkt+'</td><td>'+tTray+'</td><td>'+tWs+'</td></tr>';
+        lhtml+='</tbody></table></div></div>';
+      } else {
+        lhtml='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Labour Summary — koi record nahi mila.</div>';
+      }
+      con.innerHTML=html+lhtml;
+    }).catch(()=>{
+      con.innerHTML=html;
+    });
+  }).catch(()=>{
+    con.innerHTML='<div class="rep-card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Data load nahi hua. Internet check karo.</div>';
+  });
+}
+
+function loadLabourReport(){
+  const from=document.getElementById('lrFrom').value;
+  const to=document.getElementById('lrTo').value;
+  const labFilter=document.getElementById('lrLabour').value;
+  const con=document.getElementById('labourReportContent');
+  con.innerHTML='<div class="card" style="margin-top:10px;text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;color:var(--gd);">Report load ho rahi hai...</div></div>';
+
+  const ts=Date.now();
+  Promise.all([
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Attendance%20Records&headers=1&t='+ts).then(r=>r.text()).catch(()=>''),
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Seed%20Labour%20Data&headers=1&t='+ts).then(r=>r.text()).catch(()=>''),
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=W-S%20Labour&headers=1&t='+ts).then(r=>r.text()).catch(()=>'')
+  ]).then(([attTxt, seedLabTxt, wsTxt])=>{
+
+    function parseRows(txt){
+      try{
+        const json=JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+        return json.table.rows.filter(r=>r.c&&r.c[0]&&r.c[0].v&&r.c[0].v!=='Date');
+      }catch(e){return [];}
+    }
+    function fixDate(r){
+      if(!r.c||!r.c[0]||!r.c[0].v) return '';
+      let d=r.c[0].v.toString();
+      if(d.startsWith('Date(')){
+        const pts=d.replace('Date(','').replace(')','').split(',');
+        d=pts[0]+'-'+String(parseInt(pts[1])+1).padStart(2,'0')+'-'+String(pts[2]).padStart(2,'0');
+      }
+      return d;
+    }
+    function inRange(d){ return d && d>=from && d<=to; }
+
+    // ── Attendance ──
+    const attRows=parseRows(attTxt);
+    attRows.forEach(r=>{r._date=fixDate(r);});
+
+    // ── Seed Labour ──
+    const seedLabRows=parseRows(seedLabTxt);
+    seedLabRows.forEach(r=>{r._date=fixDate(r);});
+
+    // ── W-S Labour ──
+    const wsRows=parseRows(wsTxt);
+    wsRows.forEach(r=>{r._date=fixDate(r);});
+
+    // Build labour summary
+    const summary={};
+    function ensure(name){
+      if(!summary[name]) summary[name]={present:0,half:0,absent:0,pkt:0,tray:0,plants:0,wsCount:0,wsHours:0};
+      return summary[name];
+    }
+
+    attRows.forEach(r=>{
+      if(!inRange(r._date)) return;
+      const name=(r.c[4]?.v||'').toString().trim();
+      if(!name) return;
+      if(labFilter && name!==labFilter) return;
+      const status=(r.c[5]?.v||'').toString();
+      const s=ensure(name);
+      if(status==='Present') s.present++;
+      else if(status==='Half Day') s.half++;
+      else if(status==='Absent') s.absent++;
+    });
+
+    seedLabRows.forEach(r=>{
+      if(!inRange(r._date)) return;
+      const name=(r.c[6]?.v||'').toString().trim();
+      if(!name) return;
+      if(labFilter && name!==labFilter) return;
+      const s=ensure(name);
+      s.pkt+=parseFloat(r.c[7]?.v)||0;
+      s.tray+=parseFloat(r.c[8]?.v)||0;
+      s.plants+=parseFloat(r.c[9]?.v)||0;
+    });
+
+    wsRows.forEach(r=>{
+      if(!inRange(r._date)) return;
+      const name=(r.c[4]?.v||'').toString().trim();
+      if(!name) return;
+      if(labFilter && name!==labFilter) return;
+      const s=ensure(name);
+      s.wsCount++;
+      s.wsHours+=parseFloat(r.c[5]?.v)||0;
+    });
+
+    const names=Object.keys(summary).sort();
+
+    if(names.length===0){
+      con.innerHTML='<div class="rep-card" style="text-align:center;color:var(--g5);padding:30px;">Is filter mein koi labour record nahi mila.</div>';
+      return;
+    }
+
+    // Totals
+    let tP=0,tH=0,tA=0,tPkt=0,tTray=0,tPlants=0,tWs=0,tWsH=0;
+    names.forEach(n=>{
+      const s=summary[n];
+      tP+=s.present; tH+=s.half; tA+=s.absent;
+      tPkt+=s.pkt; tTray+=s.tray; tPlants+=s.plants;
+      tWs+=s.wsCount; tWsH+=s.wsHours;
+    });
+
+    let html='';
+
+    // Summary card
+    html+='<div class="rep-card" style="margin-top:10px;"><div class="rep-title">👷 Labour Summary — '+names.length+' Labour</div>'+
+      '<div class="rep-sub">'+from+' to '+to+'</div>'+
+      '<div class="stat-grid">'+
+      '<div class="stat-item"><span class="sv" style="color:var(--gm);">'+tP+'</span><div class="sl">Present Days</div></div>'+
+      '<div class="stat-item"><span class="sv" style="color:#f57c00;">'+tH+'</span><div class="sl">Half Days</div></div>'+
+      '<div class="stat-item"><span class="sv" style="color:var(--rd);">'+tA+'</span><div class="sl">Absent Days</div></div>'+
+      '</div></div>';
+
+    // Detail table
+    html+='<div class="rep-card"><div class="rep-title">📋 Labour-wise Detail</div>'+
+      '<div style="overflow-x:auto;"><table class="att-table">'+
+      '<thead><tr><th>Labour</th><th>Present</th><th>Half</th><th>Absent</th><th>Seed PKT</th><th>Seed Tray</th><th>W/S Days</th></tr></thead><tbody>';
+    names.forEach(n=>{
+      const s=summary[n];
+      html+='<tr><td style="font-weight:700;">'+n+'</td>'+
+        '<td>'+s.present+'</td><td>'+s.half+'</td><td>'+s.absent+'</td>'+
+        '<td>'+s.pkt+'</td><td>'+s.tray+'</td><td>'+s.wsCount+'</td></tr>';
+    });
+    html+='<tr style="background:var(--gd);color:white;font-weight:800;">'+
+      '<td>TOTAL</td><td>'+tP+'</td><td>'+tH+'</td><td>'+tA+'</td>'+
+      '<td>'+tPkt+'</td><td>'+tTray+'</td><td>'+tWs+'</td></tr>';
+    html+='</tbody></table></div></div>';
 
     con.innerHTML=html;
   }).catch(()=>{
