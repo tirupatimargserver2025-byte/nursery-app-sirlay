@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌱 Tirumala Green House Nursery</title>
+<title>🌱 Nursery Management App</title>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -297,8 +297,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 <div class="screen" id="loginScreen" style="display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#1a4731,#0a2318);">
   <div class="lbox">
     <div class="llogo">🌱</div>
-    <div class="ltitle">TGH Nursery Sirlay</div>
-    <div class="lsub">Tirumala Green House Nursery, Sirlay</div>
+    <div class="ltitle">TGH Nursery</div>
+    <div class="lsub">Tirupati Green House Nursery, Bafalgaon</div>
     <div class="linfo" id="loadInfo">⏳ Loading...</div>
     <div class="fr"><label>👷 Apna Naam Chunein</label>
       <select id="loginName"><option value="">-- Naam Chunein --</option></select></div>
@@ -314,7 +314,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   <div class="hdr">
     <div class="htop">
       <div class="hico" id="menuIco">🌱</div>
-      <h1 id="menuTitle">TGH Nursery Sirlay <span>Tirumala Green House Nursery, Sirlay</span></h1>
+      <h1 id="menuTitle">TGH Nursery <span>Tirupati Green House Nursery, Bafalgaon</span></h1>
       <div class="dbadge" id="dateTop"></div>
     </div>
     <div class="sbar">
@@ -340,6 +340,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div class="ico">👷</div><div class="ttl">Attendance</div>
           <div class="dsc">Manager ke paas hai</div>
           <span class="cbadge">Manager Only</span>
+        </div>
+      </div>
+      <div class="msec-title">📊 Meri Report</div>
+      <div class="mgrid">
+        <div class="mcard report" onclick="openMod('myReport')">
+          <div class="ico">📊</div><div class="ttl">Meri Report</div>
+          <div class="dsc">Meri saari entries — date filter</div>
         </div>
       </div>
       <div class="msec-title">📊 Kaam Ki Entry</div>
@@ -368,6 +375,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
         <div class="mcard report" onclick="openMod('attReport')">
           <div class="ico">📊</div><div class="ttl">Attendance Report</div>
           <div class="dsc">Date range + Labour match check</div>
+        </div>
+      </div>
+      <div class="msec-title">📊 Reports</div>
+      <div class="mgrid">
+        <div class="mcard seed" onclick="openMod('seedReport')">
+          <div class="ico">🌱</div><div class="ttl">Seed Sowing Report</div>
+          <div class="dsc">Date range, filter, totals</div>
         </div>
       </div>
     </div>
@@ -422,8 +436,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
       </div>
       <div class="fr"><label>📍 Area/Zone</label>
         <select id="asArea"><option value="">-- Select --</option>
-          <option>Net House</option><option>Kavery</option><option>Poras</option>
-          <option>Gayatry</option><option>1 No. PH</option><option>Narmada</option>
+          <option>Saraswati</option><option>Kedar</option><option>Onkar</option>
+          <option>Godavari</option><option>Brahmputra</option><option>NH</option>
         </select></div>
     </div>
     <div class="card">
@@ -517,8 +531,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
       <div class="g2">
         <div><label>📍 Area</label>
           <select id="sArea"><option value="">-- Select --</option>
-            <option>Net House</option><option>Kavery</option><option>Poras</option>
-            <option>Gayatry</option><option>1 No. PH</option><option>Narmada</option>
+            <option>Saraswati</option><option>Kedar</option><option>Onkar</option>
+            <option>Godavari</option><option>Brahmputra</option><option>NH</option>
           </select></div>
         <div><label>⏰ Shift</label>
           <select id="sShift"><option>Full Day</option><option>Half Day</option></select></div>
@@ -561,8 +575,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
       <div class="g2">
         <div><label>📍 Area</label>
           <select id="wArea"><option value="">-- Select --</option>
-            <option>Net House</option><option>Kavery</option><option>Poras</option>
-            <option>Gayatry</option><option>1 No. PH</option><option>Narmada</option>
+            <option>Saraswati</option><option>Kedar</option><option>Onkar</option>
+            <option>Godavari</option><option>Brahmputra</option><option>NH</option>
           </select></div>
         <div><label>⏰ Shift</label>
           <select id="wShift"><option>Subah (6am-2pm)</option><option>Dopahar (2pm-10pm)</option><option>Full Day</option></select></div>
@@ -670,6 +684,82 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   </div>
 </div>
 
+<!-- SEED SOWING REPORT -->
+<div class="screen" id="seedReportScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--gl);">📊</div>
+      <h1>Seed Sowing Report <span>Filter + Totals</span></h1></div>
+    <div class="sbar"><span class="sbadge manager" id="srSupB">👔</span>
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">🔍 Filters</div>
+      <div class="g2">
+        <div><label>📅 From Date</label><input type="date" id="srFrom"></div>
+        <div><label>📅 To Date</label><input type="date" id="srTo"></div>
+      </div>
+      <div class="g2">
+        <div><label>👷 Supervisor</label>
+          <select id="srSup">
+            <option value="">-- Sab Supervisors --</option>
+          </select></div>
+        <div><label>🥬 Vegetable</label>
+          <select id="srVeg">
+            <option value="">-- Sab Vegetables --</option>
+          </select></div>
+      </div>
+      <div class="g2">
+        <div><label>📍 Area</label>
+          <select id="srArea">
+            <option value="">-- Sab Areas --</option>
+            <option>Saraswati</option><option>Kedar</option><option>Onkar</option>
+            <option>Godavari</option><option>Brahmputra</option><option>NH</option>
+          </select></div>
+        <div><label>🌱 Variety</label>
+          <input type="text" id="srVariety" placeholder="Variety naam..."></div>
+      </div>
+      <button onclick="loadSeedReport()" style="width:100%;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">🔍 Report Dekho</button>
+    </div>
+    <div id="seedReportContent"></div>
+  </div>
+</div>
+
+<!-- MY REPORT (Supervisor) -->
+<div class="screen" id="myReportScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--gl);">📊</div>
+      <h1>Meri Report <span id="mrSupName">Supervisor</span></h1></div>
+    <div class="sbar"><span class="sbadge supervisor" id="mrSupB">👷</span>
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">🔍 Filters</div>
+      <div class="g2">
+        <div><label>📅 From Date</label><input type="date" id="mrFrom"></div>
+        <div><label>📅 To Date</label><input type="date" id="mrTo"></div>
+      </div>
+      <div class="g2">
+        <div><label>🥬 Vegetable</label>
+          <select id="mrVeg"><option value="">-- Sab Vegetables --</option></select></div>
+        <div><label>📍 Area</label>
+          <select id="mrArea">
+            <option value="">-- Sab Areas --</option>
+            <option>Saraswati</option><option>Kedar</option><option>Onkar</option>
+            <option>Godavari</option><option>Brahmputra</option><option>NH</option>
+          </select></div>
+      </div>
+      <div class="fr">
+        <label>🌱 Variety</label>
+        <input type="text" id="mrVariety" placeholder="Variety naam...">
+      </div>
+      <button onclick="loadMyReport()" style="width:100%;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">🔍 Report Dekho</button>
+    </div>
+    <div id="myReportContent"></div>
+  </div>
+</div>
+
 <!-- SUCCESS -->
 <div class="sucscreen" id="sucScreen">
   <div class="sucico" id="sucIco">✅</div>
@@ -683,8 +773,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 <div class="toast" id="toast"></div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbwkn3BnHiH_9Llf4x-ig8JX22PFfWTdUz2EGeebKxWFLSKAx8S0AIKiFa46Ejkvy8MclQ/exec';
-const SHEET_ID = '1nItPv5Jk4baU4Rg6fgQMYchRK7exQk-KDsRkHLl34Ew';
+const API = 'https://script.google.com/macros/s/AKfycbzgkFwlPS-w_tdipv8CX5LVbj8oG1KJFQt1KKktE7Gfd1zd2BdgkFtCOsUfbY4LwOZrdQ/exec';
+const SHEET_ID = '1Nv8FzgMKno4idg7y8OtiQ5QV0OhlsHNTfk9gn4rBVwM';
 
 let SUP_DATA = {}; // {name: {pin, role}}
 let LABOUR_LIST = []; // [{name, wage}]
@@ -886,7 +976,19 @@ function goMenu(){show('menuScreen');}
 // ════ OPEN MODULE ════
 function openMod(mod) {
   curMod=mod;
-  if(mod==='assign') {
+  if(mod==='myReport') {
+    document.getElementById('mrSupB').textContent='👷 '+curUser.name;
+    document.getElementById('mrSupName').textContent=curUser.name+' ki entries';
+    const mrVeg=document.getElementById('mrVeg');
+    mrVeg.innerHTML='<option value="">-- Sab Vegetables --</option>';
+    Object.keys(VDATA).forEach(v=>mrVeg.innerHTML+='<option value="'+v+'">'+v+'</option>');
+    const t=new Date();
+    document.getElementById('mrTo').value=t.toISOString().split('T')[0];
+    const f=new Date(); f.setDate(f.getDate()-30);
+    document.getElementById('mrFrom').value=f.toISOString().split('T')[0];
+    document.getElementById('myReportContent').innerHTML='';
+    show('myReportScreen');
+  } else if(mod==='assign') {
     setSel('asSup',curUser.name);
     document.getElementById('asSupB').textContent='👷 '+curUser.name;
     if(!document.querySelector('[id^="ak-"]')){akCnt=0;addAssignKaam();}
@@ -915,7 +1017,23 @@ function openMod(mod) {
     document.getElementById('repTitle').textContent='👷 Attendance Report';
     show('reportScreen');
     loadAttReport();
-  } else if(mod==='report'||mod==='seedReport'||mod==='waterReport') {
+  } else if(mod==='seedReport') {
+    document.getElementById('srSupB').textContent=(curUser.role==='Manager'?'👔':'👑')+' '+curUser.name;
+    // Fill supervisor dropdown
+    const srSup=document.getElementById('srSup');
+    srSup.innerHTML='<option value="">-- Sab Supervisors --</option>';
+    Object.keys(SUP_DATA).forEach(n=>srSup.innerHTML+='<option value="'+n+'">'+n+'</option>');
+    // Fill vegetable dropdown
+    const srVeg=document.getElementById('srVeg');
+    srVeg.innerHTML='<option value="">-- Sab Vegetables --</option>';
+    Object.keys(VDATA).forEach(v=>srVeg.innerHTML+='<option value="'+v+'">'+v+'</option>');
+    // Set default dates
+    const t=new Date();
+    document.getElementById('srTo').value=t.toISOString().split('T')[0];
+    const f=new Date(); f.setDate(f.getDate()-30);
+    document.getElementById('srFrom').value=f.toISOString().split('T')[0];
+    show('seedReportScreen');
+  } else if(mod==='report'||mod==='waterReport') {
     document.getElementById('repSupB').textContent=(curUser.role==='Manager'?'👔':'👑')+' '+curUser.name;
     document.getElementById('repTitle').textContent='📊 Daily Report';
     show('reportScreen');
@@ -963,7 +1081,7 @@ function filterAKLabour(akid) {
     drop.className='ldrop-list show';
     return;
   }
-  drop.innerHTML=list.map(l=>'<div class="ldrop-item" onmousedown="addAKLabour('+akid+',\''+l.name+'\')">'+l.name+' '+(l.wage?'(₹'+l.wage+')':'')+'</div>').join('');
+  drop.innerHTML=list.map(l=>'<div class="ldrop-item" onmousedown="addAKLabour('+akid+',\''+l.name+'\')">'+l.name+'</div>').join('');
   drop.className='ldrop-list show';
 }
 function showAKDrop(akid){filterAKLabour(akid);}
@@ -1099,7 +1217,7 @@ function filterAttLabour(){
     drop.className='ldrop-list show';
     return;
   }
-  drop.innerHTML=filtered.map(l=>'<div class="ldrop-item" onmousedown="selectAttLabour(\''+l.name+'\','+l.wage+')">'+l.name+(l.wage?' (₹'+l.wage+')':'')+'</div>').join('');
+  drop.innerHTML=filtered.map(l=>'<div class="ldrop-item" onmousedown="selectAttLabour(\''+l.name+'\','+l.wage+')">'+l.name+'</div>').join('');
   drop.className='ldrop-list'+(filtered.length>0?' show':'');
 }
 function showAttDrop(){filterAttLabour();}
@@ -1248,7 +1366,7 @@ function addV(){
   Object.keys(VDATA).map(v=>'<option value="'+v+'">'+v+'</option>').join('')+'</select></div>'+
   '<div class="fr"><label>🌱 Variety</label><select id="vr-'+vid+'" disabled onchange="updSS()"><option value="">-- Pehle Vegetable Chunein --</option></select></div>'+
   '<div class="g2"><div><label>🔢 Lot No.</label><input type="text" id="vl-'+vid+'" placeholder="L-001"></div>'+
-  '<div><label>📦 Total PKT</label><input type="number" id="vp-'+vid+'" placeholder="0" min="0" oninput="calcP('+vid+')"></div></div>'+
+  '<div><label>📦 Total PKT</label><input type="number" id="vp-'+vid+'" placeholder="0" min="0" step="0.5" oninput="calcP('+vid+')"></div></div>'+
   '<div class="g3"><div><label>🪣 Trays</label><input type="number" id="vt-'+vid+'" placeholder="0" min="0" oninput="calcP('+vid+')"></div>'+
   '<div><label>🥤 Cup/Tray</label><input type="number" id="vc-'+vid+'" placeholder="0" min="0" oninput="calcP('+vid+')"></div>'+
   '<div><label>🌿 Seeds/Cup</label><input type="number" id="vs-'+vid+'" placeholder="1" min="1" oninput="calcP('+vid+')"></div></div>'+
@@ -1284,7 +1402,7 @@ function addSL(vid){
   d.innerHTML='<div class="lrtop"><div style="display:flex;align-items:center;gap:6px;"><div class="lrn">'+lid+'</div><span style="font-size:12px;font-weight:700;color:#5c3d1e;">Labour '+lid+'</span></div>'+
   (lid>1?'<button class="rmbtn2" onclick="remSL('+vid+','+lid+')">✕</button>':'')+
   '</div><div class="fr"><label>👤 Naam</label><input type="text" id="ln-'+vid+'-'+lid+'" placeholder="Naam..." oninput="updSS()" list="labourNames"></div>'+
-  '<div class="g2"><div><label>📦 PKT</label><input type="number" id="lp-'+vid+'-'+lid+'" placeholder="0" min="0" oninput="updSS()"></div>'+
+  '<div class="g2"><div><label>📦 PKT</label><input type="number" id="lp-'+vid+'-'+lid+'" placeholder="0" min="0" step="0.5" oninput="updSS()"></div>'+
   '<div><label>🪣 Tray</label><input type="number" id="lt-'+vid+'-'+lid+'" placeholder="0" min="0" oninput="updSS()"></div></div>';
   document.getElementById('lc-'+vid).appendChild(d);
   document.getElementById('ll-'+vid).textContent=document.querySelectorAll('[id^="lr-'+vid+'-"]').length+' labour';
@@ -1569,6 +1687,300 @@ function loadAttReport(){
 
     con.innerHTML=html;
   }).catch(err=>{
+    con.innerHTML='<div class="rep-card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Data load nahi hua. Internet check karo.</div>';
+  });
+}
+
+function loadSeedReport(){
+  const from=document.getElementById('srFrom').value;
+  const to=document.getElementById('srTo').value;
+  const supFilter=document.getElementById('srSup').value;
+  const vegFilter=document.getElementById('srVeg').value;
+  const areaFilter=document.getElementById('srArea').value;
+  const varFilter=document.getElementById('srVariety').value.toLowerCase();
+  const con=document.getElementById('seedReportContent');
+  con.innerHTML='<div class="card" style="margin-top:10px;text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;color:var(--gd);">Report load ho rahi hai...</div></div>';
+
+  fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Seed%20Sowing%20Data&headers=1&t='+Date.now())
+    .then(r=>r.text())
+    .then(txt=>{
+      let rows=[];
+      try{
+        const json=JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+        rows=json.table.rows.filter(r=>r.c&&r.c[0]&&r.c[0].v&&r.c[0].v!=='Date');
+      }catch(e){}
+
+      // Date format fix
+      rows.forEach(r=>{
+        if(!r.c||!r.c[0]||!r.c[0].v) return;
+        let d=r.c[0].v.toString();
+        if(d.startsWith('Date(')){
+          const pts=d.replace('Date(','').replace(')','').split(',');
+          d=pts[0]+'-'+String(parseInt(pts[1])+1).padStart(2,'0')+'-'+String(pts[2]).padStart(2,'0');
+        }
+        r._date=d;
+      });
+
+      // Apply filters
+      const filtered=rows.filter(r=>{
+        if(!r._date) return false;
+        if(r._date<from||r._date>to) return false;
+        if(supFilter && (r.c[1]?.v||'').toString()!==supFilter) return false;
+        if(vegFilter && (r.c[4]?.v||'').toString()!==vegFilter) return false;
+        if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;
+        if(varFilter && !(r.c[5]?.v||'').toString().toLowerCase().includes(varFilter)) return false;
+        return true;
+      });
+
+      if(filtered.length===0){
+        con.innerHTML='<div class="card" style="margin-top:10px;text-align:center;color:var(--g5);padding:30px;">Is filter mein koi record nahi mila.</div>';
+        return;
+      }
+
+      // Calculate totals
+      let totalPkt=0, totalTrays=0, totalPlants=0;
+      const byVeg={}, bySup={}, byDate={};
+
+      filtered.forEach(r=>{
+        const date=r._date||'';
+        const sup=(r.c[1]?.v||'').toString();
+        const veg=(r.c[4]?.v||'').toString();
+        const variety=(r.c[5]?.v||'').toString();
+        const lot=(r.c[6]?.v||'').toString();
+        const pkt=parseFloat(r.c[7]?.v)||0;
+        const trays=parseFloat(r.c[8]?.v)||0;
+        const plants=parseFloat(r.c[11]?.v)||0;
+
+        totalPkt+=pkt; totalTrays+=trays; totalPlants+=plants;
+
+        if(!byVeg[veg]) byVeg[veg]={pkt:0,trays:0,plants:0,varieties:{}};
+        byVeg[veg].pkt+=pkt; byVeg[veg].trays+=trays; byVeg[veg].plants+=plants;
+        if(!byVeg[veg].varieties[variety]) byVeg[veg].varieties[variety]={pkt:0,trays:0,plants:0};
+        byVeg[veg].varieties[variety].pkt+=pkt;
+        byVeg[veg].varieties[variety].trays+=trays;
+        byVeg[veg].varieties[variety].plants+=plants;
+
+        if(!bySup[sup]) bySup[sup]={pkt:0,plants:0};
+        bySup[sup].pkt+=pkt; bySup[sup].plants+=plants;
+      });
+
+      let html='';
+
+      // Grand Total Card
+      html+='<div class="rep-card" style="margin-top:10px;">'+
+        '<div class="rep-title">📊 Grand Total — '+filtered.length+' Records</div>'+
+        '<div class="rep-sub">'+from+' to '+to+'</div>'+
+        '<div class="stat-grid">'+
+        '<div class="stat-item"><span class="sv">'+totalPkt.toLocaleString()+'</span><div class="sl">Total PKT</div></div>'+
+        '<div class="stat-item"><span class="sv">'+totalTrays.toLocaleString()+'</span><div class="sl">Total Trays</div></div>'+
+        '<div class="stat-item"><span class="sv">'+totalPlants.toLocaleString()+'</span><div class="sl">Total Plants</div></div>'+
+        '</div></div>';
+
+      // Vegetable-wise table
+      html+='<div class="rep-card"><div class="rep-title">🥬 Vegetable-wise Report</div>'+
+        '<div style="overflow-x:auto;"><table class="att-table">'+
+        '<thead><tr><th>Vegetable</th><th>Variety</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';
+      Object.entries(byVeg).forEach(([veg,vdata])=>{
+        html+='<tr style="background:var(--gp);font-weight:700;">'+
+          '<td>'+veg+'</td><td style="color:var(--g5);">'+Object.keys(vdata.varieties).length+' varieties</td>'+
+          '<td>'+vdata.pkt+'</td><td>'+vdata.trays+'</td><td>'+vdata.plants.toLocaleString()+'</td></tr>';
+        Object.entries(vdata.varieties).forEach(([vr,vrdata])=>{
+          html+='<tr><td style="color:var(--g5);padding-left:16px;">↳</td><td>'+vr+'</td>'+
+            '<td>'+vrdata.pkt+'</td><td>'+vrdata.trays+'</td><td>'+vrdata.plants.toLocaleString()+'</td></tr>';
+        });
+      });
+      html+='<tr style="background:var(--gd);color:white;font-weight:800;">'+
+        '<td colspan="2">TOTAL</td><td>'+totalPkt+'</td><td>'+totalTrays+'</td><td>'+totalPlants.toLocaleString()+'</td></tr>';
+      html+='</tbody></table></div></div>';
+
+      // Supervisor-wise
+      html+='<div class="rep-card"><div class="rep-title">👷 Supervisor-wise</div>'+
+        '<div style="overflow-x:auto;"><table class="att-table">'+
+        '<thead><tr><th>Supervisor</th><th>PKT</th><th>Plants</th></tr></thead><tbody>';
+      Object.entries(bySup).forEach(([sup,sdata])=>{
+        html+='<tr><td>'+sup+'</td><td>'+sdata.pkt+'</td><td>'+sdata.plants.toLocaleString()+'</td></tr>';
+      });
+      html+='<tr style="background:var(--gd);color:white;font-weight:800;">'+
+        '<td>TOTAL</td><td>'+totalPkt+'</td><td>'+totalPlants.toLocaleString()+'</td></tr>';
+      html+='</tbody></table></div></div>';
+
+      // Detail table
+      html+='<div class="rep-card"><div class="rep-title">📋 Detail Records ('+filtered.length+')</div>'+
+        '<div style="overflow-x:auto;"><table class="att-table">'+
+        '<thead><tr><th>Date</th><th>Supervisor</th><th>Vegetable</th><th>Variety</th><th>Lot</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';
+      filtered.forEach(r=>{
+        html+='<tr>'+
+          '<td>'+r._date+'</td>'+
+          '<td>'+(r.c[1]?.v||'')+'</td>'+
+          '<td>'+(r.c[4]?.v||'')+'</td>'+
+          '<td>'+(r.c[5]?.v||'')+'</td>'+
+          '<td>'+(r.c[6]?.v||'')+'</td>'+
+          '<td>'+(r.c[7]?.v||0)+'</td>'+
+          '<td>'+(r.c[8]?.v||0)+'</td>'+
+          '<td>'+(parseFloat(r.c[11]?.v)||0).toLocaleString()+'</td>'+
+          '</tr>';
+      });
+      html+='<tr style="background:var(--gd);color:white;font-weight:800;">'+
+        '<td colspan="5">TOTAL</td><td>'+totalPkt+'</td><td>'+totalTrays+'</td><td>'+totalPlants.toLocaleString()+'</td></tr>';
+      html+='</tbody></table></div></div>';
+
+      con.innerHTML=html;
+    }).catch(()=>{
+      con.innerHTML='<div class="rep-card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Data load nahi hua. Internet check karo.</div>';
+    });
+}
+
+function loadMyReport(){
+  const from=document.getElementById('mrFrom').value;
+  const to=document.getElementById('mrTo').value;
+  const vegFilter=document.getElementById('mrVeg').value;
+  const areaFilter=document.getElementById('mrArea').value;
+  const varFilter=document.getElementById('mrVariety').value.toLowerCase();
+  const myName=curUser.name;
+  const con=document.getElementById('myReportContent');
+  con.innerHTML='<div class="card" style="margin-top:10px;text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;color:var(--gd);">Report load ho rahi hai...</div></div>';
+
+  const ts=Date.now();
+  Promise.all([
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Seed%20Sowing%20Data&headers=1&t='+ts).then(r=>r.text()),
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Watering%20Records&headers=1&t='+ts).then(r=>r.text()).catch(()=>''),
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Spraying%20Records&headers=1&t='+ts).then(r=>r.text()).catch(()=>'')
+  ]).then(([seedTxt, watTxt, sprTxt])=>{
+
+    function parseRows(txt){
+      try{
+        const json=JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+        return json.table.rows.filter(r=>r.c&&r.c[0]&&r.c[0].v&&r.c[0].v!=='Date');
+      }catch(e){return [];}
+    }
+    function fixDate(r){
+      if(!r.c||!r.c[0]||!r.c[0].v) return '';
+      let d=r.c[0].v.toString();
+      if(d.startsWith('Date(')){
+        const pts=d.replace('Date(','').replace(')','').split(',');
+        d=pts[0]+'-'+String(parseInt(pts[1])+1).padStart(2,'0')+'-'+String(pts[2]).padStart(2,'0');
+      }
+      return d;
+    }
+
+    let html='';
+
+    // ═══ SEED SOWING ═══
+    let seedRows=parseRows(seedTxt);
+    seedRows.forEach(r=>{r._date=fixDate(r);});
+    const mySeed=seedRows.filter(r=>{
+      if(!r._date||r._date<from||r._date>to) return false;
+      if((r.c[1]?.v||'').toString()!==myName) return false;
+      if(vegFilter && (r.c[4]?.v||'').toString()!==vegFilter) return false;
+      if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;
+      if(varFilter && !(r.c[5]?.v||'').toString().toLowerCase().includes(varFilter)) return false;
+      return true;
+    });
+
+    let sPkt=0, sTrays=0, sPlants=0;
+    const byVeg={};
+    mySeed.forEach(r=>{
+      const veg=(r.c[4]?.v||'').toString();
+      const variety=(r.c[5]?.v||'').toString();
+      const pkt=parseFloat(r.c[7]?.v)||0;
+      const trays=parseFloat(r.c[8]?.v)||0;
+      const plants=parseFloat(r.c[11]?.v)||0;
+      sPkt+=pkt; sTrays+=trays; sPlants+=plants;
+      if(!byVeg[veg]) byVeg[veg]={pkt:0,trays:0,plants:0,varieties:{}};
+      byVeg[veg].pkt+=pkt; byVeg[veg].trays+=trays; byVeg[veg].plants+=plants;
+      if(!byVeg[veg].varieties[variety]) byVeg[veg].varieties[variety]={pkt:0,trays:0,plants:0};
+      byVeg[veg].varieties[variety].pkt+=pkt;
+      byVeg[veg].varieties[variety].trays+=trays;
+      byVeg[veg].varieties[variety].plants+=plants;
+    });
+
+    html+='<div class="rep-card" style="margin-top:10px;"><div class="rep-title">🌱 Seed Sowing — '+mySeed.length+' Records</div>'+
+      '<div class="rep-sub">'+from+' to '+to+'</div>'+
+      '<div class="stat-grid">'+
+      '<div class="stat-item"><span class="sv">'+sPkt.toLocaleString()+'</span><div class="sl">Total PKT</div></div>'+
+      '<div class="stat-item"><span class="sv">'+sTrays.toLocaleString()+'</span><div class="sl">Total Trays</div></div>'+
+      '<div class="stat-item"><span class="sv">'+sPlants.toLocaleString()+'</span><div class="sl">Total Plants</div></div>'+
+      '</div></div>';
+
+    if(mySeed.length>0){
+      html+='<div class="rep-card"><div class="rep-title">🥬 Vegetable-wise</div>'+
+        '<div style="overflow-x:auto;"><table class="att-table">'+
+        '<thead><tr><th>Vegetable</th><th>Variety</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';
+      Object.entries(byVeg).forEach(([veg,vdata])=>{
+        html+='<tr style="background:var(--gp);font-weight:700;"><td>'+veg+'</td>'+
+          '<td style="color:var(--g5);">'+Object.keys(vdata.varieties).length+' varieties</td>'+
+          '<td>'+vdata.pkt+'</td><td>'+vdata.trays+'</td><td>'+vdata.plants.toLocaleString()+'</td></tr>';
+        Object.entries(vdata.varieties).forEach(([vr,vrdata])=>{
+          html+='<tr><td style="color:var(--g5);padding-left:16px;">↳</td><td>'+vr+'</td>'+
+            '<td>'+vrdata.pkt+'</td><td>'+vrdata.trays+'</td><td>'+vrdata.plants.toLocaleString()+'</td></tr>';
+        });
+      });
+      html+='<tr style="background:var(--gd);color:white;font-weight:800;"><td colspan="2">TOTAL</td><td>'+sPkt+'</td><td>'+sTrays+'</td><td>'+sPlants.toLocaleString()+'</td></tr>';
+      html+='</tbody></table></div></div>';
+
+      html+='<div class="rep-card"><div class="rep-title">📋 Seed Sowing Detail</div>'+
+        '<div style="overflow-x:auto;"><table class="att-table">'+
+        '<thead><tr><th>Date</th><th>Area</th><th>Vegetable</th><th>Variety</th><th>Lot</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';
+      mySeed.forEach(r=>{
+        html+='<tr><td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>'+(r.c[4]?.v||'')+'</td>'+
+          '<td>'+(r.c[5]?.v||'')+'</td><td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+'</td>'+
+          '<td>'+(r.c[8]?.v||0)+'</td><td>'+(parseFloat(r.c[11]?.v)||0).toLocaleString()+'</td></tr>';
+      });
+      html+='<tr style="background:var(--gd);color:white;font-weight:800;"><td colspan="5">TOTAL</td><td>'+sPkt+'</td><td>'+sTrays+'</td><td>'+sPlants.toLocaleString()+'</td></tr>';
+      html+='</tbody></table></div></div>';
+    } else {
+      html+='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Seed Sowing — koi record nahi mila.</div>';
+    }
+
+    // ═══ WATERING / SPRAYING ═══
+    let watRows=parseRows(watTxt);
+    let sprRows=parseRows(sprTxt);
+    watRows.forEach(r=>{r._date=fixDate(r);});
+    sprRows.forEach(r=>{r._date=fixDate(r);});
+
+    const myWat=watRows.filter(r=>{
+      if(!r._date||r._date<from||r._date>to) return false;
+      if((r.c[1]?.v||'').toString()!==myName) return false;
+      if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;
+      return true;
+    });
+    const mySpr=sprRows.filter(r=>{
+      if(!r._date||r._date<from||r._date>to) return false;
+      if((r.c[1]?.v||'').toString()!==myName) return false;
+      if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;
+      return true;
+    });
+
+    const totalWaterL=myWat.reduce((s,r)=>s+(parseFloat(r.c[7]?.v)||0),0);
+    const totalPumps=mySpr.reduce((s,r)=>s+(parseFloat(r.c[7]?.v)||0),0);
+
+    html+='<div class="rep-card"><div class="rep-title">💧 Watering & Spraying — '+(myWat.length+mySpr.length)+' Records</div>'+
+      '<div class="rep-sub">'+from+' to '+to+'</div>'+
+      '<div class="stat-grid">'+
+      '<div class="stat-item"><span class="sv">'+myWat.length+'</span><div class="sl">Watering</div></div>'+
+      '<div class="stat-item"><span class="sv">'+mySpr.length+'</span><div class="sl">Spraying</div></div>'+
+      '<div class="stat-item"><span class="sv">'+totalWaterL.toLocaleString()+'L</span><div class="sl">Total Pani</div></div>'+
+      '</div></div>';
+
+    if(myWat.length+mySpr.length>0){
+      html+='<div class="rep-card"><div class="rep-title">📋 Watering & Spraying Detail</div>'+
+        '<div style="overflow-x:auto;"><table class="att-table">'+
+        '<thead><tr><th>Date</th><th>Area</th><th>Type</th><th>Method/Sprayer</th><th>Pani/Pumps</th><th>Labour</th></tr></thead><tbody>';
+      myWat.forEach(r=>{
+        html+='<tr><td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>💧 Watering</td>'+
+          '<td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+'L</td><td>'+(r.c[9]?.v||0)+'</td></tr>';
+      });
+      mySpr.forEach(r=>{
+        html+='<tr><td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>🌿 Spraying</td>'+
+          '<td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+' pumps</td><td>'+(r.c[10]?.v||0)+'</td></tr>';
+      });
+      html+='</tbody></table></div></div>';
+    } else {
+      html+='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Watering/Spraying — koi record nahi mila.</div>';
+    }
+
+    con.innerHTML=html;
+  }).catch(()=>{
     con.innerHTML='<div class="rep-card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Data load nahi hua. Internet check karo.</div>';
   });
 }
