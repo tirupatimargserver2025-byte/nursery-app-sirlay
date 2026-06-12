@@ -289,6 +289,16 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .att-total-row{background:var(--gd)!important;color:white;font-weight:700;}
 .att-total-row td{color:white!important;border:none!important;}
 
+
+.exp-toggle{cursor:pointer;}
+.exp-toggle:hover{background:var(--gp)!important;}
+.exp-arrow{display:inline-block;transition:transform 0.2s;margin-right:4px;color:var(--gm);font-weight:800;}
+.exp-row{display:none;background:#fafdfb;}
+.exp-row.show{display:table-row;}
+.exp-row.show + tr .exp-arrow, tr.exp-open .exp-arrow{transform:rotate(90deg);}
+.exp-inner{padding:8px;}
+.exp-inner table{width:100%;font-size:12px;}
+.exp-inner th{background:var(--gp)!important;color:var(--gm)!important;}
 </style>
 </head>
 <body>
@@ -1741,25 +1751,39 @@ function loadSeedReport(){
   const con=document.getElementById('seedReportContent');
   con.innerHTML='<div class="card" style="margin-top:10px;text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;color:var(--gd);">Report load ho rahi hai...</div></div>';
 
-  fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Seed%20Sowing%20Data&headers=1&t='+Date.now())
-    .then(r=>r.text())
-    .then(txt=>{
+  const ts=Date.now();
+  Promise.all([
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Seed%20Sowing%20Data&headers=1&t='+ts).then(r=>r.text()),
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Seed%20Labour%20Data&headers=1&t='+ts).then(r=>r.text()).catch(()=>'')
+  ])
+    .then(([txt, labTxt])=>{
+      function fixDate(rw){
+        if(!rw.c||!rw.c[0]||!rw.c[0].v) return '';
+        let d=rw.c[0].v.toString();
+        if(d.startsWith('Date(')){
+          const pts=d.replace('Date(','').replace(')','').split(',');
+          d=pts[0]+'-'+String(parseInt(pts[1])+1).padStart(2,'0')+'-'+String(pts[2]).padStart(2,'0');
+        }
+        return d;
+      }
       let rows=[];
       try{
         const json=JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
         rows=json.table.rows.filter(r=>r.c&&r.c[0]&&r.c[0].v&&r.c[0].v!=='Date');
       }catch(e){}
+      rows.forEach(r=>{ r._date=fixDate(r); });
 
-      // Date format fix
-      rows.forEach(r=>{
-        if(!r.c||!r.c[0]||!r.c[0].v) return;
-        let d=r.c[0].v.toString();
-        if(d.startsWith('Date(')){
-          const pts=d.replace('Date(','').replace(')','').split(',');
-          d=pts[0]+'-'+String(parseInt(pts[1])+1).padStart(2,'0')+'-'+String(pts[2]).padStart(2,'0');
-        }
-        r._date=d;
-      });
+      // Build labour map: key = date|area|veg|variety|lot -> [{name,pkt,tray}]
+      const labMap={};
+      try{
+        const ljson=JSON.parse(labTxt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+        ljson.table.rows.filter(r=>r.c&&r.c[0]&&r.c[0].v&&r.c[0].v!=='Date').forEach(r=>{
+          const d=fixDate(r);
+          const key=d+'|'+(r.c[2]?.v||'')+'|'+(r.c[3]?.v||'')+'|'+(r.c[4]?.v||'')+'|'+(r.c[5]?.v||'');
+          if(!labMap[key]) labMap[key]=[];
+          labMap[key].push({name:(r.c[6]?.v||'').toString(),pkt:r.c[7]?.v||0,tray:r.c[8]?.v||0});
+        });
+      }catch(e){}
 
       // Apply filters
       const filtered=rows.filter(r=>{
@@ -1844,12 +1868,16 @@ function loadSeedReport(){
         '<td>TOTAL</td><td>'+totalPkt+'</td><td>'+totalPlants.toLocaleString()+'</td></tr>';
       html+='</tbody></table></div></div>';
 
-      // Detail table
-      html+='<div class="rep-card"><div class="rep-title">📋 Detail Records ('+filtered.length+')</div>'+
+      // Detail table (expandable rows — click se labour breakdown khulta hai)
+      html+='<div class="rep-card"><div class="rep-title">📋 Detail Records ('+filtered.length+') <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div>'+
         '<div style="overflow-x:auto;"><table class="att-table">'+
-        '<thead><tr><th>Date</th><th>Supervisor</th><th>Vegetable</th><th>Variety</th><th>Lot</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';
-      filtered.forEach(r=>{
-        html+='<tr>'+
+        '<thead><tr><th></th><th>Date</th><th>Supervisor</th><th>Vegetable</th><th>Variety</th><th>Lot</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';
+      filtered.forEach((r,idx)=>{
+        const key=r._date+'|'+(r.c[2]?.v||'')+'|'+(r.c[4]?.v||'')+'|'+(r.c[5]?.v||'')+'|'+(r.c[6]?.v||'');
+        const labs=labMap[key]||[];
+        const rid='sr_exp_'+idx;
+        html+='<tr class="exp-toggle" onclick="toggleRow(\''+rid+'\')">'+
+          '<td><span class="exp-arrow">▶</span></td>'+
           '<td>'+r._date+'</td>'+
           '<td>'+(r.c[1]?.v||'')+'</td>'+
           '<td>'+(r.c[4]?.v||'')+'</td>'+
@@ -1859,9 +1887,18 @@ function loadSeedReport(){
           '<td>'+(r.c[8]?.v||0)+'</td>'+
           '<td>'+(parseFloat(r.c[11]?.v)||0).toLocaleString()+'</td>'+
           '</tr>';
+        html+='<tr class="exp-row" id="'+rid+'"><td colspan="9" class="exp-inner">';
+        if(labs.length>0){
+          html+='<table><thead><tr><th>👤 Labour</th><th>PKT</th><th>Tray</th></tr></thead><tbody>';
+          labs.forEach(l=>{ html+='<tr><td>'+l.name+'</td><td>'+l.pkt+'</td><td>'+l.tray+'</td></tr>'; });
+          html+='</tbody></table>';
+        } else {
+          html+='<div style="color:var(--g5);font-size:12px;">Labour breakdown nahi mila.</div>';
+        }
+        html+='</td></tr>';
       });
       html+='<tr style="background:var(--gd);color:white;font-weight:800;">'+
-        '<td colspan="5">TOTAL</td><td>'+totalPkt+'</td><td>'+totalTrays+'</td><td>'+totalPlants.toLocaleString()+'</td></tr>';
+        '<td colspan="6">TOTAL</td><td>'+totalPkt+'</td><td>'+totalTrays+'</td><td>'+totalPlants.toLocaleString()+'</td></tr>';
       html+='</tbody></table></div></div>';
 
       con.innerHTML=html;
@@ -1871,21 +1908,15 @@ function loadSeedReport(){
 }
 
 function loadMyReport(){
-  const from=document.getElementById('mrFrom').value;
-  const to=document.getElementById('mrTo').value;
-  const vegFilter=document.getElementById('mrVeg').value;
-  const areaFilter=document.getElementById('mrArea').value;
-  const varFilter=document.getElementById('mrVariety').value.toLowerCase();
-  const myName=curUser.name;
-  const con=document.getElementById('myReportContent');
-  con.innerHTML='<div class="card" style="margin-top:10px;text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;color:var(--gd);">Report load ho rahi hai...</div></div>';
-
   const ts=Date.now();
   Promise.all([
     fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Seed%20Sowing%20Data&headers=1&t='+ts).then(r=>r.text()),
     fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Watering%20Records&headers=1&t='+ts).then(r=>r.text()).catch(()=>''),
-    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Spraying%20Records&headers=1&t='+ts).then(r=>r.text()).catch(()=>'')
-  ]).then(([seedTxt, watTxt, sprTxt])=>{
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Spraying%20Records&headers=1&t='+ts).then(r=>r.text()).catch(()=>''),
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Seed%20Labour%20Data&headers=1&t='+ts).then(r=>r.text()).catch(()=>''),
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=W-S%20Labour&headers=1&t='+ts).then(r=>r.text()).catch(()=>''),
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Chemical%20Records&headers=1&t='+ts).then(r=>r.text()).catch(()=>'')
+  ]).then(([seedTxt, watTxt, sprTxt, seedLabTxt, wsLabTxt, chemTxt])=>{
 
     function parseRows(txt){
       try{
@@ -1904,6 +1935,28 @@ function loadMyReport(){
     }
 
     let html='';
+    let ridCounter=0;
+    function expRow(innerHtml, colspan){
+      ridCounter++;
+      const rid='mr_exp_'+ridCounter;
+      return {rid, row:'<tr class="exp-row" id="'+rid+'"><td colspan="'+colspan+'" class="exp-inner">'+innerHtml+'</td></tr>'};
+    }
+
+    // Pre-parse all related sheets once
+    let seedLabRows=parseRows(seedLabTxt);
+    let wsLabRows=parseRows(wsLabTxt);
+    let chemRows=parseRows(chemTxt);
+    seedLabRows.forEach(r=>{r._date=fixDate(r);});
+    wsLabRows.forEach(r=>{r._date=fixDate(r);});
+    chemRows.forEach(r=>{r._date=fixDate(r);});
+
+    // Seed labour map: key = date|area|veg|variety|lot
+    const seedLabMap={};
+    seedLabRows.forEach(r=>{
+      const key=r._date+'|'+(r.c[2]?.v||'')+'|'+(r.c[3]?.v||'')+'|'+(r.c[4]?.v||'')+'|'+(r.c[5]?.v||'');
+      if(!seedLabMap[key]) seedLabMap[key]=[];
+      seedLabMap[key].push({name:(r.c[6]?.v||'').toString(),pkt:r.c[7]?.v||0,tray:r.c[8]?.v||0});
+    });
 
     // ═══ SEED SOWING ═══
     let seedRows=parseRows(seedTxt);
@@ -1958,15 +2011,29 @@ function loadMyReport(){
       html+='<tr style="background:var(--gd);color:white;font-weight:800;"><td colspan="2">TOTAL</td><td>'+sPkt+'</td><td>'+sTrays+'</td><td>'+sPlants.toLocaleString()+'</td></tr>';
       html+='</tbody></table></div></div>';
 
-      html+='<div class="rep-card"><div class="rep-title">📋 Seed Sowing Detail</div>'+
+      html+='<div class="rep-card"><div class="rep-title">📋 Seed Sowing Detail <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div>'+
         '<div style="overflow-x:auto;"><table class="att-table">'+
-        '<thead><tr><th>Date</th><th>Area</th><th>Vegetable</th><th>Variety</th><th>Lot</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';
+        '<thead><tr><th></th><th>Date</th><th>Area</th><th>Vegetable</th><th>Variety</th><th>Lot</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';
       mySeed.forEach(r=>{
-        html+='<tr><td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>'+(r.c[4]?.v||'')+'</td>'+
+        const key=r._date+'|'+(r.c[2]?.v||'')+'|'+(r.c[4]?.v||'')+'|'+(r.c[5]?.v||'')+'|'+(r.c[6]?.v||'');
+        const labs=seedLabMap[key]||[];
+        let inner='';
+        if(labs.length>0){
+          inner+='<table><thead><tr><th>👤 Labour</th><th>PKT</th><th>Tray</th></tr></thead><tbody>';
+          labs.forEach(l=>{ inner+='<tr><td>'+l.name+'</td><td>'+l.pkt+'</td><td>'+l.tray+'</td></tr>'; });
+          inner+='</tbody></table>';
+        } else {
+          inner='<div style="color:var(--g5);font-size:12px;">Labour breakdown nahi mila.</div>';
+        }
+        const ex=expRow(inner,9);
+        html+='<tr class="exp-toggle" onclick="toggleRow(\''+ex.rid+'\')">'+
+          '<td><span class="exp-arrow">▶</span></td>'+
+          '<td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>'+(r.c[4]?.v||'')+'</td>'+
           '<td>'+(r.c[5]?.v||'')+'</td><td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+'</td>'+
           '<td>'+(r.c[8]?.v||0)+'</td><td>'+(parseFloat(r.c[11]?.v)||0).toLocaleString()+'</td></tr>';
+        html+=ex.row;
       });
-      html+='<tr style="background:var(--gd);color:white;font-weight:800;"><td colspan="5">TOTAL</td><td>'+sPkt+'</td><td>'+sTrays+'</td><td>'+sPlants.toLocaleString()+'</td></tr>';
+      html+='<tr style="background:var(--gd);color:white;font-weight:800;"><td colspan="6">TOTAL</td><td>'+sPkt+'</td><td>'+sTrays+'</td><td>'+sPlants.toLocaleString()+'</td></tr>';
       html+='</tbody></table></div></div>';
     } else {
       html+='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Seed Sowing — koi record nahi mila.</div>';
@@ -1992,7 +2059,6 @@ function loadMyReport(){
     });
 
     const totalWaterL=myWat.reduce((s,r)=>s+(parseFloat(r.c[7]?.v)||0),0);
-    const totalPumps=mySpr.reduce((s,r)=>s+(parseFloat(r.c[7]?.v)||0),0);
 
     html+='<div class="rep-card"><div class="rep-title">💧 Watering & Spraying — '+(myWat.length+mySpr.length)+' Records</div>'+
       '<div class="rep-sub">'+from+' to '+to+'</div>'+
@@ -2003,16 +2069,47 @@ function loadMyReport(){
       '</div></div>';
 
     if(myWat.length+mySpr.length>0){
-      html+='<div class="rep-card"><div class="rep-title">📋 Watering & Spraying Detail</div>'+
+      html+='<div class="rep-card"><div class="rep-title">📋 Watering & Spraying Detail <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div>'+
         '<div style="overflow-x:auto;"><table class="att-table">'+
-        '<thead><tr><th>Date</th><th>Area</th><th>Type</th><th>Method/Sprayer</th><th>Pani/Pumps</th><th>Labour</th></tr></thead><tbody>';
+        '<thead><tr><th></th><th>Date</th><th>Area</th><th>Type</th><th>Method/Sprayer</th><th>Pani/Pumps</th><th>Labour</th></tr></thead><tbody>';
       myWat.forEach(r=>{
-        html+='<tr><td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>💧 Watering</td>'+
+        const labs=wsLabRows.filter(w=>w._date===r._date && (w.c[2]?.v||'')===(r.c[2]?.v||'') && (w.c[3]?.v||'')==='water');
+        let inner='';
+        if(labs.length>0){
+          inner+='<table><thead><tr><th>👤 Labour</th><th>Ghante</th></tr></thead><tbody>';
+          labs.forEach(l=>{ inner+='<tr><td>'+(l.c[4]?.v||'')+'</td><td>'+(l.c[5]?.v||0)+'</td></tr>'; });
+          inner+='</tbody></table>';
+        } else {
+          inner='<div style="color:var(--g5);font-size:12px;">Labour detail nahi mila.</div>';
+        }
+        const ex=expRow(inner,7);
+        html+='<tr class="exp-toggle" onclick="toggleRow(\''+ex.rid+'\')">'+
+          '<td><span class="exp-arrow">▶</span></td>'+
+          '<td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>💧 Watering</td>'+
           '<td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+'L</td><td>'+(r.c[9]?.v||0)+'</td></tr>';
+        html+=ex.row;
       });
       mySpr.forEach(r=>{
-        html+='<tr><td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>🌿 Spraying</td>'+
+        const labs=wsLabRows.filter(w=>w._date===r._date && (w.c[2]?.v||'')===(r.c[2]?.v||'') && (w.c[3]?.v||'')==='spray');
+        const chems=chemRows.filter(c=>c._date===r._date && (c.c[2]?.v||'')===(r.c[2]?.v||''));
+        let inner='';
+        if(chems.length>0){
+          inner+='<table><thead><tr><th>🧪 Chemical</th><th>Dose</th><th>Unit</th><th>Purpose</th></tr></thead><tbody>';
+          chems.forEach(c=>{ inner+='<tr><td>'+(c.c[3]?.v||'')+'</td><td>'+(c.c[4]?.v||'')+'</td><td>'+(c.c[5]?.v||'')+'</td><td>'+(c.c[6]?.v||'')+'</td></tr>'; });
+          inner+='</tbody></table>';
+        }
+        if(labs.length>0){
+          inner+='<table style="margin-top:6px;"><thead><tr><th>👤 Labour</th><th>Pumps</th></tr></thead><tbody>';
+          labs.forEach(l=>{ inner+='<tr><td>'+(l.c[4]?.v||'')+'</td><td>'+(l.c[6]?.v||0)+'</td></tr>'; });
+          inner+='</tbody></table>';
+        }
+        if(!inner) inner='<div style="color:var(--g5);font-size:12px;">Detail nahi mila.</div>';
+        const ex=expRow(inner,7);
+        html+='<tr class="exp-toggle" onclick="toggleRow(\''+ex.rid+'\')">'+
+          '<td><span class="exp-arrow">▶</span></td>'+
+          '<td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>🌿 Spraying</td>'+
           '<td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+' pumps</td><td>'+(r.c[10]?.v||0)+'</td></tr>';
+        html+=ex.row;
       });
       html+='</tbody></table></div></div>';
     } else {
@@ -2020,64 +2117,50 @@ function loadMyReport(){
     }
 
     // ═══ LABOUR SUMMARY (from my entries) ═══
-    Promise.all([
-      fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Seed%20Labour%20Data&headers=1&t='+ts).then(r=>r.text()).catch(()=>''),
-      fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=W-S%20Labour&headers=1&t='+ts).then(r=>r.text()).catch(()=>'')
-    ]).then(([seedLabTxt, wsLabTxt])=>{
-      let seedLabRows=parseRows(seedLabTxt);
-      let wsLabRows=parseRows(wsLabTxt);
-      seedLabRows.forEach(r=>{r._date=fixDate(r);});
-      wsLabRows.forEach(r=>{r._date=fixDate(r);});
-
-      const labSummary={};
-      function ensureLab(name){
-        if(!labSummary[name]) labSummary[name]={pkt:0,tray:0,wsCount:0};
-        return labSummary[name];
-      }
-
-      seedLabRows.forEach(r=>{
-        if(!r._date||r._date<from||r._date>to) return;
-        if((r.c[1]?.v||'').toString()!==myName) return;
-        if(vegFilter && (r.c[3]?.v||'').toString()!==vegFilter) return;
-        if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return;
-        if(varFilter && !(r.c[4]?.v||'').toString().toLowerCase().includes(varFilter)) return;
-        const name=(r.c[6]?.v||'').toString().trim();
-        if(!name) return;
-        const s=ensureLab(name);
-        s.pkt+=parseFloat(r.c[7]?.v)||0;
-        s.tray+=parseFloat(r.c[8]?.v)||0;
-      });
-
-      wsLabRows.forEach(r=>{
-        if(!r._date||r._date<from||r._date>to) return;
-        if((r.c[1]?.v||'').toString()!==myName) return;
-        if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return;
-        const name=(r.c[4]?.v||'').toString().trim();
-        if(!name) return;
-        ensureLab(name).wsCount++;
-      });
-
-      const labNames=Object.keys(labSummary).sort();
-      let lhtml='';
-      if(labNames.length>0){
-        let tPkt=0,tTray=0,tWs=0;
-        labNames.forEach(n=>{tPkt+=labSummary[n].pkt;tTray+=labSummary[n].tray;tWs+=labSummary[n].wsCount;});
-        lhtml+='<div class="rep-card"><div class="rep-title">👷 Labour Summary — '+labNames.length+' Labour</div>'+
-          '<div style="overflow-x:auto;"><table class="att-table">'+
-          '<thead><tr><th>Labour</th><th>Seed PKT</th><th>Seed Tray</th><th>W/S Days</th></tr></thead><tbody>';
-        labNames.forEach(n=>{
-          const s=labSummary[n];
-          lhtml+='<tr><td style="font-weight:700;">'+n+'</td><td>'+s.pkt+'</td><td>'+s.tray+'</td><td>'+s.wsCount+'</td></tr>';
-        });
-        lhtml+='<tr style="background:var(--gd);color:white;font-weight:800;"><td>TOTAL</td><td>'+tPkt+'</td><td>'+tTray+'</td><td>'+tWs+'</td></tr>';
-        lhtml+='</tbody></table></div></div>';
-      } else {
-        lhtml='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Labour Summary — koi record nahi mila.</div>';
-      }
-      con.innerHTML=html+lhtml;
-    }).catch(()=>{
-      con.innerHTML=html;
+    const labSummary={};
+    function ensureLab(name){
+      if(!labSummary[name]) labSummary[name]={pkt:0,tray:0,wsCount:0};
+      return labSummary[name];
+    }
+    seedLabRows.forEach(r=>{
+      if(!r._date||r._date<from||r._date>to) return;
+      if((r.c[1]?.v||'').toString()!==myName) return;
+      if(vegFilter && (r.c[3]?.v||'').toString()!==vegFilter) return;
+      if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return;
+      if(varFilter && !(r.c[4]?.v||'').toString().toLowerCase().includes(varFilter)) return;
+      const name=(r.c[6]?.v||'').toString().trim();
+      if(!name) return;
+      const s=ensureLab(name);
+      s.pkt+=parseFloat(r.c[7]?.v)||0;
+      s.tray+=parseFloat(r.c[8]?.v)||0;
     });
+    wsLabRows.forEach(r=>{
+      if(!r._date||r._date<from||r._date>to) return;
+      if((r.c[1]?.v||'').toString()!==myName) return;
+      if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return;
+      const name=(r.c[4]?.v||'').toString().trim();
+      if(!name) return;
+      ensureLab(name).wsCount++;
+    });
+
+    const labNames=Object.keys(labSummary).sort();
+    if(labNames.length>0){
+      let tPkt=0,tTray=0,tWs=0;
+      labNames.forEach(n=>{tPkt+=labSummary[n].pkt;tTray+=labSummary[n].tray;tWs+=labSummary[n].wsCount;});
+      html+='<div class="rep-card"><div class="rep-title">👷 Labour Summary — '+labNames.length+' Labour</div>'+
+        '<div style="overflow-x:auto;"><table class="att-table">'+
+        '<thead><tr><th>Labour</th><th>Seed PKT</th><th>Seed Tray</th><th>W/S Days</th></tr></thead><tbody>';
+      labNames.forEach(n=>{
+        const s=labSummary[n];
+        html+='<tr><td style="font-weight:700;">'+n+'</td><td>'+s.pkt+'</td><td>'+s.tray+'</td><td>'+s.wsCount+'</td></tr>';
+      });
+      html+='<tr style="background:var(--gd);color:white;font-weight:800;"><td>TOTAL</td><td>'+tPkt+'</td><td>'+tTray+'</td><td>'+tWs+'</td></tr>';
+      html+='</tbody></table></div></div>';
+    } else {
+      html+='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Labour Summary — koi record nahi mila.</div>';
+    }
+
+    con.innerHTML=html;
   }).catch(()=>{
     con.innerHTML='<div class="rep-card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Data load nahi hua. Internet check karo.</div>';
   });
@@ -2129,7 +2212,7 @@ function loadLabourReport(){
     // Build labour summary
     const summary={};
     function ensure(name){
-      if(!summary[name]) summary[name]={present:0,half:0,absent:0,pkt:0,tray:0,plants:0,wsCount:0,wsHours:0};
+      if(!summary[name]) summary[name]={present:0,half:0,absent:0,pkt:0,tray:0,plants:0,wsCount:0,wsHours:0,records:[]};
       return summary[name];
     }
 
@@ -2143,6 +2226,7 @@ function loadLabourReport(){
       if(status==='Present') s.present++;
       else if(status==='Half Day') s.half++;
       else if(status==='Absent') s.absent++;
+      s.records.push({date:r._date,type:'👷 Attendance',detail:status+' — '+(r.c[3]?.v||'')+' ('+(r.c[2]?.v||'')+')'});
     });
 
     seedLabRows.forEach(r=>{
@@ -2154,6 +2238,7 @@ function loadLabourReport(){
       s.pkt+=parseFloat(r.c[7]?.v)||0;
       s.tray+=parseFloat(r.c[8]?.v)||0;
       s.plants+=parseFloat(r.c[9]?.v)||0;
+      s.records.push({date:r._date,type:'🌱 Seed Sowing',detail:(r.c[3]?.v||'')+' '+(r.c[4]?.v||'')+' — PKT:'+(r.c[7]?.v||0)+', Tray:'+(r.c[8]?.v||0)+' ('+(r.c[2]?.v||'')+')'});
     });
 
     wsRows.forEach(r=>{
@@ -2164,6 +2249,8 @@ function loadLabourReport(){
       const s=ensure(name);
       s.wsCount++;
       s.wsHours+=parseFloat(r.c[5]?.v)||0;
+      const kaam=(r.c[3]?.v||'')==='spray'?'🌿 Spraying':'💧 Watering';
+      s.records.push({date:r._date,type:kaam,detail:'Ghante:'+(r.c[5]?.v||0)+', Pumps:'+(r.c[6]?.v||0)+' ('+(r.c[2]?.v||'')+')'});
     });
 
     const names=Object.keys(summary).sort();
@@ -2193,18 +2280,29 @@ function loadLabourReport(){
       '<div class="stat-item"><span class="sv" style="color:var(--rd);">'+tA+'</span><div class="sl">Absent Days</div></div>'+
       '</div></div>';
 
-    // Detail table
-    html+='<div class="rep-card"><div class="rep-title">📋 Labour-wise Detail</div>'+
+    // Detail table (expandable — labour pe click karo)
+    html+='<div class="rep-card"><div class="rep-title">📋 Labour-wise Detail <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div>'+
       '<div style="overflow-x:auto;"><table class="att-table">'+
-      '<thead><tr><th>Labour</th><th>Present</th><th>Half</th><th>Absent</th><th>Seed PKT</th><th>Seed Tray</th><th>W/S Days</th></tr></thead><tbody>';
-    names.forEach(n=>{
+      '<thead><tr><th></th><th>Labour</th><th>Present</th><th>Half</th><th>Absent</th><th>Seed PKT</th><th>Seed Tray</th><th>W/S Days</th></tr></thead><tbody>';
+    names.forEach((n,idx)=>{
       const s=summary[n];
-      html+='<tr><td style="font-weight:700;">'+n+'</td>'+
+      const rid='lr_exp_'+idx;
+      html+='<tr class="exp-toggle" onclick="toggleRow(\''+rid+'\')"><td><span class="exp-arrow">▶</span></td><td style="font-weight:700;">'+n+'</td>'+
         '<td>'+s.present+'</td><td>'+s.half+'</td><td>'+s.absent+'</td>'+
         '<td>'+s.pkt+'</td><td>'+s.tray+'</td><td>'+s.wsCount+'</td></tr>';
+      let inner='';
+      const recs=s.records.slice().sort((a,b)=>a.date<b.date?-1:1);
+      if(recs.length>0){
+        inner+='<table><thead><tr><th>Date</th><th>Type</th><th>Detail</th></tr></thead><tbody>';
+        recs.forEach(rc=>{ inner+='<tr><td>'+rc.date+'</td><td>'+rc.type+'</td><td>'+rc.detail+'</td></tr>'; });
+        inner+='</tbody></table>';
+      } else {
+        inner='<div style="color:var(--g5);font-size:12px;">Koi record nahi mila.</div>';
+      }
+      html+='<tr class="exp-row" id="'+rid+'"><td colspan="8" class="exp-inner">'+inner+'</td></tr>';
     });
     html+='<tr style="background:var(--gd);color:white;font-weight:800;">'+
-      '<td>TOTAL</td><td>'+tP+'</td><td>'+tH+'</td><td>'+tA+'</td>'+
+      '<td colspan="2">TOTAL</td><td>'+tP+'</td><td>'+tH+'</td><td>'+tA+'</td>'+
       '<td>'+tPkt+'</td><td>'+tTray+'</td><td>'+tWs+'</td></tr>';
     html+='</tbody></table></div></div>';
 
@@ -2341,6 +2439,15 @@ function newEntry(){
 function goMenuS(){document.getElementById('sucScreen').classList.remove('show');show('menuScreen');}
 
 // ════ UTILS ════
+
+function toggleRow(id){
+  const row=document.getElementById(id);
+  if(!row) return;
+  row.classList.toggle('show');
+  const btn=row.previousElementSibling;
+  if(btn) btn.classList.toggle('exp-open');
+}
+
 function toast(msg,type='success'){
   const t=document.getElementById('toast');
   t.textContent=msg; t.className='toast '+type+' show';
