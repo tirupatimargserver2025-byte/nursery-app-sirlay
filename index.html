@@ -2340,7 +2340,7 @@ function loadReport(){
   con.innerHTML='<div class="card" style="margin-top:10px;text-align:center;padding:20px;"><div style="font-size:40px;margin-bottom:10px;">⏳</div><div style="font-weight:700;color:var(--gd);font-size:15px;">Report Load Ho Rahi Hai...</div></div>';
   
   // Load from multiple sheets
-  const sheets=['Variety Records','Attendance Records','Spraying Records','Watering Records','Morning Assignment'];
+  const sheets=['Seed Sowing Datas','Attendance Records','Spraying Records','Watering Records','Morning Assignment'];
   const results={};
   let loaded=0;
   
@@ -2362,8 +2362,8 @@ function renderReport(data, from, to){
   const con=document.getElementById('reportContent');
   let html='';
   
-  // Variety Records
-  const vRows=data['Variety Records']||[];
+  // Seed Sowing Datas
+  const vRows=data['Seed Sowing Datas']||[];
   const totalPlants=vRows.reduce((s,r)=>s+(parseFloat(r.c?.[11]?.v)||0),0);
   html+='<div class="rep-card"><div class="rep-title">🌱 Seed Sowing</div><div class="rep-sub">'+from+' se '+to+'</div>'+
     '<div class="stat-grid">'+
