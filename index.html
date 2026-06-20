@@ -756,8 +756,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
         <div><label>📅 To Date</label><input type="date" id="mrTo"></div>
       </div>
       <div class="g2">
+        <div><label>📊 Work Type</label>
+          <select id="mrWorkType">
+            <option value="">-- Sab Work Types --</option>
+            <option value="assign">📋 Morning Assignment</option>
+            <option value="seed">🌱 Seed Sowing</option>
+            <option value="water">💧 Watering</option>
+            <option value="spray">🌿 Spraying</option>
+          </select></div>
         <div><label>🥬 Vegetable</label>
           <select id="mrVeg"><option value="">-- Sab Vegetables --</option></select></div>
+      </div>
+      <div class="g2">
         <div><label>📍 Area</label>
           <select id="mrArea">
             <option value="">-- Sab Areas --</option>
@@ -815,7 +825,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 <div class="toast" id="toast"></div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbygNG_dWOHhw0uAcPn-jRK8pnQJNSm4HxDGM7Jhygk9LxYkY41vQ92mwp6AABeGFtkzsg/exec';
+const API = 'https://script.google.com/macros/s/AKfycbwkn3BnHiH_9Llf4x-ig8JX22PFfWTdUz2EGeebKxWFLSKAx8S0AIKiFa46Ejkvy8MclQ/exec';
 const SHEET_ID = '1nItPv5Jk4baU4Rg6fgQMYchRK7exQk-KDsRkHLl34Ew';
 
 let SUP_DATA = {}; // {name: {pin, role}}
@@ -1915,6 +1925,7 @@ function loadSeedReport(){
 function loadMyReport(){
   const from=document.getElementById('mrFrom').value;
   const to=document.getElementById('mrTo').value;
+  const workType=document.getElementById('mrWorkType').value;
   const vegFilter=document.getElementById('mrVeg').value;
   const areaFilter=document.getElementById('mrArea').value;
   const varFilter=document.getElementById('mrVariety').value.toLowerCase();
@@ -1929,255 +1940,23 @@ function loadMyReport(){
     fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Spraying%20Records&headers=1&t='+ts).then(r=>r.text()).catch(()=>''),
     fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Seed%20Labour%20Data&headers=1&t='+ts).then(r=>r.text()).catch(()=>''),
     fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=W-S%20Labour&headers=1&t='+ts).then(r=>r.text()).catch(()=>''),
-    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Chemical%20Records&headers=1&t='+ts).then(r=>r.text()).catch(()=>'')
-  ]).then(([seedTxt, watTxt, sprTxt, seedLabTxt, wsLabTxt, chemTxt])=>{
-
-    function parseRows(txt){
-      try{
-        const json=JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
-        return json.table.rows.filter(r=>r.c&&r.c[0]&&r.c[0].v&&r.c[0].v!=='Date');
-      }catch(e){return [];}
-    }
-    function fixDate(r){
-      if(!r.c||!r.c[0]||!r.c[0].v) return '';
-      let d=r.c[0].v.toString();
-      if(d.startsWith('Date(')){
-        const pts=d.replace('Date(','').replace(')','').split(',');
-        d=pts[0]+'-'+String(parseInt(pts[1])+1).padStart(2,'0')+'-'+String(pts[2]).padStart(2,'0');
-      }
-      return d;
-    }
-
-    let html='';
-    let ridCounter=0;
-    function expRow(innerHtml, colspan){
-      ridCounter++;
-      const rid='mr_exp_'+ridCounter;
-      return {rid, row:'<tr class="exp-row" id="'+rid+'"><td colspan="'+colspan+'" class="exp-inner">'+innerHtml+'</td></tr>'};
-    }
-
-    // Pre-parse all related sheets once
-    let seedLabRows=parseRows(seedLabTxt);
-    let wsLabRows=parseRows(wsLabTxt);
-    let chemRows=parseRows(chemTxt);
-    seedLabRows.forEach(r=>{r._date=fixDate(r);});
-    wsLabRows.forEach(r=>{r._date=fixDate(r);});
-    chemRows.forEach(r=>{r._date=fixDate(r);});
-
-    // Seed labour map: key = date|area|veg|variety|lot
-    const seedLabMap={};
-    seedLabRows.forEach(r=>{
-      const key=r._date+'|'+(r.c[2]?.v||'')+'|'+(r.c[3]?.v||'')+'|'+(r.c[4]?.v||'')+'|'+(r.c[5]?.v||'');
-      if(!seedLabMap[key]) seedLabMap[key]=[];
-      seedLabMap[key].push({name:(r.c[6]?.v||'').toString(),pkt:r.c[7]?.v||0,tray:r.c[8]?.v||0});
-    });
-
-    // ═══ SEED SOWING ═══
-    let seedRows=parseRows(seedTxt);
-    seedRows.forEach(r=>{r._date=fixDate(r);});
-    const mySeed=seedRows.filter(r=>{
-      if(!r._date||r._date<from||r._date>to) return false;
-      if((r.c[1]?.v||'').toString()!==myName) return false;
-      if(vegFilter && (r.c[4]?.v||'').toString()!==vegFilter) return false;
-      if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;
-      if(varFilter && !(r.c[5]?.v||'').toString().toLowerCase().includes(varFilter)) return false;
-      return true;
-    });
-
-    let sPkt=0, sTrays=0, sPlants=0;
-    const byVeg={};
-    mySeed.forEach(r=>{
-      const veg=(r.c[4]?.v||'').toString();
-      const variety=(r.c[5]?.v||'').toString();
-      const pkt=parseFloat(r.c[7]?.v)||0;
-      const trays=parseFloat(r.c[8]?.v)||0;
-      const plants=parseFloat(r.c[11]?.v)||0;
-      sPkt+=pkt; sTrays+=trays; sPlants+=plants;
-      if(!byVeg[veg]) byVeg[veg]={pkt:0,trays:0,plants:0,varieties:{}};
-      byVeg[veg].pkt+=pkt; byVeg[veg].trays+=trays; byVeg[veg].plants+=plants;
-      if(!byVeg[veg].varieties[variety]) byVeg[veg].varieties[variety]={pkt:0,trays:0,plants:0};
-      byVeg[veg].varieties[variety].pkt+=pkt;
-      byVeg[veg].varieties[variety].trays+=trays;
-      byVeg[veg].varieties[variety].plants+=plants;
-    });
-
-    html+='<div class="rep-card" style="margin-top:10px;"><div class="rep-title">🌱 Seed Sowing — '+mySeed.length+' Records</div>'+
-      '<div class="rep-sub">'+from+' to '+to+'</div>'+
-      '<div class="stat-grid">'+
-      '<div class="stat-item"><span class="sv">'+sPkt.toLocaleString()+'</span><div class="sl">Total PKT</div></div>'+
-      '<div class="stat-item"><span class="sv">'+sTrays.toLocaleString()+'</span><div class="sl">Total Trays</div></div>'+
-      '<div class="stat-item"><span class="sv">'+sPlants.toLocaleString()+'</span><div class="sl">Total Plants</div></div>'+
-      '</div></div>';
-
-    if(mySeed.length>0){
-      html+='<div class="rep-card"><div class="rep-title">🥬 Vegetable-wise</div>'+
-        '<div style="overflow-x:auto;"><table class="att-table">'+
-        '<thead><tr><th>Vegetable</th><th>Variety</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';
-      Object.entries(byVeg).forEach(([veg,vdata])=>{
-        html+='<tr style="background:var(--gp);font-weight:700;"><td>'+veg+'</td>'+
-          '<td style="color:var(--g5);">'+Object.keys(vdata.varieties).length+' varieties</td>'+
-          '<td>'+vdata.pkt+'</td><td>'+vdata.trays+'</td><td>'+vdata.plants.toLocaleString()+'</td></tr>';
-        Object.entries(vdata.varieties).forEach(([vr,vrdata])=>{
-          html+='<tr><td style="color:var(--g5);padding-left:16px;">↳</td><td>'+vr+'</td>'+
-            '<td>'+vrdata.pkt+'</td><td>'+vrdata.trays+'</td><td>'+vrdata.plants.toLocaleString()+'</td></tr>';
-        });
-      });
-      html+='<tr style="background:var(--gd);color:white;font-weight:800;"><td colspan="2">TOTAL</td><td>'+sPkt+'</td><td>'+sTrays+'</td><td>'+sPlants.toLocaleString()+'</td></tr>';
-      html+='</tbody></table></div></div>';
-
-      html+='<div class="rep-card"><div class="rep-title">📋 Seed Sowing Detail <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div>'+
-        '<div style="overflow-x:auto;"><table class="att-table">'+
-        '<thead><tr><th></th><th>Date</th><th>Area</th><th>Vegetable</th><th>Variety</th><th>Lot</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';
-      mySeed.forEach(r=>{
-        const key=r._date+'|'+(r.c[2]?.v||'')+'|'+(r.c[4]?.v||'')+'|'+(r.c[5]?.v||'')+'|'+(r.c[6]?.v||'');
-        const labs=seedLabMap[key]||[];
-        let inner='';
-        if(labs.length>0){
-          inner+='<table><thead><tr><th>👤 Labour</th><th>PKT</th><th>Tray</th></tr></thead><tbody>';
-          labs.forEach(l=>{ inner+='<tr><td>'+l.name+'</td><td>'+l.pkt+'</td><td>'+l.tray+'</td></tr>'; });
-          inner+='</tbody></table>';
-        } else {
-          inner='<div style="color:var(--g5);font-size:12px;">Labour breakdown nahi mila.</div>';
-        }
-        const ex=expRow(inner,9);
-        html+='<tr class="exp-toggle" onclick="toggleRow(\''+ex.rid+'\')">'+
-          '<td><span class="exp-arrow">▶</span></td>'+
-          '<td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>'+(r.c[4]?.v||'')+'</td>'+
-          '<td>'+(r.c[5]?.v||'')+'</td><td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+'</td>'+
-          '<td>'+(r.c[8]?.v||0)+'</td><td>'+(parseFloat(r.c[11]?.v)||0).toLocaleString()+'</td></tr>';
-        html+=ex.row;
-      });
-      html+='<tr style="background:var(--gd);color:white;font-weight:800;"><td colspan="6">TOTAL</td><td>'+sPkt+'</td><td>'+sTrays+'</td><td>'+sPlants.toLocaleString()+'</td></tr>';
-      html+='</tbody></table></div></div>';
-    } else {
-      html+='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Seed Sowing — koi record nahi mila.</div>';
-    }
-
-    // ═══ WATERING / SPRAYING ═══
-    let watRows=parseRows(watTxt);
-    let sprRows=parseRows(sprTxt);
-    watRows.forEach(r=>{r._date=fixDate(r);});
-    sprRows.forEach(r=>{r._date=fixDate(r);});
-
-    const myWat=watRows.filter(r=>{
-      if(!r._date||r._date<from||r._date>to) return false;
-      if((r.c[1]?.v||'').toString()!==myName) return false;
-      if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;
-      return true;
-    });
-    const mySpr=sprRows.filter(r=>{
-      if(!r._date||r._date<from||r._date>to) return false;
-      if((r.c[1]?.v||'').toString()!==myName) return false;
-      if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;
-      return true;
-    });
-
-    const totalWaterL=myWat.reduce((s,r)=>s+(parseFloat(r.c[7]?.v)||0),0);
-
-    html+='<div class="rep-card"><div class="rep-title">💧 Watering & Spraying — '+(myWat.length+mySpr.length)+' Records</div>'+
-      '<div class="rep-sub">'+from+' to '+to+'</div>'+
-      '<div class="stat-grid">'+
-      '<div class="stat-item"><span class="sv">'+myWat.length+'</span><div class="sl">Watering</div></div>'+
-      '<div class="stat-item"><span class="sv">'+mySpr.length+'</span><div class="sl">Spraying</div></div>'+
-      '<div class="stat-item"><span class="sv">'+totalWaterL.toLocaleString()+'L</span><div class="sl">Total Pani</div></div>'+
-      '</div></div>';
-
-    if(myWat.length+mySpr.length>0){
-      html+='<div class="rep-card"><div class="rep-title">📋 Watering & Spraying Detail <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div>'+
-        '<div style="overflow-x:auto;"><table class="att-table">'+
-        '<thead><tr><th></th><th>Date</th><th>Area</th><th>Type</th><th>Method/Sprayer</th><th>Pani/Pumps</th><th>Labour</th></tr></thead><tbody>';
-      myWat.forEach(r=>{
-        const labs=wsLabRows.filter(w=>w._date===r._date && (w.c[2]?.v||'')===(r.c[2]?.v||'') && (w.c[3]?.v||'')==='water');
-        let inner='';
-        if(labs.length>0){
-          inner+='<table><thead><tr><th>👤 Labour</th><th>Ghante</th></tr></thead><tbody>';
-          labs.forEach(l=>{ inner+='<tr><td>'+(l.c[4]?.v||'')+'</td><td>'+(l.c[5]?.v||0)+'</td></tr>'; });
-          inner+='</tbody></table>';
-        } else {
-          inner='<div style="color:var(--g5);font-size:12px;">Labour detail nahi mila.</div>';
-        }
-        const ex=expRow(inner,7);
-        html+='<tr class="exp-toggle" onclick="toggleRow(\''+ex.rid+'\')">'+
-          '<td><span class="exp-arrow">▶</span></td>'+
-          '<td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>💧 Watering</td>'+
-          '<td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+'L</td><td>'+(r.c[9]?.v||0)+'</td></tr>';
-        html+=ex.row;
-      });
-      mySpr.forEach(r=>{
-        const labs=wsLabRows.filter(w=>w._date===r._date && (w.c[2]?.v||'')===(r.c[2]?.v||'') && (w.c[3]?.v||'')==='spray');
-        const chems=chemRows.filter(c=>c._date===r._date && (c.c[2]?.v||'')===(r.c[2]?.v||''));
-        let inner='';
-        if(chems.length>0){
-          inner+='<table><thead><tr><th>🧪 Chemical</th><th>Dose</th><th>Unit</th><th>Purpose</th></tr></thead><tbody>';
-          chems.forEach(c=>{ inner+='<tr><td>'+(c.c[3]?.v||'')+'</td><td>'+(c.c[4]?.v||'')+'</td><td>'+(c.c[5]?.v||'')+'</td><td>'+(c.c[6]?.v||'')+'</td></tr>'; });
-          inner+='</tbody></table>';
-        }
-        if(labs.length>0){
-          inner+='<table style="margin-top:6px;"><thead><tr><th>👤 Labour</th><th>Pumps</th></tr></thead><tbody>';
-          labs.forEach(l=>{ inner+='<tr><td>'+(l.c[4]?.v||'')+'</td><td>'+(l.c[6]?.v||0)+'</td></tr>'; });
-          inner+='</tbody></table>';
-        }
-        if(!inner) inner='<div style="color:var(--g5);font-size:12px;">Detail nahi mila.</div>';
-        const ex=expRow(inner,7);
-        html+='<tr class="exp-toggle" onclick="toggleRow(\''+ex.rid+'\')">'+
-          '<td><span class="exp-arrow">▶</span></td>'+
-          '<td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>🌿 Spraying</td>'+
-          '<td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+' pumps</td><td>'+(r.c[10]?.v||0)+'</td></tr>';
-        html+=ex.row;
-      });
-      html+='</tbody></table></div></div>';
-    } else {
-      html+='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Watering/Spraying — koi record nahi mila.</div>';
-    }
-
-    // ═══ LABOUR SUMMARY (from my entries) ═══
-    const labSummary={};
-    function ensureLab(name){
-      if(!labSummary[name]) labSummary[name]={pkt:0,tray:0,wsCount:0};
-      return labSummary[name];
-    }
-    seedLabRows.forEach(r=>{
-      if(!r._date||r._date<from||r._date>to) return;
-      if((r.c[1]?.v||'').toString()!==myName) return;
-      if(vegFilter && (r.c[3]?.v||'').toString()!==vegFilter) return;
-      if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return;
-      if(varFilter && !(r.c[4]?.v||'').toString().toLowerCase().includes(varFilter)) return;
-      const name=(r.c[6]?.v||'').toString().trim();
-      if(!name) return;
-      const s=ensureLab(name);
-      s.pkt+=parseFloat(r.c[7]?.v)||0;
-      s.tray+=parseFloat(r.c[8]?.v)||0;
-    });
-    wsLabRows.forEach(r=>{
-      if(!r._date||r._date<from||r._date>to) return;
-      if((r.c[1]?.v||'').toString()!==myName) return;
-      if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return;
-      const name=(r.c[4]?.v||'').toString().trim();
-      if(!name) return;
-      ensureLab(name).wsCount++;
-    });
-
-    const labNames=Object.keys(labSummary).sort();
-    if(labNames.length>0){
-      let tPkt=0,tTray=0,tWs=0;
-      labNames.forEach(n=>{tPkt+=labSummary[n].pkt;tTray+=labSummary[n].tray;tWs+=labSummary[n].wsCount;});
-      html+='<div class="rep-card"><div class="rep-title">👷 Labour Summary — '+labNames.length+' Labour</div>'+
-        '<div style="overflow-x:auto;"><table class="att-table">'+
-        '<thead><tr><th>Labour</th><th>Seed PKT</th><th>Seed Tray</th><th>W/S Days</th></tr></thead><tbody>';
-      labNames.forEach(n=>{
-        const s=labSummary[n];
-        html+='<tr><td style="font-weight:700;">'+n+'</td><td>'+s.pkt+'</td><td>'+s.tray+'</td><td>'+s.wsCount+'</td></tr>';
-      });
-      html+='<tr style="background:var(--gd);color:white;font-weight:800;"><td>TOTAL</td><td>'+tPkt+'</td><td>'+tTray+'</td><td>'+tWs+'</td></tr>';
-      html+='</tbody></table></div></div>';
-    } else {
-      html+='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Labour Summary — koi record nahi mila.</div>';
-    }
-
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Chemical%20Records&headers=1&t='+ts).then(r=>r.text()).catch(()=>''),
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Morning%20Assignment&headers=1&t='+ts).then(r=>r.text()).catch(()=>'')
+  ]).then(([seedTxt, watTxt, sprTxt, seedLabTxt, wsLabTxt, chemTxt, assignTxt])=>{
+    function parseRows(txt){try{const json=JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);return json.table.rows.filter(r=>r.c&&r.c[0]&&r.c[0].v&&r.c[0].v!=='Date');}catch(e){return [];}}
+    function fixDate(r){if(!r.c||!r.c[0]||!r.c[0].v) return '';let d=r.c[0].v.toString();if(d.startsWith('Date(')){const pts=d.replace('Date(','').replace(')','').split(',');d=pts[0]+'-'+String(parseInt(pts[1])+1).padStart(2,'0')+'-'+String(pts[2]).padStart(2,'0');}return d;}
+    let html='';let ridCounter=0;function expRow(innerHtml,colspan){ridCounter++;const rid='mr_exp_'+ridCounter;return {rid,row:'<tr class="exp-row" id="'+rid+'"><td colspan="'+colspan+'" class="exp-inner">'+innerHtml+'</td></tr>'};};
+    let seedLabRows=parseRows(seedLabTxt);let wsLabRows=parseRows(wsLabTxt);let chemRows=parseRows(chemTxt);seedLabRows.forEach(r=>{r._date=fixDate(r);});wsLabRows.forEach(r=>{r._date=fixDate(r);});chemRows.forEach(r=>{r._date=fixDate(r);});
+    const seedLabMap={};seedLabRows.forEach(r=>{const key=r._date+'|'+(r.c[2]?.v||'')+'|'+(r.c[3]?.v||'')+'|'+(r.c[4]?.v||'')+'|'+(r.c[5]?.v||'');if(!seedLabMap[key]) seedLabMap[key]=[];seedLabMap[key].push({name:(r.c[6]?.v||'').toString(),pkt:r.c[7]?.v||0,tray:r.c[8]?.v||0});});
+    
+    if(!workType || workType==='assign'){let assignRows=parseRows(assignTxt);assignRows.forEach(r=>{r._date=fixDate(r);});const myAssign=assignRows.filter(r=>{if(!r._date||r._date<from||r._date>to) return false;if((r.c[1]?.v||'').toString()!==myName) return false;if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;return true;});if(myAssign.length>0){html+='<div class="rep-card" style="margin-top:10px;"><div class="rep-title">📋 Morning Assignment — '+myAssign.length+' Records</div><div class="rep-sub">'+from+' to '+to+'</div><div class="stat-grid"><div class="stat-item"><span class="sv">'+myAssign.length+'</span><div class="sl">Total Assignments</div></div><div class="stat-item"><span class="sv">'+Object.keys({...new Set(myAssign.map(r=>r.c[3]?.v))}).length+'</span><div class="sl">Kaam Types</div></div><div class="stat-item"><span class="sv">'+myAssign.reduce((s,r)=>s+(r.c[4]?.v||'').toString().split(',').length,0)+'</span><div class="sl">Total Labour</div></div></div></div>';html+='<div class="rep-card"><div class="rep-title">📋 Assignment Detail <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div><div style="overflow-x:auto;"><table class="att-table"><thead><tr><th></th><th>Date</th><th>Area</th><th>Kaam Type</th><th>Labour Count</th><th>Labour Names</th></tr></thead><tbody>';myAssign.forEach((r,idx)=>{const labStr=(r.c[4]?.v||'').toString();const labs=labStr.split(',').map(s=>s.trim()).filter(Boolean);const rid='assign_exp_'+idx;let inner='';if(labs.length>0){inner+='<table><thead><tr><th>👤 Labour</th></tr></thead><tbody>';labs.forEach(l=>{inner+='<tr><td>'+l+'</td></tr>';});inner+='</tbody></table>';}const ex=expRow(inner,6);html+='<tr class="exp-toggle" onclick="toggleRow(\''+ex.rid+'\')"><td><span class="exp-arrow">▶</span></td><td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>'+(r.c[3]?.v||'')+'</td><td>'+labs.length+'</td><td>'+labStr+'</td></tr>';html+=ex.row;});html+='</tbody></table></div></div>';}else{html+='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Morning Assignment — koi record nahi mila.</div>';};}
+    
+    if(!workType || workType==='seed'){let seedRows=parseRows(seedTxt);seedRows.forEach(r=>{r._date=fixDate(r);});const mySeed=seedRows.filter(r=>{if(!r._date||r._date<from||r._date>to) return false;if((r.c[1]?.v||'').toString()!==myName) return false;if(vegFilter && (r.c[4]?.v||'').toString()!==vegFilter) return false;if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;if(varFilter && !(r.c[5]?.v||'').toString().toLowerCase().includes(varFilter)) return false;return true;});let sPkt=0,sTrays=0,sPlants=0;const byVeg={};mySeed.forEach(r=>{const veg=(r.c[4]?.v||'').toString();const variety=(r.c[5]?.v||'').toString();const pkt=parseFloat(r.c[7]?.v)||0;const trays=parseFloat(r.c[8]?.v)||0;const plants=parseFloat(r.c[11]?.v)||0;sPkt+=pkt;sTrays+=trays;sPlants+=plants;if(!byVeg[veg]) byVeg[veg]={pkt:0,trays:0,plants:0,varieties:{}};byVeg[veg].pkt+=pkt;byVeg[veg].trays+=trays;byVeg[veg].plants+=plants;if(!byVeg[veg].varieties[variety]) byVeg[veg].varieties[variety]={pkt:0,trays:0,plants:0};byVeg[veg].varieties[variety].pkt+=pkt;byVeg[veg].varieties[variety].trays+=trays;byVeg[veg].varieties[variety].plants+=plants;});html+='<div class="rep-card"><div class="rep-title">🌱 Seed Sowing — '+mySeed.length+' Records</div><div class="rep-sub">'+from+' to '+to+'</div><div class="stat-grid"><div class="stat-item"><span class="sv">'+sPkt.toLocaleString()+'</span><div class="sl">Total PKT</div></div><div class="stat-item"><span class="sv">'+sTrays.toLocaleString()+'</span><div class="sl">Total Trays</div></div><div class="stat-item"><span class="sv">'+sPlants.toLocaleString()+'</span><div class="sl">Total Plants</div></div></div></div>';if(mySeed.length>0){html+='<div class="rep-card"><div class="rep-title">🥬 Vegetable-wise</div><div style="overflow-x:auto;"><table class="att-table"><thead><tr><th>Vegetable</th><th>Variety</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';Object.entries(byVeg).forEach(([veg,vdata])=>{html+='<tr style="background:var(--gp);font-weight:700;"><td>'+veg+'</td><td style="color:var(--g5);">'+Object.keys(vdata.varieties).length+' varieties</td><td>'+vdata.pkt+'</td><td>'+vdata.trays+'</td><td>'+vdata.plants.toLocaleString()+'</td></tr>';Object.entries(vdata.varieties).forEach(([vr,vrdata])=>{html+='<tr><td style="color:var(--g5);padding-left:16px;">↳</td><td>'+vr+'</td><td>'+vrdata.pkt+'</td><td>'+vrdata.trays+'</td><td>'+vrdata.plants.toLocaleString()+'</td></tr>';});});html+='<tr style="background:var(--gd);color:white;font-weight:800;"><td colspan="2">TOTAL</td><td>'+sPkt+'</td><td>'+sTrays+'</td><td>'+sPlants.toLocaleString()+'</td></tr>';html+='</tbody></table></div></div>';html+='<div class="rep-card"><div class="rep-title">📋 Seed Sowing Detail <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div><div style="overflow-x:auto;"><table class="att-table"><thead><tr><th></th><th>Date</th><th>Area</th><th>Vegetable</th><th>Variety</th><th>Lot</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';mySeed.forEach(r=>{const key=r._date+'|'+(r.c[2]?.v||'')+'|'+(r.c[4]?.v||'')+'|'+(r.c[5]?.v||'')+'|'+(r.c[6]?.v||'');const labs=seedLabMap[key]||[];let inner='';if(labs.length>0){inner+='<table><thead><tr><th>👤 Labour</th><th>PKT</th><th>Tray</th></tr></thead><tbody>';labs.forEach(l=>{inner+='<tr><td>'+l.name+'</td><td>'+l.pkt+'</td><td>'+l.tray+'</td></tr>';});inner+='</tbody></table>';}else{inner='<div style="color:var(--g5);font-size:12px;">Labour breakdown nahi mila.</div>';}const ex=expRow(inner,9);html+='<tr class="exp-toggle" onclick="toggleRow(\''+ex.rid+'\')"><td><span class="exp-arrow">▶</span></td><td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>'+(r.c[4]?.v||'')+'</td><td>'+(r.c[5]?.v||'')+'</td><td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+'</td><td>'+(r.c[8]?.v||0)+'</td><td>'+(parseFloat(r.c[11]?.v)||0).toLocaleString()+'</td></tr>';html+=ex.row;});html+='<tr style="background:var(--gd);color:white;font-weight:800;"><td colspan="6">TOTAL</td><td>'+sPkt+'</td><td>'+sTrays+'</td><td>'+sPlants.toLocaleString()+'</td></tr>';html+='</tbody></table></div></div>';}else{html+='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Seed Sowing — koi record nahi mila.</div>';}}
+    
+    if(!workType || workType==='water' || workType==='spray'){let watRows=parseRows(watTxt);let sprRows=parseRows(sprTxt);watRows.forEach(r=>{r._date=fixDate(r);});sprRows.forEach(r=>{r._date=fixDate(r);});const myWat=watRows.filter(r=>{if(!r._date||r._date<from||r._date>to) return false;if((r.c[1]?.v||'').toString()!==myName) return false;if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;return true;});const mySpr=sprRows.filter(r=>{if(!r._date||r._date<from||r._date>to) return false;if((r.c[1]?.v||'').toString()!==myName) return false;if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;return true;});const totalWaterL=myWat.reduce((s,r)=>s+(parseFloat(r.c[7]?.v)||0),0);html+='<div class="rep-card"><div class="rep-title">💧 Watering & Spraying — '+(myWat.length+mySpr.length)+' Records</div><div class="rep-sub">'+from+' to '+to+'</div><div class="stat-grid"><div class="stat-item"><span class="sv">'+myWat.length+'</span><div class="sl">Watering</div></div><div class="stat-item"><span class="sv">'+mySpr.length+'</span><div class="sl">Spraying</div></div><div class="stat-item"><span class="sv">'+totalWaterL.toLocaleString()+'L</span><div class="sl">Total Pani</div></div></div></div>';if(myWat.length+mySpr.length>0){html+='<div class="rep-card"><div class="rep-title">📋 Watering & Spraying Detail <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div><div style="overflow-x:auto;"><table class="att-table"><thead><tr><th></th><th>Date</th><th>Area</th><th>Type</th><th>Method/Sprayer</th><th>Pani/Pumps</th><th>Labour</th></tr></thead><tbody>';myWat.forEach(r=>{const labs=wsLabRows.filter(w=>w._date===r._date && (w.c[2]?.v||'')===(r.c[2]?.v||'') && (w.c[3]?.v||'')==='water');let inner='';if(labs.length>0){inner+='<table><thead><tr><th>👤 Labour</th><th>Ghante</th></tr></thead><tbody>';labs.forEach(l=>{inner+='<tr><td>'+(l.c[4]?.v||'')+'</td><td>'+(l.c[5]?.v||0)+'</td></tr>';});inner+='</tbody></table>';}else{inner='<div style="color:var(--g5);font-size:12px;">Labour detail nahi mila.</div>';}const ex=expRow(inner,7);html+='<tr class="exp-toggle" onclick="toggleRow(\''+ex.rid+'\')"><td><span class="exp-arrow">▶</span></td><td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>💧 Watering</td><td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+'L</td><td>'+(r.c[9]?.v||0)+'</td></tr>';html+=ex.row;});mySpr.forEach(r=>{const labs=wsLabRows.filter(w=>w._date===r._date && (w.c[2]?.v||'')===(r.c[2]?.v||'') && (w.c[3]?.v||'')==='spray');const chems=chemRows.filter(c=>c._date===r._date && (c.c[2]?.v||'')===(r.c[2]?.v||''));let inner='';if(chems.length>0){inner+='<table><thead><tr><th>🧪 Chemical</th><th>Dose</th><th>Unit</th><th>Purpose</th></tr></thead><tbody>';chems.forEach(c=>{inner+='<tr><td>'+(c.c[3]?.v||'')+'</td><td>'+(c.c[4]?.v||'')+'</td><td>'+(c.c[5]?.v||'')+'</td><td>'+(c.c[6]?.v||'')+'</td></tr>';});inner+='</tbody></table>';}if(labs.length>0){inner+='<table style="margin-top:6px;"><thead><tr><th>👤 Labour</th><th>Pumps</th></tr></thead><tbody>';labs.forEach(l=>{inner+='<tr><td>'+(l.c[4]?.v||'')+'</td><td>'+(l.c[6]?.v||0)+'</td></tr>';});inner+='</tbody></table>';}if(!inner) inner='<div style="color:var(--g5);font-size:12px;">Detail nahi mila.</div>';const ex=expRow(inner,7);html+='<tr class="exp-toggle" onclick="toggleRow(\''+ex.rid+'\')"><td><span class="exp-arrow">▶</span></td><td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>🌿 Spraying</td><td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+' pumps</td><td>'+(r.c[10]?.v||0)+'</td></tr>';html+=ex.row;});html+='</tbody></table></div></div>';}else{html+='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Watering/Spraying — koi record nahi mila.</div>';}}
+    
     con.innerHTML=html;
-  }).catch(()=>{
-    con.innerHTML='<div class="rep-card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Data load nahi hua. Internet check karo.</div>';
-  });
+  }).catch(()=>{con.innerHTML='<div class="rep-card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Data load nahi hua. Internet check karo.</div>';});
 }
 
 function loadLabourReport(){
@@ -2340,7 +2119,7 @@ function loadReport(){
   con.innerHTML='<div class="card" style="margin-top:10px;text-align:center;padding:20px;"><div style="font-size:40px;margin-bottom:10px;">⏳</div><div style="font-weight:700;color:var(--gd);font-size:15px;">Report Load Ho Rahi Hai...</div></div>';
   
   // Load from multiple sheets
-  const sheets=['Seed Sowing Datas','Attendance Records','Spraying Records','Watering Records','Morning Assignment'];
+  const sheets=['Variety Records','Attendance Records','Spraying Records','Watering Records','Morning Assignment'];
   const results={};
   let loaded=0;
   
@@ -2362,8 +2141,8 @@ function renderReport(data, from, to){
   const con=document.getElementById('reportContent');
   let html='';
   
-  // Seed Sowing Datas
-  const vRows=data['Seed Sowing Datas']||[];
+  // Variety Records
+  const vRows=data['Variety Records']||[];
   const totalPlants=vRows.reduce((s,r)=>s+(parseFloat(r.c?.[11]?.v)||0),0);
   html+='<div class="rep-card"><div class="rep-title">🌱 Seed Sowing</div><div class="rep-sub">'+from+' se '+to+'</div>'+
     '<div class="stat-grid">'+
