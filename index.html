@@ -398,6 +398,30 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div class="dsc">Labour-wise kaam summary</div>
         </div>
       </div>
+
+      <div class="msec-title">🔄 Operations</div>
+      <div class="mgrid">
+        <div class="mcard entry" onclick="openShiftingForm()">
+          <div class="ico">🔄</div><div class="ttl">Shifting</div>
+          <div class="dsc">Labour shifting records</div>
+        </div>
+        <div class="mcard entry" onclick="openDispatchForm()">
+          <div class="ico">🚚</div><div class="ttl">Dispatch</div>
+          <div class="dsc">Vehicle dispatch records</div>
+        </div>
+      </div>
+
+      <div class="msec-title">📋 My Records</div>
+      <div class="mgrid">
+        <div class="mcard report" onclick="openShiftingReport()">
+          <div class="ico">📊</div><div class="ttl">Shifting Report</div>
+          <div class="dsc">Meri shifting records</div>
+        </div>
+        <div class="mcard report" onclick="openDispatchReport()">
+          <div class="ico">📊</div><div class="ttl">Dispatch Report</div>
+          <div class="dsc">Meri dispatch records</div>
+        </div>
+      </div>
     </div>
 
     <!-- Admin Menu -->
@@ -2260,6 +2284,220 @@ function buildLabourDatalist(){
 // Build after data loads
 setTimeout(buildLabourDatalist, 3000);
 setInterval(buildLabourDatalist, 5000);
+<!-- SHIFTING FORM SCREEN -->
+<div class="screen" id="shiftingScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--or);">🔄</div>
+      <h1>Shifting</h1></div>
+    <div class="sbar">
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">📋 Shifting Form</div>
+      
+      <div class="g2">
+        <div><label>📅 Date</label><input type="date" id="shDate"></div>
+        <div><label>👤 Supervisor</label><input type="text" id="shSup" readonly style="background:var(--g1);"></div>
+      </div>
+      
+      <div class="g2">
+        <div><label>📍 Area</label>
+          <select id="shArea">
+            <option value="">-- Select Area --</option>
+          </select></div>
+        <div><label>🥬 Crop</label>
+          <select id="shCrop">
+            <option value="">-- Select Crop --</option>
+          </select></div>
+      </div>
+      
+      <div class="fr">
+        <label>🌱 Variety</label>
+        <select id="shVariety">
+          <option value="">-- Select Variety --</option>
+        </select>
+      </div>
+
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--g2);">
+        <div class="ctitle" style="font-size:14px;margin-bottom:12px;">👥 Add Labour</div>
+        
+        <div class="g2">
+          <div><label>Labour</label>
+            <select id="shLabour">
+              <option value="">-- Select Labour --</option>
+            </select></div>
+          <div><label>Tray Count</label>
+            <input type="number" id="shTray" placeholder="0" min="0" step="1" style="width:100%;"></div>
+        </div>
+        
+        <button onclick="addShiftingLabour()" style="width:100%;padding:10px;background:var(--gl);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;margin-top:8px;">➕ Add Labour</button>
+      </div>
+
+      <div id="shLabourList" style="margin-top:16px;padding:12px;background:var(--gp);border-radius:var(--rs);min-height:40px;">
+        <div style="color:var(--g5);font-size:13px;text-align:center;">Koi labour add nahi hua</div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:16px;">
+        <button onclick="submitShifting()" style="flex:1;padding:12px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">💾 Save</button>
+        <button onclick="resetShifting()" style="flex:1;padding:12px;background:var(--g2);color:var(--g8);border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">🔄 Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SHIFTING REPORT SCREEN -->
+<div class="screen" id="shiftingReportScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--or);">📊</div>
+      <h1>Shifting Report</h1></div>
+    <div class="sbar">
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">🔍 Filters</div>
+      <div class="g2">
+        <div><label>📅 From Date</label><input type="date" id="srFrom"></div>
+        <div><label>📅 To Date</label><input type="date" id="srTo"></div>
+      </div>
+      <div class="g2">
+        <div><label>📍 Area</label>
+          <select id="srArea">
+            <option value="">-- Sab Areas --</option>
+          </select></div>
+        <div><label>🥬 Crop</label>
+          <select id="srCrop">
+            <option value="">-- Sab Crops --</option>
+          </select></div>
+      </div>
+      <button onclick="loadShiftingReport()" style="width:100%;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">🔍 Report Dekho</button>
+    </div>
+    <div id="shiftingReportContent"></div>
+  </div>
+</div>
+
+<!-- DISPATCH FORM SCREEN -->
+<div class="screen" id="dispatchScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--gl);">🚚</div>
+      <h1>Dispatch</h1></div>
+    <div class="sbar">
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">📦 Vehicle Header</div>
+      
+      <div class="g2">
+        <div><label>📅 Date</label><input type="date" id="dpDate"></div>
+        <div><label>📍 Area</label>
+          <select id="dpArea">
+            <option value="">-- Select Area --</option>
+          </select></div>
+      </div>
+      
+      <div class="g2">
+        <div><label>👤 Supervisor</label><input type="text" id="dpSup" readonly style="background:var(--g1);"></div>
+        <div><label>🚙 Gaadi No</label>
+          <input type="text" id="dpGaadi" placeholder="Vehicle number"></div>
+      </div>
+      
+      <div class="g2">
+        <div><label>👨 Driver</label>
+          <input type="text" id="dpDriver" placeholder="Driver name"></div>
+        <div><label>📊 Meter Reading</label>
+          <input type="number" id="dpMeter" placeholder="0" min="0" step="0.1"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle">🌱 Add Crop/Farmer Entry</div>
+      
+      <div class="g2">
+        <div><label>👨 Farmer</label>
+          <input type="text" id="dpFarmer" placeholder="Farmer name"></div>
+        <div><label>🥬 Crop</label>
+          <select id="dpCrop">
+            <option value="">-- Select Crop --</option>
+          </select></div>
+      </div>
+      
+      <div class="g2">
+        <div><label>🌱 Variety</label>
+          <select id="dpVariety">
+            <option value="">-- Select Variety --</option>
+          </select></div>
+        <div><label>📦 Carret</label>
+          <input type="number" id="dpCarret" placeholder="0" min="0" step="1"></div>
+      </div>
+      
+      <div class="g2">
+        <div><label>🌿 Plant Per Carret</label>
+          <input type="number" id="dpPPC" placeholder="0" min="0" step="1"></div>
+        <div><label>🌱 Direct Plants</label>
+          <input type="number" id="dpDirect" placeholder="0" min="0" step="1"></div>
+      </div>
+      
+      <div class="fr">
+        <label>📅 Date of Sowing (Mandatory)</label>
+        <input type="date" id="dpSowingDate" required style="width:100%;"></div>
+      
+      <div id="dpValidationMsg" style="padding:8px;margin-top:8px;border-radius:var(--rs);display:none;font-size:13px;font-weight:600;"></div>
+      
+      <div class="fr">
+        <label>📝 Remarks (Optional)</label>
+        <textarea id="dpRemarks" placeholder="Kuch special note..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:var(--rs);font-family:inherit;resize:vertical;min-height:50px;"></textarea>
+      </div>
+      
+      <button onclick="addDispatchEntry()" style="width:100%;padding:10px;background:var(--gl);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;margin-top:8px;">➕ Add Entry</button>
+    </div>
+
+    <div class="card">
+      <div class="ctitle">📋 Added Entries</div>
+      <div id="dpEntryList" style="display:flex;flex-direction:column;gap:8px;min-height:40px;">
+        <div style="color:var(--g5);font-size:13px;text-align:center;">Koi entry add nahi hua</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;gap:8px;">
+        <button onclick="submitDispatch()" style="flex:1;padding:12px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">💾 Save</button>
+        <button onclick="resetDispatch()" style="flex:1;padding:12px;background:var(--g2);color:var(--g8);border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">🔄 Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DISPATCH REPORT SCREEN -->
+<div class="screen" id="dispatchReportScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--gl);">📊</div>
+      <h1>Dispatch Report</h1></div>
+    <div class="sbar">
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">🔍 Filters</div>
+      <div class="g2">
+        <div><label>📅 From Date</label><input type="date" id="drFrom"></div>
+        <div><label>📅 To Date</label><input type="date" id="drTo"></div>
+      </div>
+      <div class="g2">
+        <div><label>📍 Area</label>
+          <select id="drArea">
+            <option value="">-- Sab Areas --</option>
+          </select></div>
+        <div><label>🚙 Gaadi No</label>
+          <input type="text" id="drGaadi" placeholder="Filter by vehicle"></div>
+      </div>
+      <button onclick="loadDispatchReport()" style="width:100%;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">🔍 Report Dekho</button>
+    </div>
+    <div id="dispatchReportContent"></div>
+  </div>
+</div>
+
 </script>
 </body>
 </html>
