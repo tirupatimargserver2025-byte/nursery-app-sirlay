@@ -300,7 +300,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .exp-inner table{width:100%;font-size:12px;}
 .exp-inner th{background:var(--gp)!important;color:var(--gm)!important;}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -3375,126 +3375,138 @@ function submitBooking(){
     lines: collected
   };
 
+  // PDF pehle banao (saara data haath mein hai) - server ke response ka intezaar mat karo
+  generateBookingPDF({bkDate, farmer, village, tehsil, mobile, payMode, cashAmt, bankAmt, payDate, bookingId, marketing, lines: collected, totalAmt});
+
+  // Ab data server ko bhejo (background mein)
   fetch(API, {
     method: 'POST', mode: 'no-cors',
     headers: {'Content-Type': 'text/plain'},
     body: JSON.stringify(payload)
   }).then(() => {
-    // PDF banao
-    generateBookingPDF({bkDate, farmer, village, tehsil, mobile, payMode, cashAmt, bankAmt, payDate, bookingId, marketing, lines: collected, totalAmt});
-    toast('✅ Booking save + PDF download ho gaya!');
-    openBookingForm();
+    toast('✅ Booking save ho gaya!');
   }).catch(() => {
-    toast('⚠️ Error! Internet check karo.', 'error');
+    toast('⚠️ Data bhejne mein dikkat — internet check karo', 'error');
+  });
+
+  // Form thodi der baad reset (PDF ban jaane ke baad)
+  setTimeout(() => {
     btn.disabled = false;
     btn.innerHTML = '💾 Save + PDF Download';
-  });
+    openBookingForm();
+  }, 1500);
 }
 
 function generateBookingPDF(d){
-  try {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const pw = doc.internal.pageSize.getWidth();
-    const cx = pw / 2;
+  // Sirf safe characters (garbage hatao)
+  const clean = (s) => String(s == null ? '' : s).replace(/[^\x20-\x7E]/g, '').trim();
 
-    // Sirf safe ASCII characters rakho (garbage/special char hatao)
-    const clean = (s) => String(s == null ? '' : s).replace(/[^\x20-\x7E]/g, '').trim();
+  // Receipt ka HTML banao (hidden div mein)
+  let rowsHtml = '';
+  d.lines.forEach((ln, i) => {
+    const bg = (i % 2 === 0) ? '#ffffff' : '#f5f7f5';
+    rowsHtml +=
+      '<tr style="background:' + bg + ';">' +
+        '<td style="padding:8px 6px;border-bottom:1px solid #e0e0e0;">' + clean(ln.crop) + '</td>' +
+        '<td style="padding:8px 6px;border-bottom:1px solid #e0e0e0;font-weight:600;">' + clean(ln.variety) + '</td>' +
+        '<td style="padding:8px 6px;border-bottom:1px solid #e0e0e0;text-align:center;">' + ln.plant + '</td>' +
+        '<td style="padding:8px 6px;border-bottom:1px solid #e0e0e0;text-align:center;">' + ln.rate + '</td>' +
+        '<td style="padding:8px 6px;border-bottom:1px solid #e0e0e0;text-align:center;">' + clean(ln.deliveryDate) + '</td>' +
+      '</tr>';
+  });
 
-    // Logo top-left
-    try { doc.addImage(TGH_LOGO, 'JPEG', 14, 10, 34, 20); } catch(e){}
+  let payText = 'Payment Mode: ' + clean(d.payMode);
+  if(d.payMode === 'Both') payText += ' (Cash: Rs.' + d.cashAmt + ', Bank: Rs.' + d.bankAmt + ')';
 
-    // Heading — CENTER
-    doc.setFontSize(17); doc.setFont(undefined, 'bold');
-    doc.setTextColor(26, 71, 42);
-    doc.text('Tirupati Green House Nursery', cx, 17, {align:'center'});
-    doc.setFontSize(9); doc.setFont(undefined, 'normal');
-    doc.setTextColor(80, 80, 80);
-    doc.text('Village Sirlay, Barwaha, Khargone, MP 451115', cx, 24, {align:'center'});
-    doc.setTextColor(0, 0, 0);
+  const html =
+    '<div style="width:700px;background:#ffffff;padding:28px;font-family:Arial,sans-serif;color:#222;box-sizing:border-box;">' +
+      // Header: logo + name center
+      '<div style="text-align:center;border-bottom:3px solid #388e3c;padding-bottom:14px;margin-bottom:16px;">' +
+        '<img src="' + TGH_LOGO + '" style="height:70px;margin-bottom:8px;" />' +
+        '<div style="font-size:24px;font-weight:800;color:#1a472a;">Tirupati Green House Nursery</div>' +
+        '<div style="font-size:12px;color:#555;margin-top:3px;">Village Bafalgaon, Barwaha, Khargone, MP 451115</div>' +
+      '</div>' +
+      // Receipt title
+      '<div style="text-align:center;font-size:18px;font-weight:800;color:#2e7d32;letter-spacing:1px;margin-bottom:14px;">BOOKING RECEIPT</div>' +
+      // Booking ID + date
+      '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px;">' +
+        '<span><b>Booking ID:</b> ' + clean(d.bookingId) + '</span>' +
+        '<span><b>Date:</b> ' + clean(d.bkDate) + '</span>' +
+      '</div>' +
+      // Farmer details
+      '<div style="background:#f1f8f1;border-radius:8px;padding:12px;margin-bottom:14px;font-size:14px;line-height:1.7;">' +
+        '<div><b>Farmer:</b> ' + clean(d.farmer) + '</div>' +
+        '<div><b>Village:</b> ' + clean(d.village) + (d.tehsil ? ', ' + clean(d.tehsil) : '') + '</div>' +
+        '<div><b>Mobile:</b> ' + clean(d.mobile) + '</div>' +
+      '</div>' +
+      // Table
+      '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:14px;">' +
+        '<thead><tr style="background:#2e7d32;color:#fff;">' +
+          '<th style="padding:9px 6px;text-align:left;">Crop</th>' +
+          '<th style="padding:9px 6px;text-align:left;">Variety</th>' +
+          '<th style="padding:9px 6px;">Plant</th>' +
+          '<th style="padding:9px 6px;">Rate</th>' +
+          '<th style="padding:9px 6px;">Delivery</th>' +
+        '</tr></thead><tbody>' + rowsHtml + '</tbody>' +
+      '</table>' +
+      // Total
+      '<div style="border-top:2px solid #999;padding-top:10px;margin-bottom:6px;">' +
+        '<div style="font-size:16px;font-weight:800;color:#1a472a;">Total Booking Amount: Rs. ' + d.totalAmt.toLocaleString('en-IN') + '</div>' +
+      '</div>' +
+      // Payment
+      '<div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:24px;">' +
+        '<div>' + payText + '</div>' +
+        '<div>Payment Date: ' + clean(d.payDate) + '</div>' +
+      '</div>' +
+      // Prepared by + signature
+      '<div style="display:flex;justify-content:space-between;align-items:flex-end;font-size:13px;margin-top:30px;">' +
+        '<span>Prepared by: <b>' + clean(d.marketing) + '</b></span>' +
+        '<span style="text-align:center;">_____________<br/>Signature</span>' +
+      '</div>' +
+    '</div>';
 
-    // Line
-    doc.setDrawColor(56, 142, 60); doc.setLineWidth(0.5);
-    doc.line(14, 32, pw-14, 32);
-
-    // BOOKING RECEIPT — CENTER + BADA
-    doc.setFontSize(15); doc.setFont(undefined, 'bold');
-    doc.setTextColor(46, 125, 50);
-    doc.text('BOOKING RECEIPT', cx, 42, {align:'center'});
-    doc.setTextColor(0, 0, 0);
-
-    // Booking ID & Date
-    doc.setFontSize(9); doc.setFont(undefined, 'normal');
-    doc.text('Booking ID: ' + clean(d.bookingId), 14, 51);
-    doc.text('Date: ' + clean(d.bkDate), pw-14, 51, {align:'right'});
-
-    // Farmer details
-    doc.setFontSize(10); let y = 59;
-    doc.setFont(undefined, 'bold'); doc.text('Farmer: ', 14, y);
-    doc.setFont(undefined, 'normal'); doc.text(clean(d.farmer), 34, y);
-    y += 5;
-    doc.setFont(undefined, 'bold'); doc.text('Village: ', 14, y);
-    doc.setFont(undefined, 'normal'); doc.text(clean(d.village) + (d.tehsil ? ', ' + clean(d.tehsil) : ''), 34, y);
-    y += 5;
-    doc.setFont(undefined, 'bold'); doc.text('Mobile: ', 14, y);
-    doc.setFont(undefined, 'normal'); doc.text(clean(d.mobile), 34, y);
-
-    // Table header (NO Amount column)
-    y += 9;
-    doc.setFillColor(46, 125, 50); doc.setTextColor(255,255,255);
-    doc.setFont(undefined, 'bold'); doc.setFontSize(9);
-    doc.rect(14, y-4, pw-28, 7, 'F');
-    doc.text('Crop', 16, y);
-    doc.text('Variety', 55, y);
-    doc.text('Plant', 120, y);
-    doc.text('Rate', 145, y);
-    doc.text('Delivery', 168, y);
-    doc.setTextColor(0,0,0); doc.setFont(undefined, 'normal');
-
-    // Table rows
-    y += 7;
-    d.lines.forEach(ln => {
-      doc.text(clean(ln.crop).substring(0,20), 16, y);
-      doc.text(clean(ln.variety).substring(0,30), 55, y);
-      doc.text(String(ln.plant), 120, y);
-      doc.text(String(ln.rate), 145, y);
-      doc.text(clean(ln.deliveryDate), 168, y);
-      y += 6;
-      if(y > 255){ doc.addPage(); y = 20; }
-    });
-
-    // Line
-    y += 2;
-    doc.setDrawColor(150,150,150); doc.line(14, y, pw-14, y);
-
-    // Total Booking Amount — bold, niche
-    y += 8;
-    doc.setFont(undefined, 'bold'); doc.setFontSize(12);
-    doc.setTextColor(26, 71, 42);
-    doc.text('Total Booking Amount: Rs. ' + d.totalAmt.toLocaleString('en-IN'), 14, y);
-    doc.setTextColor(0,0,0);
-
-    // Payment
-    y += 8;
-    doc.setFont(undefined, 'normal'); doc.setFontSize(9);
-    let payText = 'Payment Mode: ' + clean(d.payMode);
-    if(d.payMode === 'Both') payText += '  (Cash: Rs.' + d.cashAmt + ', Bank: Rs.' + d.bankAmt + ')';
-    doc.text(payText, 14, y);
-    y += 5;
-    doc.text('Payment Date: ' + clean(d.payDate), 14, y);
-
-    // Prepared by + signature
-    y += 18;
-    doc.setFontSize(9);
-    doc.text('Prepared by: ' + clean(d.marketing), 14, y);
-    doc.text('_____________________', pw-14, y, {align:'right'});
-    y += 5;
-    doc.text('Signature', pw-30, y, {align:'right'});
-
-    doc.save('Booking-' + clean(d.bookingId) + '.pdf');
-  } catch(err) {
-    toast('⚠️ PDF banane mein dikkat: ' + err.message, 'error');
+  // Hidden container mein daalo
+  let holder = document.getElementById('jpgHolder');
+  if(!holder){
+    holder = document.createElement('div');
+    holder.id = 'jpgHolder';
+    holder.style.cssText = 'position:fixed;left:-9999px;top:0;';
+    document.body.appendChild(holder);
   }
+  holder.innerHTML = html;
+  const target = holder.firstChild;
+
+  // html2canvas se JPG banao
+  html2canvas(target, {scale: 2, backgroundColor: '#ffffff', useCORS: true}).then(canvas => {
+    const fileName = 'Booking-' + clean(d.bookingId) + '.jpg';
+    canvas.toBlob(function(blob){
+      const url = URL.createObjectURL(blob);
+      const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+      // Download link banao
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      // Mobile ke liye: nayi tab mein bhi kholo (gallery save / share ke liye)
+      if(isMobile){
+        setTimeout(()=>{
+          const win = window.open(url, '_blank');
+          if(!win){ /* popup block - download to ho hi gaya */ }
+          toast('📸 Receipt ban gaya — Download ya Share karo', 'success');
+        }, 300);
+      } else {
+        toast('📸 Receipt JPG download ho gaya!', 'success');
+      }
+
+      setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(e){} holder.innerHTML=''; }, 60000);
+    }, 'image/jpeg', 0.92);
+  }).catch(err => {
+    toast('⚠️ Image banane mein dikkat: ' + err.message, 'error');
+  });
 }
 
 // ─────── BOOKING REPORT ───────
