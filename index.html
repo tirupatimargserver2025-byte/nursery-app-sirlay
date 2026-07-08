@@ -1088,6 +1088,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
     <div class="card">
       <div class="ctitle">💰 Payment</div>
       <div class="fr">
+        <label>💰 Total Booking Amount</label>
+        <input type="number" id="bkTotalInput" placeholder="0" min="0" oninput="bkSyncTotal()" style="width:100%;font-weight:700;">
+      </div>
+      <div class="fr">
         <label>💳 Payment Mode</label>
         <select id="bkPayMode" onchange="bkTogglePayment()" style="width:100%;">
           <option value="Cash">Cash</option>
@@ -1102,13 +1106,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
       <div class="fr">
         <label>📅 Payment Date</label>
         <input type="date" id="bkPayDate" style="width:100%;">
-      </div>
-    </div>
-
-    <div class="card" style="background:var(--gp);">
-      <div style="display:flex;justify-content:space-between;font-weight:700;color:var(--gd);font-size:15px;">
-        <span>Total Booking Amount:</span>
-        <span>₹<span id="bkTotalAmt">0</span></span>
       </div>
     </div>
 
@@ -1163,13 +1160,22 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   </div>
   <div class="wrap">
     <div class="card">
-      <div class="ctitle">🔍 Crop Filter</div>
-      <div class="fr">
-        <label>🥬 Crop (khaali = sab)</label>
-        <select id="vrCrop" style="width:100%;">
-          <option value="">-- Sab Crops --</option>
-        </select>
+      <div class="ctitle">🔍 Filters</div>
+      <div class="g2">
+        <div><label>📅 From Date</label><input type="date" id="vrFrom"></div>
+        <div><label>📅 To Date</label><input type="date" id="vrTo"></div>
       </div>
+      <div class="g2">
+        <div><label>🥬 Crop</label>
+          <select id="vrCrop" onchange="loadVrVariety()">
+            <option value="">-- Sab Crops --</option>
+          </select></div>
+        <div><label>🌱 Variety</label>
+          <select id="vrVariety">
+            <option value="">-- Sab Varieties --</option>
+          </select></div>
+      </div>
+      <div style="font-size:11px;color:var(--g5);margin-bottom:8px;">📅 Date filter sirf Booking par lagta hai. Sowing/Dispatch total rahega.</div>
       <button onclick="loadVarietyReport()" style="width:100%;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">🔍 Report Dekho</button>
     </div>
     <div id="varietyReportContent"></div>
@@ -3238,13 +3244,16 @@ function openBookingForm(){
   document.getElementById('bkCash').value = '';
   document.getElementById('bkBank').value = '';
   document.getElementById('bkBothBox').style.display = 'none';
-  document.getElementById('bkTotalAmt').textContent = '0';
+  document.getElementById('bkTotalInput').value = '';
 
   document.getElementById('bkLineCon').innerHTML = '';
   bkLineCnt = 0;
   addBkLine();
   show('bookingScreen');
 }
+
+// Total input badle to Both box ke logic ke liye rakha (abhi kuch nahi karta, future ke liye)
+function bkSyncTotal(){ /* manual total - koi auto calc nahi */ }
 
 function bkCropOptions(){
   return '<option value="">-- Crop --</option>' +
@@ -3275,10 +3284,7 @@ function addBkLine(){
       '<div><label>🌿 Plant</label><input type="number" id="bk-plant-'+id+'" placeholder="0" min="0" oninput="bkCalcTotal()"></div>' +
       '<div><label>💵 Rate</label><input type="number" id="bk-rate-'+id+'" placeholder="0" min="0" step="0.01"></div>' +
     '</div>' +
-    '<div class="g2">' +
-      '<div><label>💰 Booking Amount</label><input type="number" id="bk-amt-'+id+'" placeholder="0" min="0" oninput="bkCalcTotal()"></div>' +
-      '<div><label>🚚 Delivery Date</label><input type="date" id="bk-deliv-'+id+'"></div>' +
-    '</div>';
+    '<div class="fr"><label>🚚 Delivery Date</label><input type="date" id="bk-deliv-'+id+'" style="width:100%;"></div>';
   con.appendChild(line);
 }
 
@@ -3286,7 +3292,6 @@ function removeBkLine(id){
   const el = document.getElementById('bkl-' + id);
   if(el) el.remove();
   if(document.getElementById('bkLineCon').children.length === 0) addBkLine();
-  bkCalcTotal();
 }
 
 function bkLoadVar(id){
@@ -3296,14 +3301,6 @@ function bkLoadVar(id){
   if(crop && VDATA[crop]){
     VDATA[crop].forEach(v => sel.innerHTML += '<option>'+v+'</option>');
   }
-}
-
-function bkCalcTotal(){
-  let total = 0;
-  document.querySelectorAll('[id^="bk-amt-"]').forEach(inp => {
-    total += parseFloat(inp.value) || 0;
-  });
-  document.getElementById('bkTotalAmt').textContent = total.toLocaleString('en-IN');
 }
 
 function submitBooking(){
@@ -3333,25 +3330,27 @@ function submitBooking(){
     const variety = document.getElementById('bk-var-'+id)?.value || '';
     const plant = parseInt(document.getElementById('bk-plant-'+id)?.value) || 0;
     const rate = parseFloat(document.getElementById('bk-rate-'+id)?.value) || 0;
-    const amount = parseFloat(document.getElementById('bk-amt-'+id)?.value) || 0;
     const deliveryDate = document.getElementById('bk-deliv-'+id)?.value || '';
 
-    const empty = !crop && !variety && plant===0 && amount===0;
+    const empty = !crop && !variety && plant===0;
     if(empty) return;
 
     if(!crop || !variety){ errMsg = 'Har line mein Crop aur Variety chuno!'; return; }
     if(plant === 0){ errMsg = variety+': Plant zaroori hai!'; return; }
     if(!deliveryDate){ errMsg = variety+': Delivery date zaroori hai!'; return; }
 
-    collected.push({crop, variety, plant, rate, amount, deliveryDate});
+    collected.push({crop, variety, plant, rate, deliveryDate});
   });
 
   if(errMsg){ toast('❗ '+errMsg, 'error'); return; }
   if(collected.length === 0){ toast('❗ Kam se kam ek variety bharo!', 'error'); return; }
 
+  // Total booking amount (manual)
+  const totalAmt = parseFloat(document.getElementById('bkTotalInput').value) || 0;
+  if(totalAmt === 0){ toast('❗ Total Booking Amount daalo!', 'error'); return; }
+
   // Payment amounts
   let cashAmt = 0, bankAmt = 0;
-  const totalAmt = collected.reduce((s,l)=>s+l.amount, 0);
   if(payMode === 'Cash'){ cashAmt = totalAmt; }
   else if(payMode === 'Bank'){ bankAmt = totalAmt; }
   else { // Both
@@ -3370,6 +3369,7 @@ function submitBooking(){
   const payload = {
     module: 'booking',
     bookingDate: bkDate, farmer, village, tehsil, mobile,
+    totalAmount: totalAmt,
     paymentMode: payMode, cashAmount: cashAmt, bankAmount: bankAmt,
     paymentDate: payDate, bookingId, marketing,
     lines: collected
@@ -3396,93 +3396,102 @@ function generateBookingPDF(d){
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     const pw = doc.internal.pageSize.getWidth();
+    const cx = pw / 2;
+
+    // Sirf safe ASCII characters rakho (garbage/special char hatao)
+    const clean = (s) => String(s == null ? '' : s).replace(/[^\x20-\x7E]/g, '').trim();
 
     // Logo top-left
     try { doc.addImage(TGH_LOGO, 'JPEG', 14, 10, 34, 20); } catch(e){}
 
-    // Heading
-    doc.setFontSize(16); doc.setFont(undefined, 'bold');
+    // Heading — CENTER
+    doc.setFontSize(17); doc.setFont(undefined, 'bold');
     doc.setTextColor(26, 71, 42);
-    doc.text('Tirupati Green House Nursery', 52, 17);
+    doc.text('Tirupati Green House Nursery', cx, 17, {align:'center'});
     doc.setFontSize(9); doc.setFont(undefined, 'normal');
     doc.setTextColor(80, 80, 80);
-    doc.text('Village Bafalgaon, Barwaha, Khargone, MP 451115', 52, 23);
+    doc.text('Village Bafalgaon, Barwaha, Khargone, MP 451115', cx, 24, {align:'center'});
     doc.setTextColor(0, 0, 0);
 
     // Line
     doc.setDrawColor(56, 142, 60); doc.setLineWidth(0.5);
-    doc.line(14, 34, pw-14, 34);
+    doc.line(14, 32, pw-14, 32);
 
-    // Booking meta
-    doc.setFontSize(11); doc.setFont(undefined, 'bold');
-    doc.text('BOOKING RECEIPT', 14, 42);
-    doc.setFont(undefined, 'normal'); doc.setFontSize(9);
-    doc.text('Booking ID: ' + d.bookingId, pw-14, 42, {align:'right'});
-    doc.text('Date: ' + d.bkDate, pw-14, 47, {align:'right'});
+    // BOOKING RECEIPT — CENTER + BADA
+    doc.setFontSize(15); doc.setFont(undefined, 'bold');
+    doc.setTextColor(46, 125, 50);
+    doc.text('BOOKING RECEIPT', cx, 42, {align:'center'});
+    doc.setTextColor(0, 0, 0);
+
+    // Booking ID & Date
+    doc.setFontSize(9); doc.setFont(undefined, 'normal');
+    doc.text('Booking ID: ' + clean(d.bookingId), 14, 51);
+    doc.text('Date: ' + clean(d.bkDate), pw-14, 51, {align:'right'});
 
     // Farmer details
-    doc.setFontSize(10); let y = 52;
+    doc.setFontSize(10); let y = 59;
     doc.setFont(undefined, 'bold'); doc.text('Farmer: ', 14, y);
-    doc.setFont(undefined, 'normal'); doc.text(d.farmer, 32, y);
+    doc.setFont(undefined, 'normal'); doc.text(clean(d.farmer), 34, y);
     y += 5;
     doc.setFont(undefined, 'bold'); doc.text('Village: ', 14, y);
-    doc.setFont(undefined, 'normal'); doc.text(d.village + (d.tehsil ? ', ' + d.tehsil : ''), 32, y);
+    doc.setFont(undefined, 'normal'); doc.text(clean(d.village) + (d.tehsil ? ', ' + clean(d.tehsil) : ''), 34, y);
     y += 5;
     doc.setFont(undefined, 'bold'); doc.text('Mobile: ', 14, y);
-    doc.setFont(undefined, 'normal'); doc.text(d.mobile, 32, y);
+    doc.setFont(undefined, 'normal'); doc.text(clean(d.mobile), 34, y);
 
-    // Table header
-    y += 8;
+    // Table header (NO Amount column)
+    y += 9;
     doc.setFillColor(46, 125, 50); doc.setTextColor(255,255,255);
     doc.setFont(undefined, 'bold'); doc.setFontSize(9);
     doc.rect(14, y-4, pw-28, 7, 'F');
     doc.text('Crop', 16, y);
-    doc.text('Variety', 42, y);
-    doc.text('Plant', 92, y);
-    doc.text('Rate', 112, y);
-    doc.text('Amount', 132, y);
-    doc.text('Delivery', 160, y);
+    doc.text('Variety', 55, y);
+    doc.text('Plant', 120, y);
+    doc.text('Rate', 145, y);
+    doc.text('Delivery', 168, y);
     doc.setTextColor(0,0,0); doc.setFont(undefined, 'normal');
 
     // Table rows
     y += 7;
     d.lines.forEach(ln => {
-      doc.text(String(ln.crop).substring(0,14), 16, y);
-      doc.text(String(ln.variety).substring(0,24), 42, y);
-      doc.text(String(ln.plant), 92, y);
-      doc.text(String(ln.rate), 112, y);
-      doc.text(String(ln.amount), 132, y);
-      doc.text(String(ln.deliveryDate), 160, y);
+      doc.text(clean(ln.crop).substring(0,20), 16, y);
+      doc.text(clean(ln.variety).substring(0,30), 55, y);
+      doc.text(String(ln.plant), 120, y);
+      doc.text(String(ln.rate), 145, y);
+      doc.text(clean(ln.deliveryDate), 168, y);
       y += 6;
-      if(y > 260){ doc.addPage(); y = 20; }
+      if(y > 255){ doc.addPage(); y = 20; }
     });
 
-    // Total
+    // Line
     y += 2;
     doc.setDrawColor(150,150,150); doc.line(14, y, pw-14, y);
-    y += 6;
-    doc.setFont(undefined, 'bold'); doc.setFontSize(10);
+
+    // Total Booking Amount — bold, niche
+    y += 8;
+    doc.setFont(undefined, 'bold'); doc.setFontSize(12);
+    doc.setTextColor(26, 71, 42);
     doc.text('Total Booking Amount: Rs. ' + d.totalAmt.toLocaleString('en-IN'), 14, y);
+    doc.setTextColor(0,0,0);
 
     // Payment
-    y += 7;
+    y += 8;
     doc.setFont(undefined, 'normal'); doc.setFontSize(9);
-    let payText = 'Payment Mode: ' + d.payMode;
+    let payText = 'Payment Mode: ' + clean(d.payMode);
     if(d.payMode === 'Both') payText += '  (Cash: Rs.' + d.cashAmt + ', Bank: Rs.' + d.bankAmt + ')';
     doc.text(payText, 14, y);
     y += 5;
-    doc.text('Payment Date: ' + d.payDate, 14, y);
+    doc.text('Payment Date: ' + clean(d.payDate), 14, y);
 
     // Prepared by + signature
-    y += 16;
+    y += 18;
     doc.setFontSize(9);
-    doc.text('Prepared by: ' + d.marketing, 14, y);
+    doc.text('Prepared by: ' + clean(d.marketing), 14, y);
     doc.text('_____________________', pw-14, y, {align:'right'});
     y += 5;
     doc.text('Signature', pw-30, y, {align:'right'});
 
-    // Save (auto-download)
-    doc.save('Booking-' + d.bookingId + '.pdf');
+    doc.save('Booking-' + clean(d.bookingId) + '.pdf');
   } catch(err) {
     toast('⚠️ PDF banane mein dikkat: ' + err.message, 'error');
   }
@@ -3549,27 +3558,49 @@ function loadBookingReport(){
           return;
         }
 
-        let totalPlant = 0, totalAmt = 0;
-        rows.forEach(r => { totalPlant += parseInt(r.c[7]?.v)||0; totalAmt += parseFloat(r.c[9]?.v)||0; });
+        let totalPlant = 0;
+        rows.forEach(r => { totalPlant += parseInt(r.c[7]?.v)||0; });
 
-        let html = '<div class="rep-card"><div class="rep-title">📋 '+rows.length+' Bookings</div>'+
-          '<div class="stat-grid">'+
-          '<div class="stat-item"><span class="sv" style="color:var(--gm);">'+totalPlant.toLocaleString('en-IN')+'</span><div class="sl">Total Plants</div></div>'+
-          '<div class="stat-item"><span class="sv" style="color:var(--gd);">Rs.'+totalAmt.toLocaleString('en-IN')+'</span><div class="sl">Total Amount</div></div>'+
-          '</div></div>';
+        const fixD = (val) => {
+          let s=(val||'').toString();
+          if(s.startsWith('Date(')){ const p=s.replace('Date(','').replace(')','').split(','); s=p[0]+'-'+String(parseInt(p[1])+1).padStart(2,'0')+'-'+String(p[2]).padStart(2,'0'); }
+          return s;
+        };
+
+        // Summary
+        let html = '<div class="rep-card"><div class="rep-title">📋 '+rows.length+' Rows • '+totalPlant.toLocaleString('en-IN')+' Plants</div></div>';
+
+        // TABLE (card ki jagah)
+        html += '<div class="card" style="padding:0;overflow-x:auto;">'+
+          '<table style="width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;">'+
+          '<thead><tr style="background:var(--gm);color:white;">'+
+          '<th style="padding:7px;text-align:left;">Date</th>'+
+          '<th style="padding:7px;text-align:left;">Farmer</th>'+
+          '<th style="padding:7px;text-align:left;">Village</th>'+
+          '<th style="padding:7px;text-align:left;">Crop</th>'+
+          '<th style="padding:7px;text-align:left;">Variety</th>'+
+          '<th style="padding:7px;">Plant</th>'+
+          '<th style="padding:7px;">Rate</th>'+
+          '<th style="padding:7px;">Delivery</th>'+
+          '</tr></thead><tbody>';
 
         rows.forEach(r => {
-          const farmer=(r.c[1]?.v||''), village=(r.c[2]?.v||''), mobile=(r.c[4]?.v||'');
+          const farmer=(r.c[1]?.v||''), village=(r.c[2]?.v||'');
           const crop=(r.c[5]?.v||''), variety=(r.c[6]?.v||''), plant=(r.c[7]?.v||0);
-          const rate=(r.c[8]?.v||0), amt=(r.c[9]?.v||0), deliv=(r.c[10]?.v||'');
-          let delivStr = deliv.toString();
-          if(delivStr.startsWith('Date(')){ const p=delivStr.replace('Date(','').replace(')','').split(','); delivStr=p[2].padStart(2,'0')+'/'+String(parseInt(p[1])+1).padStart(2,'0')+'/'+p[0]; }
-          html += '<div class="card" style="border-left:4px solid var(--gm);">'+
-            '<div style="font-weight:700;color:var(--gd);">👨 '+farmer+' — '+village+'</div>'+
-            '<div style="font-size:13px;color:var(--g8);margin-top:4px;">🌱 '+crop+' / '+variety+' • '+plant+' plants @ ₹'+rate+'</div>'+
-            '<div style="font-size:13px;color:var(--gm);font-weight:700;margin-top:2px;">💰 ₹'+amt+' • 🚚 '+delivStr+'</div>'+
-            '</div>';
+          const rate=(r.c[8]?.v||0);
+          const deliv = fixD(r.c[9]?.v);
+          html += '<tr style="border-bottom:1px solid var(--g2);">'+
+            '<td style="padding:7px;">'+r._date+'</td>'+
+            '<td style="padding:7px;">'+farmer+'</td>'+
+            '<td style="padding:7px;">'+village+'</td>'+
+            '<td style="padding:7px;">'+crop+'</td>'+
+            '<td style="padding:7px;font-weight:600;">'+variety+'</td>'+
+            '<td style="padding:7px;text-align:center;">'+plant+'</td>'+
+            '<td style="padding:7px;text-align:center;">'+rate+'</td>'+
+            '<td style="padding:7px;text-align:center;">'+deliv+'</td>'+
+            '</tr>';
         });
+        html += '</tbody></table></div>';
         con.innerHTML = html;
       }catch(e){
         con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--rd);">Report load nahi hui. Sheet check karo.</div>';
@@ -3581,19 +3612,41 @@ function loadBookingReport(){
 
 // ─────── VARIETY REPORT (Sowing / Booking / Dispatch / Bacha) ───────
 function openVarietyReport(){
+  const from = new Date(); from.setDate(from.getDate()-30);
+  document.getElementById('vrFrom').valueAsDate = from;
+  document.getElementById('vrTo').valueAsDate = new Date();
   const cropSel = document.getElementById('vrCrop');
   cropSel.innerHTML = '<option value="">-- Sab Crops --</option>';
   Object.keys(VDATA).forEach(c => cropSel.innerHTML += '<option value="'+c+'">'+c+'</option>');
+  document.getElementById('vrVariety').innerHTML = '<option value="">-- Sab Varieties --</option>';
   document.getElementById('varietyReportContent').innerHTML = '';
   show('varietyReportScreen');
 }
 
+function loadVrVariety(){
+  const crop = document.getElementById('vrCrop').value;
+  const sel = document.getElementById('vrVariety');
+  sel.innerHTML = '<option value="">-- Sab Varieties --</option>';
+  if(crop && VDATA[crop]){
+    VDATA[crop].forEach(v => sel.innerHTML += '<option value="'+v+'">'+v+'</option>');
+  }
+}
+
 function loadVarietyReport(){
   const cropF = document.getElementById('vrCrop').value;
+  const varF = document.getElementById('vrVariety').value;
+  const fromD = document.getElementById('vrFrom').value;
+  const toD = document.getElementById('vrTo').value;
   const con = document.getElementById('varietyReportContent');
   con.innerHTML = '<div class="card" style="text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;color:var(--gd);">3 sheets se data jod rahe hain...</div></div>';
 
   const gv = (sheet) => fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(sheet)+'&headers=1&t='+Date.now()).then(r=>r.text());
+
+  const fixDate = (val) => {
+    let d = (val||'').toString();
+    if(d.startsWith('Date(')){ const p=d.replace('Date(','').replace(')','').split(','); d=p[0]+'-'+String(parseInt(p[1])+1).padStart(2,'0')+'-'+String(p[2]).padStart(2,'0'); }
+    return d;
+  };
 
   Promise.all([gv('Seed Sowing Data'), gv('Booking Data'), gv('Dispatch Data')])
     .then(([seedTxt, bookTxt, dispTxt]) => {
@@ -3603,35 +3656,42 @@ function loadVarietyReport(){
       };
       const seedRows = parse(seedTxt), bookRows = parse(bookTxt), dispRows = parse(dispTxt);
 
-      // Build map: variety -> {crop, sowing, booking, dispatch}
       const map = {};
       const ensure = (crop, variety) => {
         const k = crop+'||'+variety;
         if(!map[k]) map[k] = {crop, variety, sowing:0, booking:0, dispatch:0};
         return map[k];
       };
+      const passFilter = (crop, variety) => {
+        if(cropF && crop !== cropF) return false;
+        if(varF && variety !== varF) return false;
+        return true;
+      };
 
-      // Seed Sowing Data: Vegetable=c[4], Variety=c[5], Total Plants=c[11]
+      // Seed Sowing: Vegetable=c[4], Variety=c[5], Total Plants=c[11] (total, no date filter)
       seedRows.forEach(r => {
         if(!r.c || !r.c[5] || !r.c[5].v || r.c[5].v==='Variety') return;
         const crop=(r.c[4]?.v||'').toString(), variety=(r.c[5]?.v||'').toString();
-        if(cropF && crop !== cropF) return;
+        if(!passFilter(crop, variety)) return;
         ensure(crop, variety).sowing += parseInt(r.c[11]?.v)||0;
       });
 
-      // Booking Data: Crop=c[5], Variety=c[6], Plant=c[7]
+      // Booking: Date=c[0], Crop=c[5], Variety=c[6], Plant=c[7] (DATE FILTER)
       bookRows.forEach(r => {
         if(!r.c || !r.c[6] || !r.c[6].v || r.c[6].v==='Variety') return;
         const crop=(r.c[5]?.v||'').toString(), variety=(r.c[6]?.v||'').toString();
-        if(cropF && crop !== cropF) return;
+        if(!passFilter(crop, variety)) return;
+        const bd = fixDate(r.c[0]?.v);
+        if(fromD && bd < fromD) return;
+        if(toD && bd > toD) return;
         ensure(crop, variety).booking += parseInt(r.c[7]?.v)||0;
       });
 
-      // Dispatch Data: Crop=c[7], Variety=c[8], Total Plants=c[13]
+      // Dispatch: Crop=c[7], Variety=c[8], Total Plants=c[13] (total, no date filter)
       dispRows.forEach(r => {
         if(!r.c || !r.c[8] || !r.c[8].v || r.c[8].v==='Variety') return;
         const crop=(r.c[7]?.v||'').toString(), variety=(r.c[8]?.v||'').toString();
-        if(cropF && crop !== cropF) return;
+        if(!passFilter(crop, variety)) return;
         ensure(crop, variety).dispatch += parseInt(r.c[13]?.v)||0;
       });
 
@@ -3669,7 +3729,7 @@ function loadVarietyReport(){
           '</tr>';
       });
       html += '</tbody></table></div>'+
-        '<div style="font-size:11px;color:var(--g5);padding:8px;">Bacha = Sowing − Dispatch</div>';
+        '<div style="font-size:11px;color:var(--g5);padding:8px;">Bacha = Sowing − Dispatch • Booking par date filter lagta hai</div>';
       con.innerHTML = html;
     }).catch(()=>{
       con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--rd);">Data load nahi hua!</div>';
