@@ -964,86 +964,28 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
       
       <div class="g2">
         <div><label>📅 Date</label><input type="date" id="dpDate"></div>
-        <div><label>📍 Area</label>
-          <select id="dpArea">
-            <option value="">-- Select Area --</option>
-          </select></div>
-      </div>
-      
-      <div class="g2">
-        <div><label>👤 Supervisor</label><input type="text" id="dpSup" readonly style="background:var(--g1);"></div>
         <div><label>🚙 Gaadi No</label>
           <input type="text" id="dpGaadi" placeholder="Vehicle number"></div>
       </div>
       
       <div class="g2">
+        <div><label>👤 Supervisor</label><input type="text" id="dpSup" readonly style="background:var(--g1);"></div>
         <div><label>👨 Driver</label>
           <input type="text" id="dpDriver" placeholder="Driver name"></div>
-        <div><label>📊 Meter Reading</label>
-          <input type="number" id="dpMeter" placeholder="0" min="0" step="0.1"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="ctitle">🌱 Add Crop/Farmer Entry</div>
-      
-      <div class="g2">
-        <div><label>👨 Farmer</label>
-          <input type="text" id="dpFarmer" placeholder="Farmer name"></div>
-        <div><label>🥬 Crop</label>
-          <select id="dpCrop" onchange="loadDispatchVarieties()">
-            <option value="">-- Select Crop --</option>
-          </select></div>
-      </div>
-      
-      <div class="g2">
-        <div><label>🌱 Variety</label>
-          <select id="dpVariety">
-            <option value="">-- Select Variety --</option>
-          </select></div>
-        <div><label>📦 Carret</label>
-          <input type="number" id="dpCarret" placeholder="0" min="0" step="1" oninput="calcDpTotal()"></div>
-      </div>
-      
-      <div class="g2">
-        <div><label>🌿 Plant Per Carret</label>
-          <input type="number" id="dpPPC" placeholder="0" min="0" step="1" oninput="calcDpTotal()"></div>
-        <div><label>🌱 Direct Plants</label>
-          <input type="number" id="dpDirect" placeholder="0" min="0" step="1" oninput="calcDpTotal()"></div>
-      </div>
-      
-      <div style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9);padding:14px;border-radius:var(--rs);margin-bottom:12px;text-align:center;border:2px solid var(--gl);">
-        <div style="font-size:13px;color:var(--gd);font-weight:600;margin-bottom:4px;">🌱 TOTAL PLANTS</div>
-        <div style="font-size:28px;font-weight:800;color:var(--gd);" id="dpTotalDisplay">0</div>
-        <div style="font-size:11px;color:var(--g5);margin-top:2px;">(Carret × Per Carret) + Direct</div>
       </div>
       
       <div class="fr">
-        <label>📅 Date of Sowing (Mandatory)</label>
-        <input type="date" id="dpSowingDate" required style="width:100%;"></div>
-      
-      <div id="dpValidationMsg" style="padding:8px;margin-top:8px;border-radius:var(--rs);display:none;font-size:13px;font-weight:600;"></div>
-      
-      <div class="fr">
-        <label>📝 Remarks (Optional)</label>
-        <textarea id="dpRemarks" placeholder="Kuch special note..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:var(--rs);font-family:inherit;resize:vertical;min-height:50px;"></textarea>
-      </div>
-      
-      <button onclick="addDispatchEntry()" style="width:100%;padding:10px;background:var(--gl);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;margin-top:8px;">➕ Add Entry</button>
-    </div>
-
-    <div class="card">
-      <div class="ctitle">📋 Added Entries</div>
-      <div id="dpEntryList" style="display:flex;flex-direction:column;gap:8px;min-height:40px;">
-        <div style="color:var(--g5);font-size:13px;text-align:center;">Koi entry add nahi hua</div>
+        <label>📊 Meter Reading</label>
+        <input type="number" id="dpMeter" placeholder="0" min="0" step="0.1" style="width:100%;">
       </div>
     </div>
 
+    <div id="dpFarmerCon" style="display:flex;flex-direction:column;gap:12px;"></div>
+
+    <button onclick="addDpFarmer()" style="width:100%;padding:12px;background:var(--gl);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;margin:12px 0;">➕ Naya Farmer Jodo</button>
+
     <div class="card">
-      <div style="display:flex;gap:8px;">
-        <button onclick="submitDispatch()" style="flex:1;padding:12px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">💾 Save</button>
-        <button onclick="resetDispatch()" style="flex:1;padding:12px;background:var(--g2);color:var(--g8);border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">🔄 Reset</button>
-      </div>
+      <button onclick="submitDispatch()" style="width:100%;padding:14px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;">💾 Sab Save Karo</button>
     </div>
   </div>
 </div>
@@ -1125,10 +1067,6 @@ window.onload = () => {
   });
   const now = t.toTimeString().slice(0,5);
   if(document.getElementById('wST')) document.getElementById('wST').value=now;
-  
-  // Set crop change listener for Dispatch
-  const dpCrop = document.getElementById('dpCrop');
-  if(dpCrop) dpCrop.addEventListener('change', loadDispatchVarieties);
   
   loadAll();
 };
@@ -2588,12 +2526,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if(document.getElementById('shCrop')){
     document.getElementById('shCrop').addEventListener('change', loadShiftingVarieties);
   }
-  if(document.getElementById('dpVariety')){
-    document.getElementById('dpVariety').addEventListener('change', validateSowingDate);
-  }
-  if(document.getElementById('dpSowingDate')){
-    document.getElementById('dpSowingDate').addEventListener('change', validateSowingDate);
-  }
 });
 
 function loadShiftingVarieties(){
@@ -2888,276 +2820,260 @@ function loadShiftingReport(){
 
 // ════ DISPATCH FUNCTIONS ════
 
-let dispatchEntries = [];
+// ═══════════ DISPATCH (naya: farmer blocks, har line ka apna area) ═══════════
+let dpFarmerCnt = 0;              // unique farmer block id
+let dpLineCnt = {};               // per-farmer line counter
 
-function calcDpTotal(){
-  const carret = parseInt(document.getElementById('dpCarret').value) || 0;
-  const ppc = parseInt(document.getElementById('dpPPC').value) || 0;
-  const direct = parseInt(document.getElementById('dpDirect').value) || 0;
-  const total = (carret * ppc) + direct;
-  document.getElementById('dpTotalDisplay').textContent = total.toLocaleString();
-}
+const DP_AREAS = ['Net House', 'Kavery', 'Poras', 'Gayatry', '1 No. PH', 'Narmada'];
 
 function openDispatchForm(){
   document.getElementById('dpDate').valueAsDate = new Date();
   document.getElementById('dpSup').value = curUser ? curUser.name : 'Supervisor';
-  document.getElementById('dpTotalDisplay').textContent = '0';
-  
-  const areaSelect = document.getElementById('dpArea');
-  areaSelect.innerHTML = '<option value="">-- Select Area --</option>';
-  const areas = ['Net House', 'Kavery', 'Poras', 'Gayatry', '1 No. PH', 'Narmada'];
-  areas.forEach(a => {
-    const opt = document.createElement('option');
-    opt.value = a;
-    opt.textContent = a;
-    areaSelect.appendChild(opt);
-  });
-  
-  // Add Crop options - EXACTLY like Seed Sowing, only from VDATA (sheet data)
-  const cropSelect = document.getElementById('dpCrop');
-  cropSelect.innerHTML = '<option value="">-- Crop Chunein --</option>';
-  Object.keys(VDATA).forEach(c => cropSelect.innerHTML += '<option value="'+c+'">'+c+'</option>');
-  
-  document.getElementById('dpVariety').innerHTML = '<option value="">-- Variety Chunein --</option>';
-  document.getElementById('dpRemarks').value = '';
   document.getElementById('dpGaadi').value = '';
   document.getElementById('dpDriver').value = '';
   document.getElementById('dpMeter').value = '';
-  document.getElementById('dpFarmer').value = '';
-  document.getElementById('dpCarret').value = '';
-  document.getElementById('dpPPC').value = '';
-  document.getElementById('dpDirect').value = '';
-  
-  dispatchEntries = [];
-  updateDispatchEntryList();
+
+  // Reset farmer blocks
+  document.getElementById('dpFarmerCon').innerHTML = '';
+  dpFarmerCnt = 0;
+  dpLineCnt = {};
+
+  addDpFarmer(); // pehla farmer block
   show('dispatchScreen');
 }
 
-function loadDispatchVarieties(){
-  const crop = document.getElementById('dpCrop').value;
-  const sel = document.getElementById('dpVariety');
-  sel.innerHTML = '<option value="">-- Variety Chunein --</option>';
-  // Exactly like Seed Sowing: use VDATA which is already loaded from the sheet
-  if(crop && VDATA[crop]){
-    VDATA[crop].forEach(v => sel.innerHTML += '<option>'+v+'</option>');
+// ---- Area dropdown options (reusable) ----
+function dpAreaOptions(){
+  return '<option value="">-- Area --</option>' +
+    DP_AREAS.map(a => '<option value="'+a+'">'+a+'</option>').join('');
+}
+
+// ---- Crop dropdown options from VDATA (jaise Seed Sowing) ----
+function dpCropOptions(){
+  return '<option value="">-- Crop --</option>' +
+    Object.keys(VDATA).map(c => '<option value="'+c+'">'+c+'</option>').join('');
+}
+
+// ---- Naya Farmer block jodo ----
+function addDpFarmer(){
+  const fid = ++dpFarmerCnt;
+  dpLineCnt[fid] = 0;
+
+  const con = document.getElementById('dpFarmerCon');
+  const block = document.createElement('div');
+  block.className = 'card';
+  block.id = 'dpf-' + fid;
+  block.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+      '<div style="flex:1;margin-right:8px;">' +
+        '<label style="font-size:13px;font-weight:700;color:var(--gd);">👨 Farmer Naam</label>' +
+        '<input type="text" id="dpf-name-'+fid+'" placeholder="Farmer ka naam" style="width:100%;">' +
+      '</div>' +
+      '<button onclick="removeDpFarmer('+fid+')" style="background:var(--rd);color:white;border:none;padding:8px 10px;border-radius:6px;cursor:pointer;font-weight:700;margin-top:18px;">❌</button>' +
+    '</div>' +
+    '<div id="dpf-lines-'+fid+'" style="display:flex;flex-direction:column;gap:10px;"></div>' +
+    '<button onclick="addDpLine('+fid+')" style="width:100%;padding:9px;background:var(--gl);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;margin-top:10px;">➕ Is Farmer Mein Variety Jodo</button>';
+  con.appendChild(block);
+
+  addDpLine(fid); // pehli line
+}
+
+function removeDpFarmer(fid){
+  const el = document.getElementById('dpf-' + fid);
+  if(el) el.remove();
+  // Agar koi farmer nahi bacha, ek naya de do
+  if(document.getElementById('dpFarmerCon').children.length === 0){
+    addDpFarmer();
   }
 }
 
-function validateSowingDate(){
-  const variety = document.getElementById('dpVariety').value;
-  const sowingDate = document.getElementById('dpSowingDate').value;
-  const msgDiv = document.getElementById('dpValidationMsg');
-  
-  if(!variety || !sowingDate){
-    msgDiv.style.display = 'none';
-    return;
+// ---- Farmer ke andar nayi variety line jodo ----
+function addDpLine(fid){
+  const lid = ++dpLineCnt[fid];
+  const linesCon = document.getElementById('dpf-lines-' + fid);
+  const key = fid + '_' + lid;
+
+  const line = document.createElement('div');
+  line.id = 'dpl-' + key;
+  line.style.cssText = 'background:var(--gp);border-radius:var(--rs);padding:10px;border-left:4px solid var(--gl);';
+  line.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+      '<span style="font-size:12px;font-weight:700;color:var(--gd);">🌱 Variety Line</span>' +
+      '<button onclick="removeDpLine(\''+key+'\','+fid+')" style="background:var(--rd);color:white;border:none;padding:4px 9px;border-radius:4px;cursor:pointer;font-weight:700;font-size:12px;">❌</button>' +
+    '</div>' +
+    '<div class="g2">' +
+      '<div><label>📍 Area</label><select id="dp-area-'+key+'">'+dpAreaOptions()+'</select></div>' +
+      '<div><label>🥬 Crop</label><select id="dp-crop-'+key+'" onchange="dpLoadVar(\''+key+'\')">'+dpCropOptions()+'</select></div>' +
+    '</div>' +
+    '<div class="g2">' +
+      '<div><label>🌱 Variety</label><select id="dp-var-'+key+'"><option value="">-- Variety --</option></select></div>' +
+      '<div><label>📦 Carret</label><input type="number" id="dp-car-'+key+'" placeholder="0" min="0" step="1" oninput="dpCalc(\''+key+'\')"></div>' +
+    '</div>' +
+    '<div class="g2">' +
+      '<div><label>🌿 Per Carret</label><input type="number" id="dp-ppc-'+key+'" placeholder="0" min="0" step="1" oninput="dpCalc(\''+key+'\')"></div>' +
+      '<div><label>🌱 Direct Plants</label><input type="number" id="dp-dir-'+key+'" placeholder="0" min="0" step="1" oninput="dpCalc(\''+key+'\')"></div>' +
+    '</div>' +
+    '<div class="fr"><label>📅 Date of Sowing</label><input type="date" id="dp-sow-'+key+'" onchange="dpValidate(\''+key+'\')" style="width:100%;"></div>' +
+    '<div id="dp-msg-'+key+'" style="padding:6px;border-radius:6px;display:none;font-size:12px;font-weight:600;margin-bottom:6px;"></div>' +
+    '<div style="background:#e8f5e9;padding:8px;border-radius:6px;text-align:center;border:1px solid var(--gl);">' +
+      '<span style="font-size:12px;color:var(--gd);font-weight:600;">Total Plants: </span>' +
+      '<span style="font-size:18px;font-weight:800;color:var(--gd);" id="dp-tot-'+key+'">0</span>' +
+    '</div>';
+  linesCon.appendChild(line);
+}
+
+function removeDpLine(key, fid){
+  const el = document.getElementById('dpl-' + key);
+  if(el) el.remove();
+  // Farmer mein koi line na bache to ek de do
+  const linesCon = document.getElementById('dpf-lines-' + fid);
+  if(linesCon && linesCon.children.length === 0){
+    addDpLine(fid);
   }
-  
+}
+
+// ---- Line ki variety load (VDATA se, crop ke hisaab se) ----
+function dpLoadVar(key){
+  const crop = document.getElementById('dp-crop-'+key).value;
+  const sel = document.getElementById('dp-var-'+key);
+  sel.innerHTML = '<option value="">-- Variety --</option>';
+  if(crop && VDATA[crop]){
+    VDATA[crop].forEach(v => sel.innerHTML += '<option>'+v+'</option>');
+  }
+  // variety badli to dobara validate
+  dpValidate(key);
+}
+
+// ---- Line ka live total ----
+function dpCalc(key){
+  const car = parseInt(document.getElementById('dp-car-'+key).value) || 0;
+  const ppc = parseInt(document.getElementById('dp-ppc-'+key).value) || 0;
+  const dir = parseInt(document.getElementById('dp-dir-'+key).value) || 0;
+  const tot = (car * ppc) + dir;
+  document.getElementById('dp-tot-'+key).textContent = tot.toLocaleString();
+}
+
+// ---- Sowing date ko Seed Sowing Data se verify ----
+function dpValidate(key){
+  const variety = document.getElementById('dp-var-'+key).value;
+  const sowingDate = document.getElementById('dp-sow-'+key).value;
+  const msg = document.getElementById('dp-msg-'+key);
+
+  if(!variety || !sowingDate){ msg.style.display='none'; return; }
+
   fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Seed%20Sowing%20Data&headers=1&t='+Date.now())
     .then(r=>r.text())
     .then(txt=>{
       try{
         const json = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
         const rows = json.table.rows.filter(r => r.c && r.c[0] && r.c[0].v && r.c[0].v !== 'Date');
-        
-        const matchFound = rows.some(r => {
+        const found = rows.some(r => {
           let d = (r.c[0]?.v||'').toString();
           if(d.startsWith('Date(')){
             const pts = d.replace('Date(','').replace(')','').split(',');
             d = pts[0] + '-' + String(parseInt(pts[1])+1).padStart(2,'0') + '-' + String(pts[2]).padStart(2,'0');
           }
-          const rowVariety = (r.c[5]?.v||'').toString();
-          return d === sowingDate && rowVariety === variety;
+          return d === sowingDate && (r.c[5]?.v||'').toString() === variety;
         });
-        
-        if(matchFound){
-          msgDiv.style.display = 'block';
-          msgDiv.style.background = 'var(--g3)';
-          msgDiv.style.color = 'var(--gd)';
-          msgDiv.style.border = '1px solid var(--gl)';
-          msgDiv.innerHTML = '✅ Sowing date verified! Yeh variety is date mein sow hua tha.';
-          document.getElementById('dpSowingDate').setAttribute('data-validated', 'true');
+        if(found){
+          msg.style.display='block'; msg.style.background='var(--g3)'; msg.style.color='var(--gd)'; msg.style.border='1px solid var(--gl)';
+          msg.innerHTML = '✅ Verified! Is date mein sowing mila.';
+          document.getElementById('dp-sow-'+key).setAttribute('data-validated','true');
         } else {
-          msgDiv.style.display = 'block';
-          msgDiv.style.background = '#fff3cd';
-          msgDiv.style.color = '#856404';
-          msgDiv.style.border = '1px solid #ffc107';
-          msgDiv.innerHTML = '⚠️ <strong>Warning:</strong> Is variety ki is date mein sowing record nahi mila! 1 mahine se pehle plant nahi dena chahiye.';
-          document.getElementById('dpSowingDate').setAttribute('data-validated', 'false');
+          msg.style.display='block'; msg.style.background='#fff3cd'; msg.style.color='#856404'; msg.style.border='1px solid #ffc107';
+          msg.innerHTML = '⚠️ Is variety ki is date mein sowing record nahi mila!';
+          document.getElementById('dp-sow-'+key).setAttribute('data-validated','false');
         }
-      }catch(e){
-        msgDiv.style.display = 'none';
-      }
-    }).catch(()=>{
-      msgDiv.style.display = 'none';
-    });
+      }catch(e){ msg.style.display='none'; }
+    }).catch(()=>{ msg.style.display='none'; });
 }
 
-function addDispatchEntry(){
-  const farmer = document.getElementById('dpFarmer').value.trim();
-  const crop = document.getElementById('dpCrop').value;
-  const variety = document.getElementById('dpVariety').value;
-  const sowingDate = document.getElementById('dpSowingDate').value;
-  const carret = parseInt(document.getElementById('dpCarret').value) || 0;
-  const ppc = parseInt(document.getElementById('dpPPC').value) || 0;
-  const direct = parseInt(document.getElementById('dpDirect').value) || 0;
-  const remarks = document.getElementById('dpRemarks').value.trim();
-  
-  if(!farmer){
-    toast('❗ Farmer name zaroori hai!', 'error');
-    return;
-  }
-  if(!crop || !variety){
-    toast('❗ Crop aur Variety select karo!', 'error');
-    return;
-  }
-  if(!sowingDate){
-    toast('❗ Sowing date zaroori hai!', 'error');
-    return;
-  }
-  if(carret === 0 && direct === 0){
-    toast('❗ Kam se kam Carret ya Direct Plants zaroori hain!', 'error');
-    return;
-  }
-  
-  const totalPlants = (carret * ppc) + direct;
-  const isValidated = document.getElementById('dpSowingDate').getAttribute('data-validated') === 'true';
-  
-  dispatchEntries.push({
-    farmer: farmer,
-    crop: crop,
-    variety: variety,
-    sowingDate: sowingDate,
-    carret: carret,
-    ppc: ppc,
-    direct: direct,
-    totalPlants: totalPlants,
-    remarks: remarks,
-    isValidated: isValidated
-  });
-  
-  document.getElementById('dpFarmer').value = '';
-  document.getElementById('dpCrop').value = '';
-  document.getElementById('dpVariety').value = '';
-  document.getElementById('dpSowingDate').value = '';
-  document.getElementById('dpCarret').value = '';
-  document.getElementById('dpPPC').value = '';
-  document.getElementById('dpDirect').value = '';
-  document.getElementById('dpRemarks').value = '';
-  document.getElementById('dpValidationMsg').style.display = 'none';
-  document.getElementById('dpTotalDisplay').textContent = '0';
-  
-  updateDispatchEntryList();
-  toast('✅ Entry add ho gaya!');
-}
-
-function removeDispatchEntry(index){
-  dispatchEntries.splice(index, 1);
-  updateDispatchEntryList();
-}
-
-function updateDispatchEntryList(){
-  const list = document.getElementById('dpEntryList');
-  
-  if(dispatchEntries.length === 0){
-    list.innerHTML = '<div style="color:var(--g5);font-size:13px;text-align:center;">Koi entry add nahi hua</div>';
-    return;
-  }
-  
-  let html = '';
-  dispatchEntries.forEach((entry, idx) => {
-    const borderColor = entry.isValidated ? 'var(--gl)' : '#ff6b6b';
-    const bgColor = entry.isValidated ? 'white' : '#fff5f5';
-    const validationBadge = entry.isValidated ? '✅' : '⚠️';
-    
-    html += '<div style="background:'+bgColor+';padding:12px;border-radius:6px;border-left:4px solid '+borderColor+';border:1px solid '+borderColor+';">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">';
-    html += '<div style="flex:1;">';
-    html += '<div style="font-weight:700;color:var(--g8);">'+validationBadge+' 👨 '+entry.farmer+' • 🥬 '+entry.crop+' • 🌱 '+entry.variety+'</div>';
-    html += '<div style="font-size:12px;color:var(--g5);margin-top:4px;">';
-    html += '📅 Sowing: '+entry.sowingDate+' | ';
-    html += '📦 '+entry.carret+' Carret | 🌿 '+entry.ppc+' Per Carret | 🌱 '+entry.direct+' Direct = <strong>'+entry.totalPlants+' Total</strong>';
-    if(entry.remarks) html += '<br>📝 '+entry.remarks;
-    html += '</div>';
-    if(!entry.isValidated){
-      html += '<div style="margin-top:6px;font-size:11px;color:#c92a2a;font-weight:600;">⚠️ Sowing date validation failed!</div>';
-    }
-    html += '</div>';
-    html += '<button onclick="removeDispatchEntry('+idx+')" style="background:var(--rd);color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-weight:700;flex-shrink:0;">❌</button>';
-    html += '</div></div>';
-  });
-  list.innerHTML = html;
-}
-
-function resetDispatch(){
-  document.getElementById('dpDate').valueAsDate = new Date();
-  document.getElementById('dpArea').value = '';
-  document.getElementById('dpGaadi').value = '';
-  document.getElementById('dpDriver').value = '';
-  document.getElementById('dpMeter').value = '';
-  document.getElementById('dpFarmer').value = '';
-  document.getElementById('dpCrop').value = '';
-  document.getElementById('dpVariety').value = '';
-  document.getElementById('dpSowingDate').value = '';
-  document.getElementById('dpCarret').value = '';
-  document.getElementById('dpPPC').value = '';
-  document.getElementById('dpDirect').value = '';
-  document.getElementById('dpRemarks').value = '';
-  document.getElementById('dpValidationMsg').style.display = 'none';
-  dispatchEntries = [];
-  updateDispatchEntryList();
-  toast('🔄 Form reset ho gaya!');
-}
-
+// ---- Sab collect karke ek saath Save ----
 function submitDispatch(){
   const date = document.getElementById('dpDate').value;
-  const area = document.getElementById('dpArea').value;
   const sup = document.getElementById('dpSup').value;
   const gaadi = document.getElementById('dpGaadi').value.trim();
   const driver = document.getElementById('dpDriver').value.trim();
   const meter = document.getElementById('dpMeter').value;
-  
-  if(!date || !area || !gaadi || !driver || meter === ''){
-    toast('❗ Sab header fields zaroori hain!', 'error');
+
+  if(!date || !gaadi || !driver || meter === ''){
+    toast('❗ Gaadi header ki sab fields zaroori hain!', 'error');
     return;
   }
-  
-  if(dispatchEntries.length === 0){
-    toast('❗ Kam se kam ek entry add karo!', 'error');
-    return;
-  }
-  
+
+  // Har farmer block, har line se data nikalo
+  const entries = [];
+  const farmerBlocks = document.querySelectorAll('[id^="dpf-"]');
+  let errorMsg = '';
+
+  document.querySelectorAll('#dpFarmerCon > .card').forEach(block => {
+    const fid = block.id.split('-')[1];
+    const farmer = (document.getElementById('dpf-name-'+fid)?.value || '').trim();
+
+    const lines = block.querySelectorAll('[id^="dpl-"]');
+    lines.forEach(line => {
+      const key = line.id.replace('dpl-','');
+      const area = document.getElementById('dp-area-'+key)?.value || '';
+      const crop = document.getElementById('dp-crop-'+key)?.value || '';
+      const variety = document.getElementById('dp-var-'+key)?.value || '';
+      const sow = document.getElementById('dp-sow-'+key)?.value || '';
+      const car = parseInt(document.getElementById('dp-car-'+key)?.value) || 0;
+      const ppc = parseInt(document.getElementById('dp-ppc-'+key)?.value) || 0;
+      const dir = parseInt(document.getElementById('dp-dir-'+key)?.value) || 0;
+      const tot = (car * ppc) + dir;
+      const validated = document.getElementById('dp-sow-'+key)?.getAttribute('data-validated') === 'true';
+
+      // Line bilkul khaali hai to skip (na farmer, na kuch)
+      const empty = !farmer && !crop && !variety && !sow && car===0 && dir===0;
+      if(empty) return;
+
+      // Validation
+      if(!farmer){ errorMsg = '❗ Har farmer ka naam zaroori hai!'; return; }
+      if(!area){ errorMsg = '❗ '+farmer+': Area select karo!'; return; }
+      if(!crop || !variety){ errorMsg = '❗ '+farmer+': Crop aur Variety select karo!'; return; }
+      if(!sow){ errorMsg = '❗ '+farmer+': Sowing date zaroori hai!'; return; }
+      if(car===0 && dir===0){ errorMsg = '❗ '+farmer+' ('+variety+'): Carret ya Direct Plants daalo!'; return; }
+
+      entries.push({
+        farmer: farmer, area: area, crop: crop, variety: variety,
+        sowingDate: sow, carret: car, ppc: ppc, direct: dir,
+        totalPlants: tot, remarks: '', isValidated: validated
+      });
+    });
+  });
+
+  if(errorMsg){ toast(errorMsg, 'error'); return; }
+  if(entries.length === 0){ toast('❗ Kam se kam ek variety line bharo!', 'error'); return; }
+
   const btn = event.target;
   btn.disabled = true;
   btn.innerHTML = '⏳ Save Ho Raha Hai...';
-  
+
   const payload = {
     module: 'dispatch',
     date: date,
-    area: area,
     supervisor: sup,
     gaadi: gaadi,
     driver: driver,
     meter: parseFloat(meter),
-    entries: dispatchEntries
+    entries: entries   // har entry ka apna area
   };
-  
+
   fetch(API, {
     method: 'POST',
     mode: 'no-cors',
     headers: {'Content-Type': 'text/plain'},
     body: JSON.stringify(payload)
   }).then(() => {
-    toast('✅ Dispatch data save ho gaya!');
-    resetDispatch();
-    btn.disabled = false;
-    btn.innerHTML = '💾 Save';
+    toast('✅ '+entries.length+' entries save ho gayi!');
+    openDispatchForm(); // form fresh
   }).catch(() => {
     toast('⚠️ Error! Internet check karo.', 'error');
     btn.disabled = false;
-    btn.innerHTML = '💾 Save';
+    btn.innerHTML = '💾 Sab Save Karo';
   });
 }
+
 
 function openDispatchReport(){
   const from = new Date();
