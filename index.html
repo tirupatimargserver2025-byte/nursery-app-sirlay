@@ -1824,7 +1824,14 @@ function submitSeed(){
     .then(()=>{
       const tp=entries.reduce((s,e)=>s+e.totalPlants,0);
       showSuc('seed','🌱 '+entries.length+' varieties\n🌿 '+tp.toLocaleString()+' total plants\n👷 '+entries.reduce((s,e)=>s+e.labours.length,0)+' labour');
-    }).catch(()=>showSuc('seed','Entry save ho gayi!'));
+      // Form turant clear karo (naya data na dikhe)
+      document.getElementById('vCon').innerHTML='';document.getElementById('sRem').value='';
+      vCnt=0;Object.keys(lCnt).forEach(k=>delete lCnt[k]);addV();updSS();
+    }).catch(()=>{
+      showSuc('seed','Entry save ho gayi!');
+      document.getElementById('vCon').innerHTML='';document.getElementById('sRem').value='';
+      vCnt=0;Object.keys(lCnt).forEach(k=>delete lCnt[k]);addV();updSS();
+    });
 }
 
 // ════ WATERING ════
@@ -1987,6 +1994,7 @@ function loadAttReport(){
 
     html+='<div class="rep-card"><div class="rep-title">📊 Summary: '+from+' to '+to+'</div>'+
       '<div class="stat-grid">'+
+      '<div class="stat-item"><span class="sv" style="color:var(--gd);">'+(totalP+totalH+totalA)+'</span><div class="sl">Total Labour</div></div>'+
       '<div class="stat-item"><span class="sv" style="color:var(--gm);">'+totalP+'</span><div class="sl">Present</div></div>'+
       '<div class="stat-item"><span class="sv" style="color:#f57c00;">'+totalH+'</span><div class="sl">Half Day</div></div>'+
       '<div class="stat-item"><span class="sv" style="color:var(--rd);">'+totalA+'</span><div class="sl">Absent</div></div>'+
