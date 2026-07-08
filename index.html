@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌱 Tirumala Green House Nursery</title>
+<title>🌱 Nursery Management App</title>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -307,8 +307,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 <div class="screen" id="loginScreen" style="display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#1a4731,#0a2318);">
   <div class="lbox">
     <div class="llogo">🌱</div>
-    <div class="ltitle">TGH Nursery Sirlay</div>
-    <div class="lsub">Tirumala Green House Nursery, Sirlay</div>
+    <div class="ltitle">TGH Nursery</div>
+    <div class="lsub">Tirupati Green House Nursery, Sirlay</div>
     <div class="linfo" id="loadInfo">⏳ Loading...</div>
     <div class="fr"><label>👷 Apna Naam Chunein</label>
       <select id="loginName"><option value="">-- Naam Chunein --</option></select></div>
@@ -324,7 +324,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   <div class="hdr">
     <div class="htop">
       <div class="hico" id="menuIco">🌱</div>
-      <h1 id="menuTitle">TGH Nursery Sirlay <span>Tirumala Green House Nursery, Sirlay</span></h1>
+      <h1 id="menuTitle">TGH Nursery <span>Tirupati Green House Nursery, Sirlay</span></h1>
       <div class="dbadge" id="dateTop"></div>
     </div>
     <div class="sbar">
@@ -358,6 +358,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div class="ico">📊</div><div class="ttl">Meri Report</div>
           <div class="dsc">Meri saari entries — date filter</div>
         </div>
+        <div class="mcard report" onclick="openShiftingReport()">
+          <div class="ico">🔄</div><div class="ttl">Shifting Report</div>
+          <div class="dsc">Meri shifting records</div>
+        </div>
+        <div class="mcard report" onclick="openDispatchReport()">
+          <div class="ico">🚚</div><div class="ttl">Dispatch Report</div>
+          <div class="dsc">Meri dispatch records</div>
+        </div>
       </div>
       <div class="msec-title">📊 Kaam Ki Entry</div>
       <div class="mgrid">
@@ -369,8 +377,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div class="ico">💧</div><div class="ttl">Watering & Spraying</div>
           <div class="dsc">Chemical, dose, pump</div>
         </div>
-        <div class="mcard soon"><div class="ico">🪴</div><div class="ttl">Potting</div><div class="dsc">Pot size, qty</div><span class="cbadge">Jald Aayega</span></div>
-        <div class="mcard soon"><div class="ico">🚚</div><div class="ttl">Dispatch</div><div class="dsc">Party, qty, vehicle</div><span class="cbadge">Jald Aayega</span></div>
+        <div class="mcard entry" onclick="openShiftingForm()"><div class="ico">🔄</div><div class="ttl">Shifting</div><div class="dsc">Labour shifting records</div></div>
+        <div class="mcard entry" onclick="openDispatchForm()"><div class="ico">🚚</div><div class="ttl">Dispatch</div><div class="dsc">Vehicle dispatch</div></div>
       </div>
     </div>
 
@@ -763,7 +771,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   </div>
 </div>
 
-
 <!-- MY REPORT (Supervisor) -->
 <div class="screen" id="myReportScreen">
   <div class="hdr">
@@ -809,7 +816,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   </div>
 </div>
 
-
 <!-- LABOUR REPORT -->
 <div class="screen" id="labourReportScreen">
   <div class="hdr">
@@ -835,7 +841,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   </div>
 </div>
 
-
 <!-- SUCCESS -->
 <div class="sucscreen" id="sucScreen">
   <div class="sucico" id="sucIco">✅</div>
@@ -848,8 +853,246 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 </div>
 <div class="toast" id="toast"></div>
 
+<!-- SHIFTING FORM SCREEN -->
+<div class="screen" id="shiftingScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--or);">🔄</div>
+      <h1>Shifting</h1></div>
+    <div class="sbar">
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">📋 Shifting Form</div>
+      
+      <div class="g2">
+        <div><label>📅 Date</label><input type="date" id="shDate"></div>
+        <div><label>👤 Supervisor</label><input type="text" id="shSup" readonly style="background:var(--g1);"></div>
+      </div>
+      
+      <div class="g2">
+        <div><label>📍 Area</label>
+          <select id="shArea">
+            <option value="">-- Select Area --</option>
+          </select></div>
+        <div><label>🥬 Crop</label>
+          <select id="shCrop" onchange="loadShiftingVarieties()">
+            <option value="">-- Select Crop --</option>
+          </select></div>
+      </div>
+      
+      <div class="fr">
+        <label>🌱 Variety</label>
+        <select id="shVariety">
+          <option value="">-- Select Variety --</option>
+        </select>
+      </div>
+
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--g2);">
+        <div class="ctitle" style="font-size:14px;margin-bottom:12px;">👥 Add Labour</div>
+        
+        <div class="g2">
+          <div><label>👤 Labour Naam</label>
+            <input type="text" id="shLabour" placeholder="Naam..." list="labourNames" style="width:100%;"></div>
+          <div><label>Tray Count</label>
+            <input type="number" id="shTray" placeholder="0" min="0" step="1" style="width:100%;"></div>
+        </div>
+        
+        <button onclick="addShiftingLabour()" style="width:100%;padding:10px;background:var(--gl);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;margin-top:8px;">➕ Add Labour</button>
+      </div>
+
+      <div id="shLabourList" style="margin-top:16px;padding:12px;background:var(--gp);border-radius:var(--rs);min-height:40px;">
+        <div style="color:var(--g5);font-size:13px;text-align:center;">Koi labour add nahi hua</div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:16px;">
+        <button onclick="submitShifting()" style="flex:1;padding:12px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">💾 Save</button>
+        <button onclick="resetShifting()" style="flex:1;padding:12px;background:var(--g2);color:var(--g8);border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">🔄 Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SHIFTING REPORT SCREEN -->
+<div class="screen" id="shiftingReportScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--or);">📊</div>
+      <h1>Shifting Report</h1></div>
+    <div class="sbar">
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">🔍 Filters</div>
+      <div class="g2">
+        <div><label>📅 From Date</label><input type="date" id="shrFrom"></div>
+        <div><label>📅 To Date</label><input type="date" id="shrTo"></div>
+      </div>
+      <div class="g2">
+        <div><label>📍 Area</label>
+          <select id="shrArea">
+            <option value="">-- Sab Areas --</option>
+          </select></div>
+        <div><label>🥬 Crop</label>
+          <select id="shrCrop" onchange="loadShrVariety()">
+            <option value="">-- Sab Crops --</option>
+          </select></div>
+      </div>
+      <div class="fr">
+        <label>🌱 Variety</label>
+        <select id="shrVariety">
+          <option value="">-- Sab Varieties --</option>
+        </select>
+      </div>
+      <button onclick="loadShiftingReport()" style="width:100%;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">🔍 Report Dekho</button>
+    </div>
+    <div id="shiftingReportContent"></div>
+  </div>
+</div>
+
+<!-- DISPATCH FORM SCREEN -->
+<div class="screen" id="dispatchScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--gl);">🚚</div>
+      <h1>Dispatch</h1></div>
+    <div class="sbar">
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">📦 Vehicle Header</div>
+      
+      <div class="g2">
+        <div><label>📅 Date</label><input type="date" id="dpDate"></div>
+        <div><label>📍 Area</label>
+          <select id="dpArea">
+            <option value="">-- Select Area --</option>
+          </select></div>
+      </div>
+      
+      <div class="g2">
+        <div><label>👤 Supervisor</label><input type="text" id="dpSup" readonly style="background:var(--g1);"></div>
+        <div><label>🚙 Gaadi No</label>
+          <input type="text" id="dpGaadi" placeholder="Vehicle number"></div>
+      </div>
+      
+      <div class="g2">
+        <div><label>👨 Driver</label>
+          <input type="text" id="dpDriver" placeholder="Driver name"></div>
+        <div><label>📊 Meter Reading</label>
+          <input type="number" id="dpMeter" placeholder="0" min="0" step="0.1"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle">🌱 Add Crop/Farmer Entry</div>
+      
+      <div class="g2">
+        <div><label>👨 Farmer</label>
+          <input type="text" id="dpFarmer" placeholder="Farmer name"></div>
+        <div><label>🥬 Crop</label>
+          <select id="dpCrop" onchange="loadDispatchVarieties()">
+            <option value="">-- Select Crop --</option>
+          </select></div>
+      </div>
+      
+      <div class="g2">
+        <div><label>🌱 Variety</label>
+          <select id="dpVariety">
+            <option value="">-- Select Variety --</option>
+          </select></div>
+        <div><label>📦 Carret</label>
+          <input type="number" id="dpCarret" placeholder="0" min="0" step="1" oninput="calcDpTotal()"></div>
+      </div>
+      
+      <div class="g2">
+        <div><label>🌿 Plant Per Carret</label>
+          <input type="number" id="dpPPC" placeholder="0" min="0" step="1" oninput="calcDpTotal()"></div>
+        <div><label>🌱 Direct Plants</label>
+          <input type="number" id="dpDirect" placeholder="0" min="0" step="1" oninput="calcDpTotal()"></div>
+      </div>
+      
+      <div style="background:linear-gradient(135deg,#e8f5e9,#c8e6c9);padding:14px;border-radius:var(--rs);margin-bottom:12px;text-align:center;border:2px solid var(--gl);">
+        <div style="font-size:13px;color:var(--gd);font-weight:600;margin-bottom:4px;">🌱 TOTAL PLANTS</div>
+        <div style="font-size:28px;font-weight:800;color:var(--gd);" id="dpTotalDisplay">0</div>
+        <div style="font-size:11px;color:var(--g5);margin-top:2px;">(Carret × Per Carret) + Direct</div>
+      </div>
+      
+      <div class="fr">
+        <label>📅 Date of Sowing (Mandatory)</label>
+        <input type="date" id="dpSowingDate" required style="width:100%;"></div>
+      
+      <div id="dpValidationMsg" style="padding:8px;margin-top:8px;border-radius:var(--rs);display:none;font-size:13px;font-weight:600;"></div>
+      
+      <div class="fr">
+        <label>📝 Remarks (Optional)</label>
+        <textarea id="dpRemarks" placeholder="Kuch special note..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:var(--rs);font-family:inherit;resize:vertical;min-height:50px;"></textarea>
+      </div>
+      
+      <button onclick="addDispatchEntry()" style="width:100%;padding:10px;background:var(--gl);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;margin-top:8px;">➕ Add Entry</button>
+    </div>
+
+    <div class="card">
+      <div class="ctitle">📋 Added Entries</div>
+      <div id="dpEntryList" style="display:flex;flex-direction:column;gap:8px;min-height:40px;">
+        <div style="color:var(--g5);font-size:13px;text-align:center;">Koi entry add nahi hua</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;gap:8px;">
+        <button onclick="submitDispatch()" style="flex:1;padding:12px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">💾 Save</button>
+        <button onclick="resetDispatch()" style="flex:1;padding:12px;background:var(--g2);color:var(--g8);border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">🔄 Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DISPATCH REPORT SCREEN -->
+<div class="screen" id="dispatchReportScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--gl);">📊</div>
+      <h1>Dispatch Report</h1></div>
+    <div class="sbar">
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">🔍 Filters</div>
+      <div class="g2">
+        <div><label>📅 From Date</label><input type="date" id="drFrom"></div>
+        <div><label>📅 To Date</label><input type="date" id="drTo"></div>
+      </div>
+      <div class="g2">
+        <div><label>📍 Area</label>
+          <select id="drArea">
+            <option value="">-- Sab Areas --</option>
+          </select></div>
+        <div><label>🥬 Crop</label>
+          <select id="drCrop" onchange="loadDrVariety()">
+            <option value="">-- Sab Crops --</option>
+          </select></div>
+      </div>
+      <div class="g2">
+        <div><label>🌱 Variety</label>
+          <select id="drVariety">
+            <option value="">-- Sab Varieties --</option>
+          </select></div>
+        <div><label>🚙 Gaadi No</label>
+          <input type="text" id="drGaadi" placeholder="Vehicle number"></div>
+      </div>
+      <div class="fr">
+        <label>👨 Driver</label>
+        <input type="text" id="drDriver" placeholder="Driver naam...">
+      </div>
+      <button onclick="loadDispatchReport()" style="width:100%;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">🔍 Report Dekho</button>
+    </div>
+    <div id="dispatchReportContent"></div>
+  </div>
+</div>
+
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbwkn3BnHiH_9Llf4x-ig8JX22PFfWTdUz2EGeebKxWFLSKAx8S0AIKiFa46Ejkvy8MclQ/exec';
+const API = 'https://script.google.com/macros/s/AKfycbxa58KGZxRzYeCELF4Mt3KdJezYICxv7bml9L5dbrUloXnt-MdwP8qN09ez_3UC-KuNlg/exec';
 const SHEET_ID = '1nItPv5Jk4baU4Rg6fgQMYchRK7exQk-KDsRkHLl34Ew';
 
 let SUP_DATA = {}; // {name: {pin, role}}
@@ -860,10 +1103,19 @@ let curMod = null;
 let vCnt=0, lCnt={}, cCnt=0, wlCnt=0, akCnt=0;
 let akLabours = {}; // {akid: [names]}
 
+// Timezone-safe date: returns YYYY-MM-DD in LOCAL time (fixes India IST shift bug from toISOString)
+function localISO(d){
+  d = d || new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
+
 // ════ INIT ════
 window.onload = () => {
   const t = new Date();
-  const iso = t.toISOString().split('T')[0];
+  const iso = localISO(t);
   const fmt = t.toLocaleDateString('hi-IN',{weekday:'short',day:'numeric',month:'short'});
   ['dateTop','asBadge','attBadge','sBadge','wBadge','repBadge'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.textContent=fmt;
@@ -873,6 +1125,11 @@ window.onload = () => {
   });
   const now = t.toTimeString().slice(0,5);
   if(document.getElementById('wST')) document.getElementById('wST').value=now;
+  
+  // Set crop change listener for Dispatch
+  const dpCrop = document.getElementById('dpCrop');
+  if(dpCrop) dpCrop.addEventListener('change', loadDispatchVarieties);
+  
   loadAll();
 };
 
@@ -1059,9 +1316,9 @@ function openMod(mod) {
     mrVeg.innerHTML='<option value="">-- Sab Vegetables --</option>';
     Object.keys(VDATA).forEach(v=>mrVeg.innerHTML+='<option value="'+v+'">'+v+'</option>');
     const t=new Date();
-    document.getElementById('mrTo').value=t.toISOString().split('T')[0];
+    document.getElementById('mrTo').value=localISO(t);
     const f=new Date(); f.setDate(f.getDate()-30);
-    document.getElementById('mrFrom').value=f.toISOString().split('T')[0];
+    document.getElementById('mrFrom').value=localISO(f);
     document.getElementById('myReportContent').innerHTML='';
     show('myReportScreen');
   } else if(mod==='assign') {
@@ -1091,6 +1348,10 @@ function openMod(mod) {
   } else if(mod==='attReport') {
     document.getElementById('repSupB').textContent=(curUser.role==='Manager'?'👔':'👑')+' '+curUser.name;
     document.getElementById('repTitle').textContent='👷 Attendance Report';
+    // Reset date range: last 30 days to today (so naye entries dikhein)
+    document.getElementById('repTo').value = localISO(new Date());
+    const attF = new Date(); attF.setDate(attF.getDate()-30);
+    document.getElementById('repFrom').value = localISO(attF);
     show('reportScreen');
     loadAttReport();
   } else if(mod==='labourReport') {
@@ -1099,9 +1360,9 @@ function openMod(mod) {
     lrLab.innerHTML='<option value="">-- Sab Labour --</option>';
     LABOUR_LIST.forEach(l=>lrLab.innerHTML+='<option value="'+l.name+'">'+l.name+'</option>');
     const t=new Date();
-    document.getElementById('lrTo').value=t.toISOString().split('T')[0];
+    document.getElementById('lrTo').value=localISO(t);
     const f=new Date(); f.setDate(f.getDate()-30);
-    document.getElementById('lrFrom').value=f.toISOString().split('T')[0];
+    document.getElementById('lrFrom').value=localISO(f);
     document.getElementById('labourReportContent').innerHTML='';
     show('labourReportScreen');
   } else if(mod==='seedReport') {
@@ -1116,11 +1377,10 @@ function openMod(mod) {
     Object.keys(VDATA).forEach(v=>srVeg.innerHTML+='<option value="'+v+'">'+v+'</option>');
     // Set default dates
     const t=new Date();
-    document.getElementById('srTo').value=t.toISOString().split('T')[0];
+    document.getElementById('srTo').value=localISO(t);
     const f=new Date(); f.setDate(f.getDate()-30);
-    document.getElementById('srFrom').value=f.toISOString().split('T')[0];
+    document.getElementById('srFrom').value=localISO(f);
     show('seedReportScreen');
-
   } else if(mod==='report'||mod==='waterReport') {
     document.getElementById('repSupB').textContent=(curUser.role==='Manager'?'👔':'👑')+' '+curUser.name;
     document.getElementById('repTitle').textContent='📊 Daily Report';
@@ -1169,7 +1429,7 @@ function filterAKLabour(akid) {
     drop.className='ldrop-list show';
     return;
   }
-  drop.innerHTML=list.map(l=>'<div class="ldrop-item" onmousedown="addAKLabour('+akid+',\''+l.name+'\')">'+l.name+' '+(l.wage?'(₹'+l.wage+')':'')+'</div>').join('');
+  drop.innerHTML=list.map(l=>'<div class="ldrop-item" onmousedown="addAKLabour('+akid+',\''+l.name+'\')">'+l.name+'</div>').join('');
   drop.className='ldrop-list show';
 }
 function showAKDrop(akid){filterAKLabour(akid);}
@@ -1305,7 +1565,7 @@ function filterAttLabour(){
     drop.className='ldrop-list show';
     return;
   }
-  drop.innerHTML=filtered.map(l=>'<div class="ldrop-item" onmousedown="selectAttLabour(\''+l.name+'\','+l.wage+')">'+l.name+(l.wage?' (₹'+l.wage+')':'')+'</div>').join('');
+  drop.innerHTML=filtered.map(l=>'<div class="ldrop-item" onmousedown="selectAttLabour(\''+l.name+'\','+l.wage+')">'+l.name+'</div>').join('');
   drop.className='ldrop-list'+(filtered.length>0?' show':'');
 }
 function showAttDrop(){filterAttLabour();}
@@ -1945,7 +2205,6 @@ function loadSeedReport(){
     });
 }
 
-
 function loadMyReport(){
   const from=document.getElementById('mrFrom').value;
   const to=document.getElementById('mrTo').value;
@@ -2129,7 +2388,6 @@ function loadLabourReport(){
   });
 }
 
-
 function repBtnClick(){
   const title=document.getElementById('repTitle')?.textContent||'';
   if(title.includes('Attendance')) loadAttReport();
@@ -2284,219 +2542,767 @@ function buildLabourDatalist(){
 // Build after data loads
 setTimeout(buildLabourDatalist, 3000);
 setInterval(buildLabourDatalist, 5000);
-<!-- SHIFTING FORM SCREEN -->
-<div class="screen" id="shiftingScreen">
-  <div class="hdr">
-    <div class="htop"><div class="hico" style="background:var(--or);">🔄</div>
-      <h1>Shifting</h1></div>
-    <div class="sbar">
-      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
-  </div>
-  <div class="wrap">
-    <div class="card">
-      <div class="ctitle">📋 Shifting Form</div>
-      
-      <div class="g2">
-        <div><label>📅 Date</label><input type="date" id="shDate"></div>
-        <div><label>👤 Supervisor</label><input type="text" id="shSup" readonly style="background:var(--g1);"></div>
-      </div>
-      
-      <div class="g2">
-        <div><label>📍 Area</label>
-          <select id="shArea">
-            <option value="">-- Select Area --</option>
-          </select></div>
-        <div><label>🥬 Crop</label>
-          <select id="shCrop">
-            <option value="">-- Select Crop --</option>
-          </select></div>
-      </div>
-      
-      <div class="fr">
-        <label>🌱 Variety</label>
-        <select id="shVariety">
-          <option value="">-- Select Variety --</option>
-        </select>
-      </div>
 
-      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--g2);">
-        <div class="ctitle" style="font-size:14px;margin-bottom:12px;">👥 Add Labour</div>
+// ════ SHIFTING FUNCTIONS ════
+
+const LOCATION = 'bafalgaon';
+let shiftingLabours = {};
+
+function openShiftingForm(){
+  document.getElementById('shDate').valueAsDate = new Date();
+  document.getElementById('shSup').value = curUser ? curUser.name : 'Supervisor';
+  
+  const areaSelect = document.getElementById('shArea');
+  areaSelect.innerHTML = '<option value="">-- Select Area --</option>';
+  const areas = ['Net House', 'Kavery', 'Poras', 'Gayatry', '1 No. PH', 'Narmada'];
+  areas.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a;
+    opt.textContent = a;
+    areaSelect.appendChild(opt);
+  });
+  
+  // Crop from VDATA - exactly like Seed Sowing
+  const shCrop = document.getElementById('shCrop');
+  shCrop.innerHTML = '<option value="">-- Crop Chunein --</option>';
+  Object.keys(VDATA).forEach(c => shCrop.innerHTML += '<option value="'+c+'">'+c+'</option>');
+  
+  document.getElementById('shVariety').innerHTML = '<option value="">-- Variety Chunein --</option>';
+  document.getElementById('shLabour').value = '';
+  document.getElementById('shTray').value = '';
+  buildLabourDatalist(); // ensure labour names ready like Seed Sowing
+  shiftingLabours = {};
+  updateShiftingLabourList();
+  show('shiftingScreen');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if(document.getElementById('shCrop')){
+    document.getElementById('shCrop').addEventListener('change', loadShiftingVarieties);
+  }
+  if(document.getElementById('dpVariety')){
+    document.getElementById('dpVariety').addEventListener('change', validateSowingDate);
+  }
+  if(document.getElementById('dpSowingDate')){
+    document.getElementById('dpSowingDate').addEventListener('change', validateSowingDate);
+  }
+});
+
+function loadShiftingVarieties(){
+  const crop = document.getElementById('shCrop').value;
+  const sel = document.getElementById('shVariety');
+  sel.innerHTML = '<option value="">-- Variety Chunein --</option>';
+  // Exactly like Seed Sowing: use VDATA
+  if(crop && VDATA[crop]){
+    VDATA[crop].forEach(v => sel.innerHTML += '<option>'+v+'</option>');
+  }
+}
+
+function loadShiftingLabour(){
+  const date = document.getElementById('shDate').value;
+  const area = document.getElementById('shArea').value;
+  const sup = document.getElementById('shSup').value;
+  
+  if(!date || !area || !sup){
+    document.getElementById('shLabour').innerHTML = '<option value="">-- Select Labour --</option>';
+    return;
+  }
+  
+  fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Morning%20Assignment&headers=1&t='+Date.now())
+    .then(r=>r.text())
+    .then(txt=>{
+      try{
+        const json = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+        const rows = json.table.rows.filter(r => {
+          if(!r.c || !r.c[0]) return false;
+          const rowDate = (r.c[0]?.v||'').toString();
+          const rowArea = (r.c[2]?.v||'').toString();
+          const rowSup = (r.c[1]?.v||'').toString();
+          return rowDate === date && rowArea === area && rowSup === sup;
+        });
         
-        <div class="g2">
-          <div><label>Labour</label>
-            <select id="shLabour">
-              <option value="">-- Select Labour --</option>
-            </select></div>
-          <div><label>Tray Count</label>
-            <input type="number" id="shTray" placeholder="0" min="0" step="1" style="width:100%;"></div>
-        </div>
+        const labourSet = new Set();
+        rows.forEach(r => {
+          const labStr = (r.c[4]?.v||'').toString();
+          labStr.split(',').forEach(l => {
+            const labour = l.trim();
+            if(labour) labourSet.add(labour);
+          });
+        });
         
-        <button onclick="addShiftingLabour()" style="width:100%;padding:10px;background:var(--gl);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;margin-top:8px;">➕ Add Labour</button>
-      </div>
+        const labourSelect = document.getElementById('shLabour');
+        labourSelect.innerHTML = '<option value="">-- Select Labour --</option>';
+        labourSet.forEach(l => {
+          const opt = document.createElement('option');
+          opt.value = l;
+          opt.textContent = l;
+          labourSelect.appendChild(opt);
+        });
+      }catch(e){}
+    }).catch(()=>{});
+}
 
-      <div id="shLabourList" style="margin-top:16px;padding:12px;background:var(--gp);border-radius:var(--rs);min-height:40px;">
-        <div style="color:var(--g5);font-size:13px;text-align:center;">Koi labour add nahi hua</div>
-      </div>
+function addShiftingLabour(){
+  const labour = document.getElementById('shLabour').value.trim();
+  const tray = document.getElementById('shTray').value;
+  
+  if(!labour){
+    toast('❗ Labour naam likho!', 'error');
+    return;
+  }
+  if(!tray || parseInt(tray) < 0){
+    toast('❗ Tray count valid nahi hai!', 'error');
+    return;
+  }
+  
+  if(shiftingLabours[labour]){
+    toast('⚠️ Yeh labour pehle se add hai!', 'error');
+    return;
+  }
+  
+  shiftingLabours[labour] = parseInt(tray);
+  document.getElementById('shLabour').value = '';
+  document.getElementById('shTray').value = '';
+  updateShiftingLabourList();
+  toast('✅ '+labour+' add ho gaya!');
+}
 
-      <div style="display:flex;gap:8px;margin-top:16px;">
-        <button onclick="submitShifting()" style="flex:1;padding:12px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">💾 Save</button>
-        <button onclick="resetShifting()" style="flex:1;padding:12px;background:var(--g2);color:var(--g8);border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">🔄 Reset</button>
-      </div>
-    </div>
-  </div>
-</div>
+function removeShiftingLabour(labour){
+  delete shiftingLabours[labour];
+  updateShiftingLabourList();
+}
 
-<!-- SHIFTING REPORT SCREEN -->
-<div class="screen" id="shiftingReportScreen">
-  <div class="hdr">
-    <div class="htop"><div class="hico" style="background:var(--or);">📊</div>
-      <h1>Shifting Report</h1></div>
-    <div class="sbar">
-      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
-  </div>
-  <div class="wrap">
-    <div class="card">
-      <div class="ctitle">🔍 Filters</div>
-      <div class="g2">
-        <div><label>📅 From Date</label><input type="date" id="srFrom"></div>
-        <div><label>📅 To Date</label><input type="date" id="srTo"></div>
-      </div>
-      <div class="g2">
-        <div><label>📍 Area</label>
-          <select id="srArea">
-            <option value="">-- Sab Areas --</option>
-          </select></div>
-        <div><label>🥬 Crop</label>
-          <select id="srCrop">
-            <option value="">-- Sab Crops --</option>
-          </select></div>
-      </div>
-      <button onclick="loadShiftingReport()" style="width:100%;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">🔍 Report Dekho</button>
-    </div>
-    <div id="shiftingReportContent"></div>
-  </div>
-</div>
+function updateShiftingLabourList(){
+  const list = document.getElementById('shLabourList');
+  const labours = Object.keys(shiftingLabours);
+  
+  if(labours.length === 0){
+    list.innerHTML = '<div style="color:var(--g5);font-size:13px;text-align:center;">Koi labour add nahi hua</div>';
+    return;
+  }
+  
+  let html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+  labours.forEach(l => {
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;background:white;padding:10px;border-radius:6px;border-left:3px solid var(--gl);">';
+    html += '<div><div style="font-weight:700;color:var(--g8);">'+l+'</div><div style="font-size:12px;color:var(--g5);">Tray: '+shiftingLabours[l]+'</div></div>';
+    html += '<button onclick="removeShiftingLabour(\''+l.replace(/'/g, "\\'")+'\')" style="background:var(--rd);color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-weight:700;">❌</button>';
+    html += '</div>';
+  });
+  html += '</div>';
+  list.innerHTML = html;
+}
 
-<!-- DISPATCH FORM SCREEN -->
-<div class="screen" id="dispatchScreen">
-  <div class="hdr">
-    <div class="htop"><div class="hico" style="background:var(--gl);">🚚</div>
-      <h1>Dispatch</h1></div>
-    <div class="sbar">
-      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
-  </div>
-  <div class="wrap">
-    <div class="card">
-      <div class="ctitle">📦 Vehicle Header</div>
-      
-      <div class="g2">
-        <div><label>📅 Date</label><input type="date" id="dpDate"></div>
-        <div><label>📍 Area</label>
-          <select id="dpArea">
-            <option value="">-- Select Area --</option>
-          </select></div>
-      </div>
-      
-      <div class="g2">
-        <div><label>👤 Supervisor</label><input type="text" id="dpSup" readonly style="background:var(--g1);"></div>
-        <div><label>🚙 Gaadi No</label>
-          <input type="text" id="dpGaadi" placeholder="Vehicle number"></div>
-      </div>
-      
-      <div class="g2">
-        <div><label>👨 Driver</label>
-          <input type="text" id="dpDriver" placeholder="Driver name"></div>
-        <div><label>📊 Meter Reading</label>
-          <input type="number" id="dpMeter" placeholder="0" min="0" step="0.1"></div>
-      </div>
-    </div>
+function resetShifting(){
+  document.getElementById('shDate').valueAsDate = new Date();
+  document.getElementById('shArea').value = '';
+  document.getElementById('shCrop').value = '';
+  document.getElementById('shVariety').value = '';
+  document.getElementById('shLabour').value = '';
+  document.getElementById('shTray').value = '';
+  shiftingLabours = {};
+  updateShiftingLabourList();
+  toast('🔄 Form reset ho gaya!');
+}
 
-    <div class="card">
-      <div class="ctitle">🌱 Add Crop/Farmer Entry</div>
-      
-      <div class="g2">
-        <div><label>👨 Farmer</label>
-          <input type="text" id="dpFarmer" placeholder="Farmer name"></div>
-        <div><label>🥬 Crop</label>
-          <select id="dpCrop">
-            <option value="">-- Select Crop --</option>
-          </select></div>
-      </div>
-      
-      <div class="g2">
-        <div><label>🌱 Variety</label>
-          <select id="dpVariety">
-            <option value="">-- Select Variety --</option>
-          </select></div>
-        <div><label>📦 Carret</label>
-          <input type="number" id="dpCarret" placeholder="0" min="0" step="1"></div>
-      </div>
-      
-      <div class="g2">
-        <div><label>🌿 Plant Per Carret</label>
-          <input type="number" id="dpPPC" placeholder="0" min="0" step="1"></div>
-        <div><label>🌱 Direct Plants</label>
-          <input type="number" id="dpDirect" placeholder="0" min="0" step="1"></div>
-      </div>
-      
-      <div class="fr">
-        <label>📅 Date of Sowing (Mandatory)</label>
-        <input type="date" id="dpSowingDate" required style="width:100%;"></div>
-      
-      <div id="dpValidationMsg" style="padding:8px;margin-top:8px;border-radius:var(--rs);display:none;font-size:13px;font-weight:600;"></div>
-      
-      <div class="fr">
-        <label>📝 Remarks (Optional)</label>
-        <textarea id="dpRemarks" placeholder="Kuch special note..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:var(--rs);font-family:inherit;resize:vertical;min-height:50px;"></textarea>
-      </div>
-      
-      <button onclick="addDispatchEntry()" style="width:100%;padding:10px;background:var(--gl);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;margin-top:8px;">➕ Add Entry</button>
-    </div>
+function submitShifting(){
+  const date = document.getElementById('shDate').value;
+  const sup = document.getElementById('shSup').value;
+  const area = document.getElementById('shArea').value;
+  const crop = document.getElementById('shCrop').value;
+  const variety = document.getElementById('shVariety').value;
+  
+  if(!date || !sup || !area || !crop || !variety){
+    toast('❗ Sab fields zaroori hain!', 'error');
+    return;
+  }
+  
+  const labours = Object.keys(shiftingLabours);
+  if(labours.length === 0){
+    toast('❗ Kam se kam ek labour add karo!', 'error');
+    return;
+  }
+  
+  const btn = event.target;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Save Ho Raha Hai...';
+  
+  const payload = {
+    module: 'shifting',
+    date: date,
+    supervisor: sup,
+    area: area,
+    crop: crop,
+    variety: variety,
+    labours: labours.map(l => ({name: l, tray: shiftingLabours[l]}))
+  };
+  
+  fetch(API, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify(payload)
+  }).then(() => {
+    toast('✅ Shifting data save ho gaya!');
+    resetShifting();
+    btn.disabled = false;
+    btn.innerHTML = '💾 Save';
+  }).catch(() => {
+    toast('⚠️ Error! Internet check karo.', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '💾 Save';
+  });
+}
 
-    <div class="card">
-      <div class="ctitle">📋 Added Entries</div>
-      <div id="dpEntryList" style="display:flex;flex-direction:column;gap:8px;min-height:40px;">
-        <div style="color:var(--g5);font-size:13px;text-align:center;">Koi entry add nahi hua</div>
-      </div>
-    </div>
+function openShiftingReport(){
+  const from = new Date();
+  from.setDate(from.getDate() - 30);
+  document.getElementById('shrFrom').valueAsDate = from;
+  document.getElementById('shrTo').valueAsDate = new Date();
+  
+  const areaSelect = document.getElementById('shrArea');
+  areaSelect.innerHTML = '<option value="">-- Sab Areas --</option>';
+  const areas = ['Net House', 'Kavery', 'Poras', 'Gayatry', '1 No. PH', 'Narmada'];
+  areas.forEach(a => {
+    areaSelect.innerHTML += '<option value="'+a+'">'+a+'</option>';
+  });
+  
+  // Crop from VDATA - like Seed Sowing
+  const cropSelect = document.getElementById('shrCrop');
+  cropSelect.innerHTML = '<option value="">-- Sab Crops --</option>';
+  Object.keys(VDATA).forEach(c => cropSelect.innerHTML += '<option value="'+c+'">'+c+'</option>');
+  
+  document.getElementById('shrVariety').innerHTML = '<option value="">-- Sab Varieties --</option>';
+  
+  show('shiftingReportScreen');
+}
 
-    <div class="card">
-      <div style="display:flex;gap:8px;">
-        <button onclick="submitDispatch()" style="flex:1;padding:12px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">💾 Save</button>
-        <button onclick="resetDispatch()" style="flex:1;padding:12px;background:var(--g2);color:var(--g8);border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">🔄 Reset</button>
-      </div>
-    </div>
-  </div>
-</div>
+function loadShrVariety(){
+  const crop = document.getElementById('shrCrop').value;
+  const sel = document.getElementById('shrVariety');
+  sel.innerHTML = '<option value="">-- Sab Varieties --</option>';
+  if(crop && VDATA[crop]){
+    VDATA[crop].forEach(v => sel.innerHTML += '<option value="'+v+'">'+v+'</option>');
+  }
+}
 
-<!-- DISPATCH REPORT SCREEN -->
-<div class="screen" id="dispatchReportScreen">
-  <div class="hdr">
-    <div class="htop"><div class="hico" style="background:var(--gl);">📊</div>
-      <h1>Dispatch Report</h1></div>
-    <div class="sbar">
-      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
-  </div>
-  <div class="wrap">
-    <div class="card">
-      <div class="ctitle">🔍 Filters</div>
-      <div class="g2">
-        <div><label>📅 From Date</label><input type="date" id="drFrom"></div>
-        <div><label>📅 To Date</label><input type="date" id="drTo"></div>
-      </div>
-      <div class="g2">
-        <div><label>📍 Area</label>
-          <select id="drArea">
-            <option value="">-- Sab Areas --</option>
-          </select></div>
-        <div><label>🚙 Gaadi No</label>
-          <input type="text" id="drGaadi" placeholder="Filter by vehicle"></div>
-      </div>
-      <button onclick="loadDispatchReport()" style="width:100%;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">🔍 Report Dekho</button>
-    </div>
-    <div id="dispatchReportContent"></div>
-  </div>
-</div>
+function loadShiftingReport(){
+  const from = document.getElementById('shrFrom').value;
+  const to = document.getElementById('shrTo').value;
+  const areaFilter = document.getElementById('shrArea').value;
+  const cropFilter = document.getElementById('shrCrop').value;
+  const varFilter = document.getElementById('shrVariety').value;
+  const myName = curUser.name;
+  const con = document.getElementById('shiftingReportContent');
+  
+  con.innerHTML = '<div class="card" style="margin-top:10px;text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;color:var(--gd);">Report load ho rahi hai...</div></div>';
+  
+  const ts = Date.now();
+  fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Shifting%20Data&headers=1&t='+ts)
+    .then(r => r.text())
+    .then(txt => {
+      try {
+        const json = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+        let rows = json.table.rows.filter(r => r.c && r.c[0] && r.c[0].v && r.c[0].v !== 'Date');
+        
+        rows = rows.map(r => {
+          let d = (r.c[0]?.v||'').toString();
+          if(d.startsWith('Date(')){
+            const pts = d.replace('Date(','').replace(')','').split(',');
+            d = pts[0] + '-' + String(parseInt(pts[1])+1).padStart(2,'0') + '-' + String(pts[2]).padStart(2,'0');
+          }
+          r._date = d;
+          return r;
+        });
+        
+        rows = rows.filter(r => {
+          if(r._date < from || r._date > to) return false;
+          if((r.c[1]?.v||'').toString() !== myName) return false;
+          if(areaFilter && (r.c[2]?.v||'').toString() !== areaFilter) return false;
+          if(cropFilter && (r.c[3]?.v||'').toString() !== cropFilter) return false;
+          if(varFilter && (r.c[4]?.v||'').toString() !== varFilter) return false;
+          return true;
+        });
+        
+        if(rows.length === 0){
+          con.innerHTML = '<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Koi shifting record nahi mila.</div>';
+          return;
+        }
+        
+        const grouped = {};
+        rows.forEach(r => {
+          const key = r._date + '|' + (r.c[2]?.v||'');
+          if(!grouped[key]) grouped[key] = [];
+          grouped[key].push(r);
+        });
+        
+        let html = '<div class="rep-card" style="margin-top:10px;"><div class="rep-title">🔄 Shifting — '+rows.length+' Records</div>';
+        html += '<div class="rep-sub">'+from+' to '+to+'</div>';
+        
+        const totalTray = rows.reduce((s, r) => s + (parseFloat(r.c[6]?.v)||0), 0);
+        html += '<div class="stat-grid">';
+        html += '<div class="stat-item"><span class="sv">'+rows.length+'</span><div class="sl">Total Records</div></div>';
+        html += '<div class="stat-item"><span class="sv">'+totalTray+'</span><div class="sl">Total Trays</div></div>';
+        html += '<div class="stat-item"><span class="sv">'+Object.keys(grouped).length+'</span><div class="sl">Date-Area Groups</div></div>';
+        html += '</div></div>';
+        
+        html += '<div class="rep-card"><div class="rep-title">📋 Shifting Detail <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div>';
+        html += '<div style="overflow-x:auto;"><table class="att-table">';
+        html += '<thead><tr><th></th><th>Date</th><th>Area</th><th>Crop</th><th>Variety</th><th>Labour</th><th>Trays</th></tr></thead><tbody>';
+        
+        let ridCounter = 0;
+        rows.forEach(r => {
+          const labour = (r.c[5]?.v||'').toString();
+          const tray = parseFloat(r.c[6]?.v)||0;
+          
+          ridCounter++;
+          const rid = 'sr_exp_' + ridCounter;
+          const inner = '<table style="width:100%;"><tr><th style="text-align:left;">Field</th><th style="text-align:left;">Value</th></tr>' +
+            '<tr><td>Supervisor</td><td>'+(r.c[1]?.v||'')+'</td></tr>' +
+            '</table>';
+          
+          html += '<tr class="exp-toggle" onclick="toggleRow(\''+rid+'\')"><td><span class="exp-arrow">▶</span></td>';
+          html += '<td>'+r._date+'</td><td>'+(r.c[2]?.v||'')+'</td><td>'+(r.c[3]?.v||'')+'</td>';
+          html += '<td>'+(r.c[4]?.v||'')+'</td><td>'+labour+'</td><td>'+tray+'</td></tr>';
+          html += '<tr class="exp-row" id="'+rid+'"><td colspan="7" class="exp-inner">'+inner+'</td></tr>';
+        });
+        
+        html += '<tr style="background:var(--gd);color:white;font-weight:800;"><td colspan="6">TOTAL TRAYS</td><td>'+totalTray.toLocaleString()+'</td></tr>';
+        html += '</tbody></table></div></div>';
+        
+        con.innerHTML = html;
+      } catch(e) {
+        con.innerHTML = '<div class="rep-card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Error: '+e.message+'</div>';
+      }
+    }).catch(err => {
+      con.innerHTML = '<div class="rep-card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Data load nahi hua. Internet check karo.</div>';
+    });
+}
+
+// ════ DISPATCH FUNCTIONS ════
+
+let dispatchEntries = [];
+
+function calcDpTotal(){
+  const carret = parseInt(document.getElementById('dpCarret').value) || 0;
+  const ppc = parseInt(document.getElementById('dpPPC').value) || 0;
+  const direct = parseInt(document.getElementById('dpDirect').value) || 0;
+  const total = (carret * ppc) + direct;
+  document.getElementById('dpTotalDisplay').textContent = total.toLocaleString();
+}
+
+function openDispatchForm(){
+  document.getElementById('dpDate').valueAsDate = new Date();
+  document.getElementById('dpSup').value = curUser ? curUser.name : 'Supervisor';
+  document.getElementById('dpTotalDisplay').textContent = '0';
+  
+  const areaSelect = document.getElementById('dpArea');
+  areaSelect.innerHTML = '<option value="">-- Select Area --</option>';
+  const areas = ['Net House', 'Kavery', 'Poras', 'Gayatry', '1 No. PH', 'Narmada'];
+  areas.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a;
+    opt.textContent = a;
+    areaSelect.appendChild(opt);
+  });
+  
+  // Add Crop options - EXACTLY like Seed Sowing, only from VDATA (sheet data)
+  const cropSelect = document.getElementById('dpCrop');
+  cropSelect.innerHTML = '<option value="">-- Crop Chunein --</option>';
+  Object.keys(VDATA).forEach(c => cropSelect.innerHTML += '<option value="'+c+'">'+c+'</option>');
+  
+  document.getElementById('dpVariety').innerHTML = '<option value="">-- Variety Chunein --</option>';
+  document.getElementById('dpRemarks').value = '';
+  document.getElementById('dpGaadi').value = '';
+  document.getElementById('dpDriver').value = '';
+  document.getElementById('dpMeter').value = '';
+  document.getElementById('dpFarmer').value = '';
+  document.getElementById('dpCarret').value = '';
+  document.getElementById('dpPPC').value = '';
+  document.getElementById('dpDirect').value = '';
+  
+  dispatchEntries = [];
+  updateDispatchEntryList();
+  show('dispatchScreen');
+}
+
+function loadDispatchVarieties(){
+  const crop = document.getElementById('dpCrop').value;
+  const sel = document.getElementById('dpVariety');
+  sel.innerHTML = '<option value="">-- Variety Chunein --</option>';
+  // Exactly like Seed Sowing: use VDATA which is already loaded from the sheet
+  if(crop && VDATA[crop]){
+    VDATA[crop].forEach(v => sel.innerHTML += '<option>'+v+'</option>');
+  }
+}
+
+function validateSowingDate(){
+  const variety = document.getElementById('dpVariety').value;
+  const sowingDate = document.getElementById('dpSowingDate').value;
+  const msgDiv = document.getElementById('dpValidationMsg');
+  
+  if(!variety || !sowingDate){
+    msgDiv.style.display = 'none';
+    return;
+  }
+  
+  fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Seed%20Sowing%20Data&headers=1&t='+Date.now())
+    .then(r=>r.text())
+    .then(txt=>{
+      try{
+        const json = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+        const rows = json.table.rows.filter(r => r.c && r.c[0] && r.c[0].v && r.c[0].v !== 'Date');
+        
+        const matchFound = rows.some(r => {
+          let d = (r.c[0]?.v||'').toString();
+          if(d.startsWith('Date(')){
+            const pts = d.replace('Date(','').replace(')','').split(',');
+            d = pts[0] + '-' + String(parseInt(pts[1])+1).padStart(2,'0') + '-' + String(pts[2]).padStart(2,'0');
+          }
+          const rowVariety = (r.c[5]?.v||'').toString();
+          return d === sowingDate && rowVariety === variety;
+        });
+        
+        if(matchFound){
+          msgDiv.style.display = 'block';
+          msgDiv.style.background = 'var(--g3)';
+          msgDiv.style.color = 'var(--gd)';
+          msgDiv.style.border = '1px solid var(--gl)';
+          msgDiv.innerHTML = '✅ Sowing date verified! Yeh variety is date mein sow hua tha.';
+          document.getElementById('dpSowingDate').setAttribute('data-validated', 'true');
+        } else {
+          msgDiv.style.display = 'block';
+          msgDiv.style.background = '#fff3cd';
+          msgDiv.style.color = '#856404';
+          msgDiv.style.border = '1px solid #ffc107';
+          msgDiv.innerHTML = '⚠️ <strong>Warning:</strong> Is variety ki is date mein sowing record nahi mila! 1 mahine se pehle plant nahi dena chahiye.';
+          document.getElementById('dpSowingDate').setAttribute('data-validated', 'false');
+        }
+      }catch(e){
+        msgDiv.style.display = 'none';
+      }
+    }).catch(()=>{
+      msgDiv.style.display = 'none';
+    });
+}
+
+function addDispatchEntry(){
+  const farmer = document.getElementById('dpFarmer').value.trim();
+  const crop = document.getElementById('dpCrop').value;
+  const variety = document.getElementById('dpVariety').value;
+  const sowingDate = document.getElementById('dpSowingDate').value;
+  const carret = parseInt(document.getElementById('dpCarret').value) || 0;
+  const ppc = parseInt(document.getElementById('dpPPC').value) || 0;
+  const direct = parseInt(document.getElementById('dpDirect').value) || 0;
+  const remarks = document.getElementById('dpRemarks').value.trim();
+  
+  if(!farmer){
+    toast('❗ Farmer name zaroori hai!', 'error');
+    return;
+  }
+  if(!crop || !variety){
+    toast('❗ Crop aur Variety select karo!', 'error');
+    return;
+  }
+  if(!sowingDate){
+    toast('❗ Sowing date zaroori hai!', 'error');
+    return;
+  }
+  if(carret === 0 && direct === 0){
+    toast('❗ Kam se kam Carret ya Direct Plants zaroori hain!', 'error');
+    return;
+  }
+  
+  const totalPlants = (carret * ppc) + direct;
+  const isValidated = document.getElementById('dpSowingDate').getAttribute('data-validated') === 'true';
+  
+  dispatchEntries.push({
+    farmer: farmer,
+    crop: crop,
+    variety: variety,
+    sowingDate: sowingDate,
+    carret: carret,
+    ppc: ppc,
+    direct: direct,
+    totalPlants: totalPlants,
+    remarks: remarks,
+    isValidated: isValidated
+  });
+  
+  document.getElementById('dpFarmer').value = '';
+  document.getElementById('dpCrop').value = '';
+  document.getElementById('dpVariety').value = '';
+  document.getElementById('dpSowingDate').value = '';
+  document.getElementById('dpCarret').value = '';
+  document.getElementById('dpPPC').value = '';
+  document.getElementById('dpDirect').value = '';
+  document.getElementById('dpRemarks').value = '';
+  document.getElementById('dpValidationMsg').style.display = 'none';
+  document.getElementById('dpTotalDisplay').textContent = '0';
+  
+  updateDispatchEntryList();
+  toast('✅ Entry add ho gaya!');
+}
+
+function removeDispatchEntry(index){
+  dispatchEntries.splice(index, 1);
+  updateDispatchEntryList();
+}
+
+function updateDispatchEntryList(){
+  const list = document.getElementById('dpEntryList');
+  
+  if(dispatchEntries.length === 0){
+    list.innerHTML = '<div style="color:var(--g5);font-size:13px;text-align:center;">Koi entry add nahi hua</div>';
+    return;
+  }
+  
+  let html = '';
+  dispatchEntries.forEach((entry, idx) => {
+    const borderColor = entry.isValidated ? 'var(--gl)' : '#ff6b6b';
+    const bgColor = entry.isValidated ? 'white' : '#fff5f5';
+    const validationBadge = entry.isValidated ? '✅' : '⚠️';
+    
+    html += '<div style="background:'+bgColor+';padding:12px;border-radius:6px;border-left:4px solid '+borderColor+';border:1px solid '+borderColor+';">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">';
+    html += '<div style="flex:1;">';
+    html += '<div style="font-weight:700;color:var(--g8);">'+validationBadge+' 👨 '+entry.farmer+' • 🥬 '+entry.crop+' • 🌱 '+entry.variety+'</div>';
+    html += '<div style="font-size:12px;color:var(--g5);margin-top:4px;">';
+    html += '📅 Sowing: '+entry.sowingDate+' | ';
+    html += '📦 '+entry.carret+' Carret | 🌿 '+entry.ppc+' Per Carret | 🌱 '+entry.direct+' Direct = <strong>'+entry.totalPlants+' Total</strong>';
+    if(entry.remarks) html += '<br>📝 '+entry.remarks;
+    html += '</div>';
+    if(!entry.isValidated){
+      html += '<div style="margin-top:6px;font-size:11px;color:#c92a2a;font-weight:600;">⚠️ Sowing date validation failed!</div>';
+    }
+    html += '</div>';
+    html += '<button onclick="removeDispatchEntry('+idx+')" style="background:var(--rd);color:white;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-weight:700;flex-shrink:0;">❌</button>';
+    html += '</div></div>';
+  });
+  list.innerHTML = html;
+}
+
+function resetDispatch(){
+  document.getElementById('dpDate').valueAsDate = new Date();
+  document.getElementById('dpArea').value = '';
+  document.getElementById('dpGaadi').value = '';
+  document.getElementById('dpDriver').value = '';
+  document.getElementById('dpMeter').value = '';
+  document.getElementById('dpFarmer').value = '';
+  document.getElementById('dpCrop').value = '';
+  document.getElementById('dpVariety').value = '';
+  document.getElementById('dpSowingDate').value = '';
+  document.getElementById('dpCarret').value = '';
+  document.getElementById('dpPPC').value = '';
+  document.getElementById('dpDirect').value = '';
+  document.getElementById('dpRemarks').value = '';
+  document.getElementById('dpValidationMsg').style.display = 'none';
+  dispatchEntries = [];
+  updateDispatchEntryList();
+  toast('🔄 Form reset ho gaya!');
+}
+
+function submitDispatch(){
+  const date = document.getElementById('dpDate').value;
+  const area = document.getElementById('dpArea').value;
+  const sup = document.getElementById('dpSup').value;
+  const gaadi = document.getElementById('dpGaadi').value.trim();
+  const driver = document.getElementById('dpDriver').value.trim();
+  const meter = document.getElementById('dpMeter').value;
+  
+  if(!date || !area || !gaadi || !driver || meter === ''){
+    toast('❗ Sab header fields zaroori hain!', 'error');
+    return;
+  }
+  
+  if(dispatchEntries.length === 0){
+    toast('❗ Kam se kam ek entry add karo!', 'error');
+    return;
+  }
+  
+  const btn = event.target;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Save Ho Raha Hai...';
+  
+  const payload = {
+    module: 'dispatch',
+    date: date,
+    area: area,
+    supervisor: sup,
+    gaadi: gaadi,
+    driver: driver,
+    meter: parseFloat(meter),
+    entries: dispatchEntries
+  };
+  
+  fetch(API, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify(payload)
+  }).then(() => {
+    toast('✅ Dispatch data save ho gaya!');
+    resetDispatch();
+    btn.disabled = false;
+    btn.innerHTML = '💾 Save';
+  }).catch(() => {
+    toast('⚠️ Error! Internet check karo.', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '💾 Save';
+  });
+}
+
+function openDispatchReport(){
+  const from = new Date();
+  from.setDate(from.getDate() - 30);
+  document.getElementById('drFrom').valueAsDate = from;
+  document.getElementById('drTo').valueAsDate = new Date();
+  
+  const areaSelect = document.getElementById('drArea');
+  areaSelect.innerHTML = '<option value="">-- Sab Areas --</option>';
+  const areas = ['Net House', 'Kavery', 'Poras', 'Gayatry', '1 No. PH', 'Narmada'];
+  areas.forEach(a => {
+    areaSelect.innerHTML += '<option value="'+a+'">'+a+'</option>';
+  });
+  
+  // Crop from VDATA - like Seed Sowing
+  const cropSelect = document.getElementById('drCrop');
+  cropSelect.innerHTML = '<option value="">-- Sab Crops --</option>';
+  Object.keys(VDATA).forEach(c => cropSelect.innerHTML += '<option value="'+c+'">'+c+'</option>');
+  
+  document.getElementById('drVariety').innerHTML = '<option value="">-- Sab Varieties --</option>';
+  document.getElementById('drGaadi').value = '';
+  document.getElementById('drDriver').value = '';
+  
+  show('dispatchReportScreen');
+}
+
+function loadDrVariety(){
+  const crop = document.getElementById('drCrop').value;
+  const sel = document.getElementById('drVariety');
+  sel.innerHTML = '<option value="">-- Sab Varieties --</option>';
+  if(crop && VDATA[crop]){
+    VDATA[crop].forEach(v => sel.innerHTML += '<option value="'+v+'">'+v+'</option>');
+  }
+}
+
+function loadDispatchReport(){
+  const from = document.getElementById('drFrom').value;
+  const to = document.getElementById('drTo').value;
+  const areaFilter = document.getElementById('drArea').value;
+  const cropFilter = document.getElementById('drCrop').value;
+  const varFilter = document.getElementById('drVariety').value;
+  const gadiFilter = document.getElementById('drGaadi').value.trim().toLowerCase();
+  const driverFilter = document.getElementById('drDriver').value.trim().toLowerCase();
+  const myName = curUser.name;
+  const con = document.getElementById('dispatchReportContent');
+  
+  con.innerHTML = '<div class="card" style="margin-top:10px;text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;color:var(--gd);">Report load ho rahi hai...</div></div>';
+  
+  const ts = Date.now();
+  fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Dispatch%20Data&headers=1&t='+ts)
+    .then(r => r.text())
+    .then(txt => {
+      try {
+        const json = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+        let rows = json.table.rows.filter(r => r.c && r.c[0] && r.c[0].v && r.c[0].v !== 'Date');
+        
+        rows = rows.map(r => {
+          let d = (r.c[0]?.v||'').toString();
+          if(d.startsWith('Date(')){
+            const pts = d.replace('Date(','').replace(')','').split(',');
+            d = pts[0] + '-' + String(parseInt(pts[1])+1).padStart(2,'0') + '-' + String(pts[2]).padStart(2,'0');
+          }
+          r._date = d;
+          return r;
+        });
+        
+        rows = rows.filter(r => {
+          if(r._date < from || r._date > to) return false;
+          if((r.c[2]?.v||'').toString() !== myName) return false;
+          if(areaFilter && (r.c[1]?.v||'').toString() !== areaFilter) return false;
+          if(cropFilter && (r.c[7]?.v||'').toString() !== cropFilter) return false;
+          if(varFilter && (r.c[8]?.v||'').toString() !== varFilter) return false;
+          const gaadi = (r.c[3]?.v||'').toString().toLowerCase();
+          if(gadiFilter && !gaadi.includes(gadiFilter)) return false;
+          const driver = (r.c[4]?.v||'').toString().toLowerCase();
+          if(driverFilter && !driver.includes(driverFilter)) return false;
+          return true;
+        });
+        
+        if(rows.length === 0){
+          con.innerHTML = '<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Koi dispatch record nahi mila.</div>';
+          return;
+        }
+        
+        const grouped = {};
+        rows.forEach(r => {
+          const key = r._date + '|' + (r.c[3]?.v||'');
+          if(!grouped[key]) grouped[key] = [];
+          grouped[key].push(r);
+        });
+        
+        let html = '<div class="rep-card" style="margin-top:10px;"><div class="rep-title">🚚 Dispatch — '+rows.length+' Records</div>';
+        html += '<div class="rep-sub">'+from+' to '+to+'</div>';
+        
+        const totalPlants = rows.reduce((s, r) => s + (parseFloat(r.c[13]?.v)||0), 0);
+        const verifiedCount = rows.filter(r => (r.c[14]?.v||'').toString().toUpperCase() === 'YES').length;
+        const unverifiedCount = rows.length - verifiedCount;
+        html += '<div class="stat-grid">';
+        html += '<div class="stat-item"><span class="sv">'+rows.length+'</span><div class="sl">Total Entries</div></div>';
+        html += '<div class="stat-item"><span class="sv">'+Object.keys(grouped).length+'</span><div class="sl">Vehicles</div></div>';
+        html += '<div class="stat-item"><span class="sv">'+totalPlants.toLocaleString()+'</span><div class="sl">Total Plants</div></div>';
+        html += '<div class="stat-item"><span class="sv" style="color:var(--rd);">'+unverifiedCount+'</span><div class="sl">Unverified</div></div>';
+        html += '</div></div>';
+        
+        html += '<div class="rep-card"><div class="rep-title">📋 Dispatch Detail <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div>';
+        html += '<div style="overflow-x:auto;"><table class="att-table">';
+        html += '<thead><tr><th></th><th>Date</th><th>Gaadi</th><th>Driver</th><th>Farmer</th><th>Crop</th><th>Variety</th><th>Sowing Date</th><th>Carret</th><th>Total Plants</th><th>Status</th></tr></thead><tbody>';
+        
+        let ridCounter = 0;
+        rows.forEach(r => {
+          ridCounter++;
+          const rid = 'dr_exp_' + ridCounter;
+          
+          const sowingDate = (r.c[9]?.v||'');
+          const ppc = (r.c[11]?.v||0);
+          const direct = (r.c[12]?.v||0);
+          const verified = (r.c[14]?.v||'');
+          const remarks = (r.c[15]?.v||'');
+          
+          const isVerified = verified.toString().toUpperCase() === 'YES';
+          const statusBadge = isVerified ? '✅' : '⚠️';
+          const statusColor = isVerified ? 'var(--gl)' : '#ff6b6b';
+          
+          const inner = '<table style="width:100%;"><tr><th style="text-align:left;">Field</th><th style="text-align:left;">Value</th></tr>' +
+            '<tr><td>Date of Sowing</td><td>'+sowingDate+'</td></tr>' +
+            '<tr><td>Sowing Verified</td><td>'+statusBadge+' '+(isVerified ? 'YES' : 'NO')+'</td></tr>' +
+            '<tr><td>Meter Reading</td><td>'+(r.c[5]?.v||0)+'</td></tr>' +
+            '<tr><td>Plant Per Carret</td><td>'+ppc+'</td></tr>' +
+            '<tr><td>Direct Plants</td><td>'+direct+'</td></tr>' +
+            (remarks ? '<tr><td>Remarks</td><td>'+remarks+'</td></tr>' : '') +
+            '</table>';
+          
+          html += '<tr class="exp-toggle" onclick="toggleRow(\''+rid+'\')" style="'+(isVerified ? '' : 'background:#fff5f5;')+'"><td><span class="exp-arrow">▶</span></td>';
+          html += '<td>'+r._date+'</td><td>'+(r.c[3]?.v||'')+'</td><td>'+(r.c[4]?.v||'')+'</td>';
+          html += '<td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||'')+'</td>';
+          html += '<td>'+(r.c[8]?.v||'')+'</td><td><span style="color:'+statusColor+';font-weight:700;">'+sowingDate+'</span></td>';
+          html += '<td>'+(r.c[10]?.v||0)+'</td>';
+          html += '<td><strong>'+(r.c[13]?.v||0)+'</strong></td>';
+          html += '<td style="color:'+statusColor+';font-weight:700;">'+statusBadge+'</td></tr>';
+          html += '<tr class="exp-row" id="'+rid+'"><td colspan="11" class="exp-inner">'+inner+'</td></tr>';
+        });
+        
+        html += '<tr style="background:var(--gd);color:white;font-weight:800;"><td colspan="9">TOTAL</td><td>'+totalPlants.toLocaleString()+'</td><td></td></tr>';
+        html += '</tbody></table></div></div>';
+        
+        con.innerHTML = html;
+      } catch(e) {
+        con.innerHTML = '<div class="rep-card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Error: '+e.message+'</div>';
+      }
+    }).catch(err => {
+      con.innerHTML = '<div class="rep-card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Data load nahi hua. Internet check karo.</div>';
+    });
+}
 
 </script>
 </body>
