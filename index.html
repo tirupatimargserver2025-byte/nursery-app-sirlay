@@ -300,6 +300,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .exp-inner table{width:100%;font-size:12px;}
 .exp-inner th{background:var(--gp)!important;color:var(--gm)!important;}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -458,6 +459,28 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
         <div class="mcard admin-c" onclick="openMod('adminLabour')">
           <div class="ico">👷</div><div class="ttl">Labour Master</div>
           <div class="dsc">Labour list manage karo</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Marketing Menu -->
+    <div id="marketingMenu" style="display:none;">
+      <div class="msec-title">📝 Booking</div>
+      <div class="mgrid">
+        <div class="mcard entry" onclick="openBookingForm()">
+          <div class="ico">📝</div><div class="ttl">Nayi Booking</div>
+          <div class="dsc">Farmer booking + PDF</div>
+        </div>
+      </div>
+      <div class="msec-title">📊 Reports</div>
+      <div class="mgrid">
+        <div class="mcard report" onclick="openBookingReport()">
+          <div class="ico">📋</div><div class="ttl">Booking Report</div>
+          <div class="dsc">Saari bookings — filter</div>
+        </div>
+        <div class="mcard report" onclick="openVarietyReport()">
+          <div class="ico">📊</div><div class="ttl">Variety Report</div>
+          <div class="dsc">Sowing / Booking / Dispatch</div>
         </div>
       </div>
     </div>
@@ -1033,6 +1056,126 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   </div>
 </div>
 
+<!-- ════ BOOKING FORM ════ -->
+<div class="screen" id="bookingScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--gm);">📝</div>
+      <h1>Nayi Booking</h1></div>
+    <div class="sbar">
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">👨 Farmer Details</div>
+      <div class="g2">
+        <div><label>📅 Booking Date</label><input type="date" id="bkDate"></div>
+        <div><label>👨 Farmer Naam</label><input type="text" id="bkFarmer" placeholder="Kisan ka naam"></div>
+      </div>
+      <div class="g2">
+        <div><label>🏘️ Village</label><input type="text" id="bkVillage" placeholder="Gaon"></div>
+        <div><label>🏛️ Tehsil</label><input type="text" id="bkTehsil" placeholder="Tehsil"></div>
+      </div>
+      <div class="fr">
+        <label>📱 Mobile No.</label>
+        <input type="tel" id="bkMobile" placeholder="10 digit mobile" maxlength="10" style="width:100%;">
+      </div>
+    </div>
+
+    <div id="bkLineCon" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+    <button onclick="addBkLine()" style="width:100%;padding:11px;background:var(--gl);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;margin:10px 0;">➕ Variety Jodo</button>
+
+    <div class="card">
+      <div class="ctitle">💰 Payment</div>
+      <div class="fr">
+        <label>💳 Payment Mode</label>
+        <select id="bkPayMode" onchange="bkTogglePayment()" style="width:100%;">
+          <option value="Cash">Cash</option>
+          <option value="Bank">Bank</option>
+          <option value="Both">Cash + Bank (dono)</option>
+        </select>
+      </div>
+      <div class="g2" id="bkBothBox" style="display:none;">
+        <div><label>💵 Cash Amount</label><input type="number" id="bkCash" placeholder="0" min="0"></div>
+        <div><label>🏦 Bank Amount</label><input type="number" id="bkBank" placeholder="0" min="0"></div>
+      </div>
+      <div class="fr">
+        <label>📅 Payment Date</label>
+        <input type="date" id="bkPayDate" style="width:100%;">
+      </div>
+    </div>
+
+    <div class="card" style="background:var(--gp);">
+      <div style="display:flex;justify-content:space-between;font-weight:700;color:var(--gd);font-size:15px;">
+        <span>Total Booking Amount:</span>
+        <span>₹<span id="bkTotalAmt">0</span></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <button onclick="submitBooking()" style="width:100%;padding:14px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;">💾 Save + PDF Download</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ BOOKING REPORT ════ -->
+<div class="screen" id="bookingReportScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--gm);">📋</div>
+      <h1>Booking Report</h1></div>
+    <div class="sbar">
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">🔍 Filters</div>
+      <div class="g2">
+        <div><label>📅 From Date</label><input type="date" id="brFrom"></div>
+        <div><label>📅 To Date</label><input type="date" id="brTo"></div>
+      </div>
+      <div class="g2">
+        <div><label>🥬 Crop</label>
+          <select id="brCrop" onchange="loadBrVariety()">
+            <option value="">-- Sab Crops --</option>
+          </select></div>
+        <div><label>🌱 Variety</label>
+          <select id="brVariety">
+            <option value="">-- Sab Varieties --</option>
+          </select></div>
+      </div>
+      <div class="g2">
+        <div><label>👨 Farmer</label><input type="text" id="brFarmer" placeholder="Naam..."></div>
+        <div><label>🏘️ Village</label><input type="text" id="brVillage" placeholder="Gaon..."></div>
+      </div>
+      <button onclick="loadBookingReport()" style="width:100%;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">🔍 Report Dekho</button>
+    </div>
+    <div id="bookingReportContent"></div>
+  </div>
+</div>
+
+<!-- ════ VARIETY REPORT ════ -->
+<div class="screen" id="varietyReportScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--gm);">📊</div>
+      <h1>Variety Report</h1></div>
+    <div class="sbar">
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">🔍 Crop Filter</div>
+      <div class="fr">
+        <label>🥬 Crop (khaali = sab)</label>
+        <select id="vrCrop" style="width:100%;">
+          <option value="">-- Sab Crops --</option>
+        </select>
+      </div>
+      <button onclick="loadVarietyReport()" style="width:100%;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">🔍 Report Dekho</button>
+    </div>
+    <div id="varietyReportContent"></div>
+  </div>
+</div>
+
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbxa58KGZxRzYeCELF4Mt3KdJezYICxv7bml9L5dbrUloXnt-MdwP8qN09ez_3UC-KuNlg/exec';
 const SHEET_ID = '1nItPv5Jk4baU4Rg6fgQMYchRK7exQk-KDsRkHLl34Ew';
@@ -1198,6 +1341,10 @@ function loginOk(name, role) {
     document.getElementById('roleIco').textContent='👔';
     document.getElementById('roleTitle').textContent='Manager — '+name;
     document.getElementById('roleDesc').textContent='Saari reports dekho';
+  } else if(role==='Marketing'){
+    document.getElementById('roleIco').textContent='📣';
+    document.getElementById('roleTitle').textContent='Marketing — '+name;
+    document.getElementById('roleDesc').textContent='Booking aur reports';
   } else {
     document.getElementById('roleIco').textContent='👷';
     document.getElementById('roleTitle').textContent='Supervisor — '+name;
@@ -1208,6 +1355,7 @@ function loginOk(name, role) {
   document.getElementById('supMenu').style.display = (role==='Supervisor'?'block':'none');
   document.getElementById('mgrMenu').style.display  = (role==='Manager'?'block':'none');
   document.getElementById('adminMenu').style.display= (role==='Admin'?'block':'none');
+  document.getElementById('marketingMenu').style.display= (role==='Marketing'?'block':'none');
 
   // Fill supervisor dropdowns
   const supNames = Object.keys(SUP_DATA).filter(n=>SUP_DATA[n] && SUP_DATA[n].role==='Supervisor');
@@ -3074,6 +3222,459 @@ function submitDispatch(){
   });
 }
 
+
+// ═══════════════════ BOOKING MODULE ═══════════════════
+const TGH_LOGO = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCACxASwDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LyPWmE8GotxMhwpbjoDgU4MzcsmBWKqxepViRcAfjRlfWowcjhHx9aQn0jY/jR7SIrEuR6ijK+tQ/wDbNv8AvqjPH+qf86OeA7FjI9aMj1qDP/TM/nRyP+WR/Oq9pF7CsTkj1po61GD6xkfjQfZG/Oj2iAkNKtRjI6I3/fVNy2T+7b/vqnzxFYnoyPWoCT/zzb/vqlGTg7SPbOaFUTdkOw/uabIQo3HgDqaQZBJEbf8AfVeK/tg+NtU8GfDAyaY4im1CU2u7+JcrkkflTc7asyrT5I3R6Zf+MvC9jN9nu9cs7dxxh5MVD/wnXg1eD4psf/AgV+Xc93qFy4uLvUL2SVzuJadieaVJb1y22W8YYJZhIeKydW+yOJ4iS7H6h/8ACc+DuP8AiqLH2zOKcPHXg/8A6GfTz/23Wvy3Se62KReXeNvH740pmu1wTf3SZ4OZTR7ZoPrM12P1HPjnwd38T2A/7brS/wDCeeDv+hn078Zlr8t/tF191L67c+0jUgubvcVN3elv+uxFHtX2D6xU8vxP1J/4TvweenifTf8Av+tKPHXg8/8AMzab/wB/1r8thcXh6ahclCM/61s0C6uxIAL67OR/z2aj2rD6xU8vxP1IPjnwfnnxRp3089aX/hOPCB5HifTsf9d1r8t/tV2Wwb66BH/TY00XV4GYfbbvk95jR7YPrNTy/E/UoeN/CH/Q0ad/3/Wg+NvCB/5mfTj/ANvC1+XD3F4JFSO/usEf89m60Pc3itu+33R7f600e2Y/rM/I/UceNvCOcDxPp3/gQtH/AAmvhHJ/4qfTf+/6V+Wy3V4BtF7dk+vnmlFzertX7fdZzz+9NHtx/Wp+R+o58aeEf+hn07/v+lKPGnhHr/wk+nfjcLX5brd3e7B1G6Hr++NI11dFyo1K8z6eceaSrC+sz62/E/UqPxj4U3gDxRp7ljwPtCmtu1uYLqMTWsyzI3RlPBr8nFur9GRmvr6NgeG8819C/sXfEDWbX4hweE729u723v8AIXzpi+zALZGenSqVS7sOOJldH3Ljn1NHfr3pgJUABXb3pd7f88m+vFaNrY9Afx60Ae9NwacKL6iK24ZPz7ccn6Vx3in4peBPDrtFqXibSxMv3ohdoWH4ZrB/ai8Ral4W+CXiDWNHkaC8WJI0mThk3uFyPzr5a/Zz/Zvtvix4Ql8ZeIfEt5Zxz3MkcaWyI7uynDMxbpzXnYSHtI8xUnY+qYfj38K2hV38T2aE/wAPmDj9aG+PPwrwP+KntP8Avsf415T/AMMSeDP+hx8Qf9+of/iaT/hiTwb/ANDj4g/79Q/4V3exj2BSPVv+F8fCr/oZ7T/vsf407/he/wAKv+hptD/wMH+teT/8MSeDv+hy1/8A79Q/4Uf8MS+DP+hy1/8A79Q/4U/ZR7D5j1r/AIXv8Ke/iiz/AO+x/jQfjv8ACn/oaLP/AL7H+NeSf8MS+DP+hx1//v1D/hSf8MS+Dv8Aocte/wC/MP8AhT9mg5vI9b/4Xt8Ke3iez/76H+NB+OvwqP8AzM9p+Dj/ABryX/hiXwb/ANDlr/8A35h/wo/4Yl8Hf9Dlr/8A35h/wo9mg5l2PWh8dfhUf+ZptP8Avsf405fjr8Kh/wAzVa/99j/GvIv+GJfB/wD0Oevf9+If8KP+GJfB/wD0OWvf9+If8KORIOZHrp+O3wr/AOhptf8Av4P8acPjr8K/+hqtP++x/jXkB/Yk8H9vGevf9+If8KP+GJfB/wD0Oevf9+If8KORBzI9e/4Xp8Kuf+Kotf8Avsf414N+2d8QvBni3wXpdr4e1a3vp473cwjcEhdh7A9Oa2x+xJ4Q/wChy17/AL8Q/wCFeW/tF/s+aD8JvDNnrWneIL/UHuLnyClzGi4+Unjb16UpQ0OXFNOGp4bEskipHGpd5CFUCvtL4d+B/Bnh7wF4f8DeKNPgbxR4gsbqXcw+ZcKSMntwRj6V82fs9+ELnxn8UtLs40cWls6zXMgXO1B39Oor6Q8bX3wum+M1l4t1D4hyxy6YvkiyhMbRodoXAPUZxzTw6UVzHkzcZS5X/TPkHxVotz4b8Vaj4fugRPYzFG/Cum+Bng2Lx38TNN0a73NZtIHuNv8Ad7816H+2N4dsI9f07x5obvcafrsW95go27iccEewrD/ZK8R2fh34t2y3LRRRXqCDzHbAGTnOfwrPlSqa7DnN+zbPR/GPxp8JfDfxRd+DvCPw103UfsZWOSeWUZY9+NpP615h8dPEnw38U6Pp2u+G9Pn0rX3BW7tFhfy8luzkAHH9a3PFfhjxL4A+PF3r0vg2bxFpl1IZogkDyxyBwT1XuCa7n496dpbfsyWPiW78F2Xh7Xb27h326o6tGNzDGG56CuiXvJpmcKa5ouK0Vtb73PKPDnwC8fatZ6bepaWsNnf2S3Ucst1GoKseByeuOcVjeC/hP4y8WazqWmadZwqNOdkmuJJlWJdrFT85OOo9a9V/aB1rUNP/AGa/hjb2d1LbO9rA8iocZAQ49+tSw/2vL+xs8HhIXE0k17KdRES5kbJUngc4zio9nC4+Z7t76HkvxF+E3jTwHYJqWtWsMlk7BPOgnSQBj2O0nFU9Z+HviXSfAFh47vbVF0i+ZVicSLkls44znnBr2j4W2mr2H7OHjJ/HC3tnYuYxZ/aYyrbvm6bgP4sVX8a2l7rv7FvhK20q0nupLW7j8xY0LEACTJ4/zzUypQ6CUnzJN9fwPGtU8BeJdO8C2fjWW2QaVeyeXbt5q5zjPTOa66P9nz4kldMlWytEh1GLzUZ7uJQBtDc5Poa7H4sWVxYfsneFba4iltpBelpEddrf6v3rqv2tbfxPc/D74eW3hyO7kSWyHmiAEk/uo8A4/GhU4ocXJrR/1ofO/wASPAHin4fX9va+IreJDdRmWB4ZVkRlBweVJFctBHNLKsNtC008rbUVRklvpX0Z8drWTTf2YvBllrCtb67HIgMUi4cpuck4PPpXlv7Oj2y/Gvwr9pC7BqEZy3TOTWcoJTsVCblByfQ6G3/Zx+Jk2lxXRtbKJ5YxKIZLuJZMEZAILZB9qh+A/wAMtW8Q/FaDSdWsUihsJN90ksqqSFwTgdT+Fbnx2s/iTcftE3r6VBqs5LweS8ETNGsfbBAxjFei/FS6s7b9qjwgug3Ef9peQU1IKcYc7Rg/8B7Vo4R3Qat2bTTRxX7ZDXun6xBo0Ph3T9O06FyLaSGWItIgGASF+YfQ1wn7Meq6XoXxv8Palqd6lrAkjh5JOFGY2HJPHcVW/aNmluPjd4oWdjsj1GWNPZQeKyvhF4KtviH8RNN8I3V+9pHdMR5iqCVAUk4B6nis+bmnoVh6ahFJev4n3/D8avhnlgPFNl+Ljr+dX9D+KfgLV7ryLbxRppkLYVWnVQT+JrwUfsR+Gcf8jzrH/gHF/jWB8Q/2O9K8PeCtY1vTPF+o3l3Y2jzxW8lnGBKyjO0kHjNbON3c9u59mQzwTQiaGWOWM/ddHBU/iKkPXvXyr+wD4s1PX/DGseFdWmM0WmMHiD/eUMRx+GK+qd+7lQCBxzS2YzxP9tD/AJN08TDn/l3/APR8dV/2D8f8M7aZ8qj/AE266d/3nerH7aH/ACbn4lPvbj/yOlVv2Duf2dtN/wCv66/9GVwZZ/A+ZU9z3qk59P1paK9IgTn0/WlGe4xRRQAmeM0oORmkPOR7UnC85pXAdnnFGecU1SpXg8Un3eeBTFcXIY7TS5wcVRvdRsrJDNdXMUagH7zAV5l40+PHgbw+siLqC3Vypx5SZz+fSplOMd2c1bGUaOk5anre4UoORXyvqH7V1qZPI03w7NLK7bVYzDj3xivovwPqtzrfhm01S7tWtZbhNxjY5IpRqRlsww+KjX2N2vmr9vnTZbr4baddQwPKYL/e5UfdXYeTX0oOgHpWT4m0HTvEGlzabqlulxbTKVZSOxqnsXXg5w03PzI+Hfj7XPBb3suhMgmvIRC7YJKjOa5Z4mkkeS4bzJpWLs55yc5619u6/wDskeGL/VJbix1aaxgc5EQBJH48VRP7HXh89PEdwB/uE/1rDklsjhjQlFuSjZs+W9b8deItZ8F6V4TvpI307TlAhUA54JIz271zUbPCUlgd4pkOVcHGK+yf+GOtAx/yMlz/AN8H/Gl/4Y50D/oYrj/vg/41Lpyeolh5R2j/AF954ToP7QPxN0XT4rBNRguooxtVrhWdgMY65rkPH3xA8Y+OnVfEOsTzwRNvSPc2zPXpX1L/AMMc6B/0MlwP+AH/ABpP+GOtA6f8JJcf9+z/AI1XLMI4eUXdR/r7z5X8VeNNb8TaJoujX7ILTSbZYYBt7LnB+vNT+AviF4r8D+aui6g4gl+9A5JjJ+lfUH/DHOg/9DJcf98H/Gl/4Y50DH/IyXOf9w/40ckxfVny8vLp/XmfNPxE+Kfjfx9Yx6drepKlhEc/Zotyo5zkEgnnFTeDvi34x8J6AfD+nTQSWBHCSqW2/TBr6Q/4Y60H/oZLj/v2f8aX/hjnQOv/AAklz/37P+NHLMHhbx5XDT+vM+YPF3xH8W+L9Bg0LWZ4prSCUywoiEEEjHr0r3b4/fGB9M0bwPB4J1nTb6aysgt2kZLmJxEigNjHv+VdO/7HGgkrt8S3K4PPyH/GpJf2PNBfAHiS4VfaM/40+WYfVp25VHTqv6Z8q/ETx14p8fanb3fiK7WX7MnlxKgICgnPcnvXP2ss9ncw3NpM0U8Lh0cHGD2r7IP7HPh/gDxFcj1JU/400/sdaB28R3H/AHwf8al05Nl+xnayjp8v8zwrTf2g/iTYadHZw3Fm7RjAnljZpTxgfNntzj61wdj4n1618Yf8Ja959o1fzPNM0uWJP1NfWI/Y50DGT4juM/7h/wAaB+x34fHH/CR3H/fB/wAafJMhYZxvaG/9dz5G8TazqHiPX9Q1/U9n2m7keeXaMDcxycV6d+x1YXd/8dtFv7e3d4bVnaZ1HCjy2HP4mvbT+x3oG9f+KhuCo6jaef1r2f4TfCjwt8OLNo9Ft2Nw4xLO7ZLf4U4U2ndmlOhO6srHfRnK1zvxOLL4B1wqQCLGTB/CuiUY/E1zvxO/5J/rv/XjJ/KtluemfKP/AAToGfFHjVict5af+jDX2dFlowQAvtXxf/wTm/5GvxmP+mKf+jDX2knK/jUyWoHiH7Z//JuXiX/t3/8ASiOq37Bv/Juum/8AX9df+jKtftnjP7OXib2+z/8ApQlVf2Df+TddN/6/rr/0ZXDln8BFz3PeqKKK9EgKD0ooPSgBABivOfjv48j8E+ELiaF3Gp3CmGwjRdzPOQdox6cda9EY4UmvmiSK5+JX7SbWdzJssPDTGUKBw7xycA57nNJ3toefj6k4w5Ke7O7/AGavH934y8KzRa3IDrFrMyzoSNygYA/XNSfHn4v6X8P9M+zxD7Vq8y/6PbjOD6liPu8HNefeEZbbwN8WfiLdgMsMemC8JPADPMScV4LHD4u+LPjye6gSe7nuZdkLc7I1HHXsAK56lWSjZbs8qeNmqSpdev6Ij8bePfF/jbUy13fzIjthIIcnGccYAya7j4Zfs9634j8vVPErtp2lbPMEjt+8Y+m04wPc1738HPgX4d8GwRahq8MOpatjJkkXKxn/AGaxf2i/iUViHgPwmftWt6g4t2SPnykbgnjvnFRHD6XqMyWFcKftKul+nX5nnPwh+Hmjar8ZpU0Od77SNHcfaXmi2AspIKjPXmvsONQiKi8KowK4P4HeB4/Avgi3spgsmoXH767lPUu3JH0Fd8oyM+tb04KmtEe3l2EjQp36sF4OKU/U0MOMChT2rU7xu3/aNKgytBpB8oz1oEmOwKMCkD+oIpdwoGG0elG0Uhf2NAf2IoAXaKMCgsPc0m//AGW/KgBcClpofnoRS7hQAtHvik3CjcKAA/TNJj/ZoLj60b/YilYBcDuKXAxxSbhSg5pgNO7OO3qKAOepNOpCuc8mgBHyBwa5z4lk/wDCv9d/68ZP5V0tc38S+PAWvf8AXhL/ACprcR8nf8E5v+Ru8Zj/AKYJ/wCjK+0o/u/jXxZ/wTo/5HLxoP8Apgn/AKMr7RiPy1lMpHiv7Zv/ACbn4n+lv/6PSqn7Bv8Aybrpv/X9df8Aoyrf7Zv/ACbn4n+lv/6PSqn7Bv8Aybvpv/X9df8AodcGVf7ui57nvROBmkz8ucUj9qQHAr0zMduFJupMe1OAwKSYmhkoymM15D8FtJh0/wAZePNdukWNm1aWMSHj5ODXrV3cR2sDSyMERQSST0r548b+LNR+IXiS6+HfgGIxQzXBXVb9Puoh4du3I470XOLE1YwkrayOe8SaXqnxB8dat4d8MyxtDesU1G/RT5aRbyQhI9CP1r2/wn4Z8G/CbwogUw2scY/eXUoyzMevOM4zW78PvCOmeC/Dlvo+mJkIo82ZuWlfHLE1JrPiHwvBO+n6rq2kxyry8NzPGCB7hjxUwpRTulqZYfL1TvUfxM8U8b/FnxZ4ou5vDnw38N3k00jGM6g6q0QX1GCCK6X4J/B3/hGL0+KfFU6an4nuI8PL1SLPJAz3z3r0K18R+DLZS0Gu6BEMfwXcI4/A0qeN/B7yeWnibR93vexj/wBmp2TdzSngrz56ruzoBkdgeKco45rH0zxT4c1K7Npp+uabdTgZKQ3SOf0NWLrXtEtbtbS51ewhuG+7FJcorH8Cc07o7zQNKKRHV1DIQynoQcg0tJIAprAnpTqKoBm1qNrU+igBgVqCpp9FADNrUbW/yafRQAgHy4NGB6ClooAMD0FGB6CiigBCOOAKbtb/ACafRQAza1OQEDmlPArG8QeKvDvh+SOPWta0+weTJRbi5SMkD/eIoA2aQ1W0vULPVLGK+0+5iurWYbo5onDo49QQSCKff3lrYWz3N5cRW8KDLSSMFUfiaTAmrn/iV/yIWuf9eMv8quaL4k0DWmZNJ1rTr51+8tvdJIR+Ck1T+JHPgTXP+vGX+VEVZgfJP/BOn/kdvGn/AF7r/wCja+1I/u18V/8ABOrjxz4zH/Tuv/o2vtOLhMVFQaPFP2zf+Tc/E/0t/wD0elVP2DP+Td9O/wCv+6/9Dq3+2b/ybn4n+lv/AOj0qp+wd/ybtpv/AF/XX/oyuDK/93Rc9z3o9KTFBHzZpa9FGYwcE0yeVIYzI7YCjPNPchVya+ef2jfivcaWn/CLeF/9L1W5+RzHljGDgdvrSlNJXOTFYlUIeZT+NPxD1jxb4kT4a+BA011O+y8u4m/1K5+YAjg/Kc/hXsHwl8AaZ4B8Mw6dagXF4UH2q7YYeZ+5rmf2ePhTB4B0MXuoKtxr12N9zcNyy5z8oP0xXrKnPanG61Zjg8O7+1qbsa2QpOMkjpX52/tEfCv4ga18avEV5pvhi5nglkSRDCdyhSg7n6Gv0Uzngik6EnAyfSnex6J+RHi/wj4j8JXENv4i0qfT5Z1LxrKMEipPCPgnxT4tWdvDujXOoiAgSmFc7cjPNfTP/BSN2/4SDwmp6fZJT+O+us/4Jt4PgbxThRkalHz3x5YpgeZ/sqfCDxvpfxh0zVNe8OXVnY2oErySgqp546dfpXnfxw8OeNLr4xasH0bV7ieW6xasttI25cDaFIHav1A7Zr44+PP7S3jfwT8ZdY8L6Xp2kPZ2EsUUbTws0mCisSCGHXdSYH0t8EbPWdP+FPh2z8QK66nHZgXCv94HJwD74xXZVltq0dr4YOt6iViiitPtM+OiqE3Hr6CvjP4kftk69/bk0HgnStPGnISqy3sRdn9xgjihAfcFM3Ey7dpwBnNfAej/ALX3xQudWs4JLTQDG8oRh9mYZB467q9+/aq+LHif4d+BdHvdFW1N3qCqXl2EqpwCcc9DzQB9A0V4Z+x18TNc+Jvg3VtQ15Y/tFlerAGjUgEFN3c17nTARTkZ6UtfPX7ZXxa8S/DDTtDHh2GESahJKGllXcBsC8df9quj/ZP+IeufEb4dDWNdihW4ilaLfEhVWwT6mgD2KivmD9pH9p2TwHr8/hnwrZwXepwArNLON0cTZIxgHJPtXiH/AA2F8WiSdnh/B7fYj/8AFUAfodRX53n9r/4sMcOug7e4WzIP57q9c/Z5/aln8Ta/b+G/GFtFDPcnZBcQrtBbsDzQB9aE4GaAcivKf2nfHur/AA8+Gk+u6ILU3ofZH9oTeo6ds18gv+158XGEY3aANhzkWPX6/NQB+ilJnnGDX53N+1/8XSxIbQB/24f/AGVPsv2vfiol3HJcpoc0QYF0Wz27h+dAH6HnpXwn/wAFG7WKH4geGp0QB59PlLn1xJgV9R/s9/Ey2+KXgZNdWNYbqOZobiEcbSMc49Oa+Yf+Ckhz458Kc9NNmGP+2tAH0f8AsiqF/Z28HhVK5s2PTHPmvzWJ+2ponibXPhFNB4ahuriRHDXENspZ5EyvGByfoK+UPhL+0V8RfDll4d8GafJph0q1njgjV7XMhRnOQWzz9419t/G/xfqPhT4H6v4sso1a+t7OORAB8oZmUfkM0mB8j/sQeDPG1t8YoNSm0jVdM0u3hk+1zT2zRKx2nauWHJzX298Rf+RC1z/rwl/9Br58/ZE+OPjn4meK9R0nxEmmm2tollD29v5ZXOQB1PpX0J8Rh/xQetj/AKcZf/QacdwPkf8A4J1/8j340/69l/8ARtfasf3fxr4r/wCCdn/I++Nh/wBO6/8Ao019pL0qJq7GjxX9s3/k3PxP9Lf/ANHpVT9gz/k3bTv+v66/9GVb/bN/5Nz8T/S3/wDR6VU/YN/5N207/r+uv/RleflX+7oqpue9UnBzg0p4FY/ijWrPQNHn1K+lEUMKlmJ9K9JuyuYzmoR5pbHDfH/4k2vgDwo90JYzeygrbRk/eb6enWvNv2X/AIbXmpahL8TPGI86/u2LWkR+6o5G4g+xGK47wjpepfHj4wya1q8bv4Z02XAjLYWRVJAA+vevsHT7SGzt47a3jWOGJAiIowAAMCsornfM9jyKFN4qq6s9v60/zLCAUoFA+mKWtj2kIAAelA60tB6Gk1cD4h/4KSHPiTwn/wBeUv8A6HXWf8E2WP8Awg/iteMf2lGf/IQrkv8AgpL/AMjL4TH/AE5S/wDoddV/wTZz/wAIX4rOeP7Ri/8ARdMD60PSvzN/a+J/4aa8UZ/5+bf/ANEx1+mTdDX5mftf/wDJzXij/r4t/wD0THSQH3L8dZHh/Z610xsyH+xmHB/6Ymvh39jvwb4f8c/GGLSfEtq13ZQ2MtysQbAZ0K43eo5PFfcHx6H/ABjzrv8A2B2P/kE18gf8E/v+S9H/ALA9x/NKEB9s2fwm+G1rcQ3Ft4L0SOWE5RhaJkfjivA/+CiqKng/QwoCjzioA6AA19ZL0r5O/wCCjH/In6Hx/wAvDfzFFgJ/+CbpP/CvPEw7DVk/9FCvquvlP/gm5/yT7xR/2FU/9FCvqymB8df8FKWzp/g4D/ntc/8AoKV2P/BPsBvg9NyTm7cEZ7bjXG/8FKP+PDwf/wBd7n/0GOuy/wCCfH/JHpv+vx//AEI0AfKXjbTbfXP2q9Q0S/Dva3ni37HKA/zGI3AQgH1296/QHQfg18MtH00WFr4M0mSIE83FusrfmwJr4M1g/wDGZcn/AGPK/wDpWK/TAZJx7k/rQBxd98JfhvdWMlo3gzRY0cYLRWcaN+BA4r88/FOkWPhj9qKbRNER7aysvEsdvApbJVPNUYz+Jr9Qz09a/Mr4rf8AJ32qn/qbE/8ARyUAfpF4i0nSNW0i4statLa5spEIkWdQygevPT618z+NPi7+zn4W1ZtJtvB+kanLasVkeHTUKq3QjOzmvW/2p9WOj/AXxXcRzNDO9kY4WXruZlH9TXwn+zZ8G5vjF4j1GyfWTpVrp8KyzziHzWYsSAACRzxQB7o3x9/Z8wzD4b2DMe39mpz/AOOV5V+0L8SvhV410C3i8KeDF0rU45B++hURKE54KhRntXsa/sQ6ETz8QNSIHB/4lydf++68n/aQ/ZwHwq8Nwa7YeIptWtnlETiW2WIqSCezHPSlcDvf+Cbd/eS6r4q015SbOG3imSPHR2fBOfoorL/4KP8A/I++Fz/1Dpf/AEYKt/8ABNb/AJGfxh/15W//AKG1Vf8AgpB/yPPhY/8AThN/6MFMD2/9k3wT4Ru/gh4O1ybw/p0mpCFpTctboZC4lcAlsZNb/wC1/wAfs4+Lv+vaP/0alH7IH/JufhD/AK9ZP/Rr0v7X3/Jufi//AK9Y/wD0alAHzT/wTnJ/4WD4gHY2cX/oTV9ofEX/AJEXW/8Arxl/9BNfFn/BOnP/AAsTXv8ArzjP/jzV9qfEMZ8Da2P+nGX/ANBprcD5F/4J3f8AJQPGo/6dl/8AR1fai9/rXxV/wTv/AOSh+Nv+vUf+jq+1B1P1rOW40eK/tm/8m5+J/pb/APo9KqfsG/8AJuunf9f11/6Mq1+2b/ybn4nHtb/+j46rfsG/8m7ab/1/XX/oyvPyr/d0XPc92c7RuJr5b/at8X3+v+INP+Gnh2ZjcXjr9oMfPDErtPp619DfEDVl0PwrqGpGTZ5Fu8gPuFJFfN37J/h5/GXjbWfiTrDee6zvHAG5IY4bI9Mf1rtqO/uI8THVJVKiow3PfPhH4Ms/A/gyy0i3hVHSJWnI/jlIG4/nXZjg0hHzAYps9xFBGXmZUUdyeK0SsrHpUaMaMFCJNRUcL7+cVJVGoUUUUAfEH/BSQH/hJfCh7CzlGf8AtpXV/wDBNoj/AIQrxWmDuOoxnPb/AFdS/txfDbxn471fw7N4Y0mTUUtraRZBGCSCWzzXS/sO+A/FHgPwnr9p4l05rGS5vldUdSGOEAyPagD6JbO01+Zn7X+4ftMeJyVwftFucZ/6Yx1+mZyV4r4O/aK+CXxK8TfHbXNa0zQ5ruwu5YJEuEBK42KpA+m2gD6j+PLp/wAM9+IC3AOjOB9fKr49/wCCf+P+F8nJIP8AZFxjH1SvtD4weHdT1v4OanoFgglvpNPMSKAfmbyyvA+tfNv7Gvwc8e+Efij/AMJF4i0eXTbUadLGPOUgkuV4+vHSgD7TFfJf/BRkSN4V0Iqp2LMxY446jFfWg6V518dvhzafE3wTc6JI6xXQw9vIT9w0AeAfsAeMPCujeCdd0nVNVtNPvJL0TYnlCb12EZGfTFfTK/ETwKp2t4v0bKjnN2v+NfBWqfst/Fixu3Sx09LpAcCSJyMj8qz2/Zr+Mu7nw7OffzKAPRv2/fGvhrxLP4e03Q9Vg1GWyeaSVoHDIA4XHI78V6/+wDbPF8EUuGQqs15NtJHXDmvnfw1+yT8U9WnH29LDS48/M9zKxOPYAc193fDbwhpvgTwXpvhfS1/cWce3cRgux5Zj9TSYH5yeNtQg0f8Aaw1PVbpgsFn4waeVj0CrdbifyFfodo/xQ8AanZLeWnirSjGx4zcKD+Vfm58adPu9W/aE8VaXYRGa7u/EVxbwRjqztMVUfmRXUL+zV8aImMUfh2ZVzglZwB/OmB+gF/8AEfwNbWE11J4q0oRxqSSLha/OnxDqVv4o/akfVNLb7RBf+KIpIWHO8GdeeK3o/wBmP4zzHypNI2qTzvuPlr3P9mj9mS68J69H4p8bvA91aOJLW3j5CMOdx/EUAekftn6fLe/AXXZI8/6NH5rY9Ay186fsA+MvD3hnxJ4hs9d1OHTzfQReS8zBUYqx4z6819t+KNH07xV4Z1DR7vE1rfQtC49jXw78SP2SfGmn63NJ4S8vULJjujBbay5PT8KQH2mvxD8D7RjxTpWCOP8ASBXzl+3Z8QvCWqfDm10DStatdQvXu1lKwSBtqhSMmvEj+zJ8aPNKf2UxAH3vtPB/WtHw/wDsm/FHUr1F1SK3sISwDu8m5setFgO9/wCCbGn3Y1XxbqpjYWj28MCuRwXDFiPyNUf+Cko/4rPwifXT5/8A0aK+rPgp8OtL+GPga38N6afMIczXEx6ySNjJz6cV4f8AtofCDxt8RvE+gX3hm1W7itbaaJwTjYSwYZPvTA9O/ZBUr+zp4Qyetq5/8ivS/te/8m5+L/8Ar1T/ANGpWz+z14W1PwZ8HPDnhvWQq39nbkTqpyEZnZtuR1xup37QXhnUPGPwe8ReG9KXfe3tuqwr6sHVv6UAfJX/AATpfHxF11MZ3WcfPphmr7V+IP8AyI+tf9eMv/oJr50/Y2+C3jH4d+LNZ1XxPBHbRyQJFEoOd/JOQQe1fRnxA/5EjW/+vGX/ANBNCA+Qf+CeHHxG8aj/AKdR/wCjq+1QDk/Wvir/AIJ4n/i5PjUf9Og/9HV9rp3+tRIaPEv2zf8Ak3XxP9Lf/wBHx1W/YO/5N203/r+uv/RlWf2zf+TdPE30t/8A0elVv2D+f2dtN/6/rv8A9GV5+Vr/AGdFz3M79trV57HwNb2Ucs8YuLhQ3lybQV5BB+tbv7Mur+GdK+FOmW8dxb20rRh5wSAS56k/lW58ffhw3xA8OC2t5xHcwsGTIyOM14T4c/Zj8ZXNwY9V186faKvyhMkn8mrplCaqXSPmqqr08W5Rj+Hke0/EX46eFvDsRtdMuF1bVGO2O0t2+bPbrxVbwFonjDxpqEfiLxmbzSbVTugsEcxlhjjdg4x3962Phb8FvCHgZhdwWzX2pFcPc3LmT67VbIFelZCnjBz0XGK25ZX1PToUqs7TrPXsPQKBhR04p1AorQ7gooooAKQDFLRQAUUUUAIwyKXHGKKKACkCgHOBS0UAFFFFABTX6U6gjIxQB+ZmuAj9sqTrz44Q8f8AX2DX6YoOv1P864T/AIU58NT4uPix/CdnJrZu/tv2t2csJgchsZx156V3h4HA5oARByfqadjjFIoOOcZpaAEVVAwFAHoBS0UUAGB6UUUUAAAHSjAoooAKMA9qKKADA9BWH4+/5ErWv+vGX/0E1uViePOfBmtD1sZf/QTQgPj/AP4J5f8AJTPGw/6dP/a9fawJBP1r4o/4J6nb8T/Gue1mf/R4r7WU5z9azmNHif7Z4P8Awzt4l/eYGLf5cdf36VX/AGDf+Td9O6f8f93/AOjK2f2sdFvtd+BHiWysIXnmEUciRouWfbKpIA+gr5r/AGYv2idG+F3hCTwh4p0nUniiuZJY3gQFlLHJBBIrky6PLRsVNn3mQCOMGgqSR0xXzP8A8Nl/DIcLo/iPA9II/wD4ukP7Z3w27aN4jP8A2xj/APi672Zn03gelJwK+Yz+2h8OO2h+I/8Av3H/APF00/tofDv/AKAHiP8A74j/APiqTGfT9FfL7ftp/D3t4e8Rn/gEX/xVN/4bT+Hw/wCZd8R/98xf/FUwPqKivls/tqeAu3hrxEfwi/8Aiqb/AMNq+BP+hY8RfnF/8VQB9TUV8rj9tbwMCf8AilfEH4vH/jSH9tjwTjjwnrx/7aR/40AfVNFfKh/bY8F/9Cjrv/f2P/Gk/wCG2fBg6eENc/7/AEdAH1ZRXyif22/B/bwbrZ/7bx01v23PCWOPBetf+BEYoA+sKK+TT+254U7eCda/8Co6Q/tu+FsceB9YP/b3H/hRZgfWdFfJR/be8M448C6uf+3yP/CkP7b3hv8A6ETVsf8AX7H/AIUAfW1FfI5/be8O9vAeq/8AgfH/APE0h/bf0DnHgLU/xv0/+Jo1A+uaK+RT+2/oX/Qg6l/4Hp/8TSH9t/RM8eAdQ/8ABgn/AMTQB9d0V8hf8NwaP/0IF9/4MU/+IpD+3BpHb4f33/gxT/4igD6+or4/P7cGmdvh/efjqS//ABFNP7cFh2+H9z+Oor/8RTsB9hUV8d/8Nv2ef+RAn/8ABiP/AIimH9t+Dt8P5P8AwYj/AOIoA+x6K+Nj+3BH2+H7/wDgx/8AsKT/AIbgTH/JPmz/ANhL/wCwpAfZVFfGZ/bgPb4ff+VL/wCwpv8Aw3A//RPl/wDBl/8AYUAfZ1YvjkFvB+sAHBNjLz6fKa+Sm/bglx8vw+TPvqR/+IrG8Z/tj6r4h8M6jodj4HhtJL+2e2E5vmcx71K5ChBk80IC3/wT5dU+KnjSJvmLWjYPriavtS0WRY2DkMdxP4V8v/sD/DrW/D2jar4u1/TZbOXUwEs/OOHki4JYr1AJHevqRRkZcbT6Cs567DRBMuM+YvmRMNuzFeWeMf2ffhf4m1J9R1HSPJnlbLNCwXP6V6zsRnyQTj16UL85ywx6VgqbjsVc8H/4ZY+D+Tusbz/wIx/Sj/hln4PY/wCPG8/8CP8A61e8bHPIZMe60bJP+eif981PLUFp1PCR+y18Hf8AoHXZ/wC3n/61A/Zd+Dg4/s66/wDAj/61e6hX/wCei/8AfNNKsf8Alov/AHxS5al9x6Hh4/Ze+DYIP9l3R/7ef/rUv/DMXwZGP+JTc/8AgSf8K9v2H++v/fFOIfH+sH/fNFqnVi0PDx+zJ8Gsf8ga44/6eT/hSj9mb4Nf9ASY/wDb0f8ACvbiJP8AnqPwSjbJn/Wj/v3VJS7hoeJj9mj4Njrok3/gQf8ACnr+zT8GlH/ICmP1uD/hXtO2X/nqv/fFJhz/AMtvyWpcZdWB41/wzZ8GxydAf8ZzTl/Zt+DX/Qvsf+25r2MKw/5bfoKUBu02fwpJyvowPHx+zd8HB08OE/8AbZqVf2cvg4D/AMi4T9Zmr2Ha2P8AWj8qNj9PNJ/4DWnvgeQf8M6fBxef+EZH/f1qcP2ePg4B/wAiwp/7avXrux/+en/jtGx/+ex/75FHLMLo8iH7PXwcH/MrofrI1O/4Z9+DoAH/AAi0f/fx69b2sP8Alqf++aTa3/PVv++afLPuFzydf2f/AIPAf8ipEf8Ato9KPgD8Hx08JRf99PXrIjcjPmn/AL5FNKMDzK/4AUcs+47nlI+AfwfB/wCRPiP/AAKSpF+AvwgB48HW+fdnr1EI+eJpPyFO2OD/AK4/lRyz7iujy8fAf4RD/mT7XHpuf/Gnr8C/hDgf8UZY/wDj/wDjXppR8/65vyFJsYH/AI+G/IUuSp3Hc82HwM+EQPHguw/N/wDGnf8ACj/hH28E6f8AgH/xr0jYcf65vyFHlkjPnv8ApWkYzJbfQ83/AOFIfCRT/wAiTYn8H/xpR8E/hKD/AMiRYf8AfLf416Ptxx5z/lSY/wCmr/lV+8LU87HwV+E4PHgiw/75b/Gn/wDCmPhSP+ZH07/vhv8AGvQsf9NZPypMekkh/ClaQann3/Cm/hSP+ZI07/vhv8aePg98KwDt8D6Zz6xn/Gu+2n+/L+QoAx/y0lotLuPU4X/hUPwvAB/4QnTPp5R/xqew+F3w4s7uK6s/BenRTwuHjfyT8rDoeTXaKAM/vHP1pRt3feY+1TaXcBrA5Vi4jRewqTnJ25x9KQhM7WCnngUEZPLY+hrWMbCJKZ2H1oopvYEKv3RSUUVPQGB7U6iiiO42LSDrRRR0ENelX734UUUDHVGO/wBaKKmWw4jT1pV60UVhD4hseKB1oorqiSLSiiihkoKKKKQwpD1oopgFFFFJbjQUh6UUVYCn7tN9KKKAHiiiikJhRRRSYBQelFFIBlKKKKpDA/eooopgj//Z";
+let bkLineCnt = 0;
+
+function openBookingForm(){
+  document.getElementById('bkDate').valueAsDate = new Date();
+  document.getElementById('bkPayDate').valueAsDate = new Date();
+  document.getElementById('bkFarmer').value = '';
+  document.getElementById('bkVillage').value = '';
+  document.getElementById('bkTehsil').value = '';
+  document.getElementById('bkMobile').value = '';
+  document.getElementById('bkPayMode').value = 'Cash';
+  document.getElementById('bkCash').value = '';
+  document.getElementById('bkBank').value = '';
+  document.getElementById('bkBothBox').style.display = 'none';
+  document.getElementById('bkTotalAmt').textContent = '0';
+
+  document.getElementById('bkLineCon').innerHTML = '';
+  bkLineCnt = 0;
+  addBkLine();
+  show('bookingScreen');
+}
+
+function bkCropOptions(){
+  return '<option value="">-- Crop --</option>' +
+    Object.keys(VDATA).map(c => '<option value="'+c+'">'+c+'</option>').join('');
+}
+
+function bkTogglePayment(){
+  const mode = document.getElementById('bkPayMode').value;
+  document.getElementById('bkBothBox').style.display = (mode === 'Both' ? 'grid' : 'none');
+}
+
+function addBkLine(){
+  const id = ++bkLineCnt;
+  const con = document.getElementById('bkLineCon');
+  const line = document.createElement('div');
+  line.className = 'card';
+  line.id = 'bkl-' + id;
+  line.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+      '<span style="font-size:13px;font-weight:700;color:var(--gd);">🌱 Variety</span>' +
+      '<button onclick="removeBkLine('+id+')" style="background:var(--rd);color:white;border:none;padding:4px 9px;border-radius:4px;cursor:pointer;font-weight:700;font-size:12px;">❌</button>' +
+    '</div>' +
+    '<div class="g2">' +
+      '<div><label>🥬 Crop</label><select id="bk-crop-'+id+'" onchange="bkLoadVar('+id+')">'+bkCropOptions()+'</select></div>' +
+      '<div><label>🌱 Variety</label><select id="bk-var-'+id+'"><option value="">-- Variety --</option></select></div>' +
+    '</div>' +
+    '<div class="g2">' +
+      '<div><label>🌿 Plant</label><input type="number" id="bk-plant-'+id+'" placeholder="0" min="0" oninput="bkCalcTotal()"></div>' +
+      '<div><label>💵 Rate</label><input type="number" id="bk-rate-'+id+'" placeholder="0" min="0" step="0.01"></div>' +
+    '</div>' +
+    '<div class="g2">' +
+      '<div><label>💰 Booking Amount</label><input type="number" id="bk-amt-'+id+'" placeholder="0" min="0" oninput="bkCalcTotal()"></div>' +
+      '<div><label>🚚 Delivery Date</label><input type="date" id="bk-deliv-'+id+'"></div>' +
+    '</div>';
+  con.appendChild(line);
+}
+
+function removeBkLine(id){
+  const el = document.getElementById('bkl-' + id);
+  if(el) el.remove();
+  if(document.getElementById('bkLineCon').children.length === 0) addBkLine();
+  bkCalcTotal();
+}
+
+function bkLoadVar(id){
+  const crop = document.getElementById('bk-crop-'+id).value;
+  const sel = document.getElementById('bk-var-'+id);
+  sel.innerHTML = '<option value="">-- Variety --</option>';
+  if(crop && VDATA[crop]){
+    VDATA[crop].forEach(v => sel.innerHTML += '<option>'+v+'</option>');
+  }
+}
+
+function bkCalcTotal(){
+  let total = 0;
+  document.querySelectorAll('[id^="bk-amt-"]').forEach(inp => {
+    total += parseFloat(inp.value) || 0;
+  });
+  document.getElementById('bkTotalAmt').textContent = total.toLocaleString('en-IN');
+}
+
+function submitBooking(){
+  const bkDate = document.getElementById('bkDate').value;
+  const farmer = document.getElementById('bkFarmer').value.trim();
+  const village = document.getElementById('bkVillage').value.trim();
+  const tehsil = document.getElementById('bkTehsil').value.trim();
+  const mobile = document.getElementById('bkMobile').value.trim();
+  const payMode = document.getElementById('bkPayMode').value;
+  const payDate = document.getElementById('bkPayDate').value;
+
+  if(!bkDate || !farmer || !village || !mobile){
+    toast('❗ Booking date, farmer, village, mobile zaroori hain!', 'error');
+    return;
+  }
+  if(mobile.length !== 10){
+    toast('❗ Mobile 10 digit ka hona chahiye!', 'error');
+    return;
+  }
+
+  // Collect lines
+  const collected = [];
+  let errMsg = '';
+  document.querySelectorAll('#bkLineCon > .card').forEach(line => {
+    const id = line.id.split('-')[1];
+    const crop = document.getElementById('bk-crop-'+id)?.value || '';
+    const variety = document.getElementById('bk-var-'+id)?.value || '';
+    const plant = parseInt(document.getElementById('bk-plant-'+id)?.value) || 0;
+    const rate = parseFloat(document.getElementById('bk-rate-'+id)?.value) || 0;
+    const amount = parseFloat(document.getElementById('bk-amt-'+id)?.value) || 0;
+    const deliveryDate = document.getElementById('bk-deliv-'+id)?.value || '';
+
+    const empty = !crop && !variety && plant===0 && amount===0;
+    if(empty) return;
+
+    if(!crop || !variety){ errMsg = 'Har line mein Crop aur Variety chuno!'; return; }
+    if(plant === 0){ errMsg = variety+': Plant zaroori hai!'; return; }
+    if(!deliveryDate){ errMsg = variety+': Delivery date zaroori hai!'; return; }
+
+    collected.push({crop, variety, plant, rate, amount, deliveryDate});
+  });
+
+  if(errMsg){ toast('❗ '+errMsg, 'error'); return; }
+  if(collected.length === 0){ toast('❗ Kam se kam ek variety bharo!', 'error'); return; }
+
+  // Payment amounts
+  let cashAmt = 0, bankAmt = 0;
+  const totalAmt = collected.reduce((s,l)=>s+l.amount, 0);
+  if(payMode === 'Cash'){ cashAmt = totalAmt; }
+  else if(payMode === 'Bank'){ bankAmt = totalAmt; }
+  else { // Both
+    cashAmt = parseFloat(document.getElementById('bkCash').value) || 0;
+    bankAmt = parseFloat(document.getElementById('bkBank').value) || 0;
+    if(cashAmt + bankAmt === 0){ toast('❗ Cash ya Bank amount daalo!', 'error'); return; }
+  }
+
+  const bookingId = 'BK' + Date.now().toString().slice(-8);
+  const marketing = curUser ? curUser.name : 'Marketing';
+
+  const btn = event.target;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Save Ho Raha Hai...';
+
+  const payload = {
+    module: 'booking',
+    bookingDate: bkDate, farmer, village, tehsil, mobile,
+    paymentMode: payMode, cashAmount: cashAmt, bankAmount: bankAmt,
+    paymentDate: payDate, bookingId, marketing,
+    lines: collected
+  };
+
+  fetch(API, {
+    method: 'POST', mode: 'no-cors',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify(payload)
+  }).then(() => {
+    // PDF banao
+    generateBookingPDF({bkDate, farmer, village, tehsil, mobile, payMode, cashAmt, bankAmt, payDate, bookingId, marketing, lines: collected, totalAmt});
+    toast('✅ Booking save + PDF download ho gaya!');
+    openBookingForm();
+  }).catch(() => {
+    toast('⚠️ Error! Internet check karo.', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '💾 Save + PDF Download';
+  });
+}
+
+function generateBookingPDF(d){
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const pw = doc.internal.pageSize.getWidth();
+
+    // Logo top-left
+    try { doc.addImage(TGH_LOGO, 'JPEG', 14, 10, 34, 20); } catch(e){}
+
+    // Heading
+    doc.setFontSize(16); doc.setFont(undefined, 'bold');
+    doc.setTextColor(26, 71, 42);
+    doc.text('Tirupati Green House Nursery', 52, 17);
+    doc.setFontSize(9); doc.setFont(undefined, 'normal');
+    doc.setTextColor(80, 80, 80);
+    doc.text('Village Bafalgaon, Barwaha, Khargone, MP 451115', 52, 23);
+    doc.setTextColor(0, 0, 0);
+
+    // Line
+    doc.setDrawColor(56, 142, 60); doc.setLineWidth(0.5);
+    doc.line(14, 34, pw-14, 34);
+
+    // Booking meta
+    doc.setFontSize(11); doc.setFont(undefined, 'bold');
+    doc.text('BOOKING RECEIPT', 14, 42);
+    doc.setFont(undefined, 'normal'); doc.setFontSize(9);
+    doc.text('Booking ID: ' + d.bookingId, pw-14, 42, {align:'right'});
+    doc.text('Date: ' + d.bkDate, pw-14, 47, {align:'right'});
+
+    // Farmer details
+    doc.setFontSize(10); let y = 52;
+    doc.setFont(undefined, 'bold'); doc.text('Farmer: ', 14, y);
+    doc.setFont(undefined, 'normal'); doc.text(d.farmer, 32, y);
+    y += 5;
+    doc.setFont(undefined, 'bold'); doc.text('Village: ', 14, y);
+    doc.setFont(undefined, 'normal'); doc.text(d.village + (d.tehsil ? ', ' + d.tehsil : ''), 32, y);
+    y += 5;
+    doc.setFont(undefined, 'bold'); doc.text('Mobile: ', 14, y);
+    doc.setFont(undefined, 'normal'); doc.text(d.mobile, 32, y);
+
+    // Table header
+    y += 8;
+    doc.setFillColor(46, 125, 50); doc.setTextColor(255,255,255);
+    doc.setFont(undefined, 'bold'); doc.setFontSize(9);
+    doc.rect(14, y-4, pw-28, 7, 'F');
+    doc.text('Crop', 16, y);
+    doc.text('Variety', 42, y);
+    doc.text('Plant', 92, y);
+    doc.text('Rate', 112, y);
+    doc.text('Amount', 132, y);
+    doc.text('Delivery', 160, y);
+    doc.setTextColor(0,0,0); doc.setFont(undefined, 'normal');
+
+    // Table rows
+    y += 7;
+    d.lines.forEach(ln => {
+      doc.text(String(ln.crop).substring(0,14), 16, y);
+      doc.text(String(ln.variety).substring(0,24), 42, y);
+      doc.text(String(ln.plant), 92, y);
+      doc.text(String(ln.rate), 112, y);
+      doc.text(String(ln.amount), 132, y);
+      doc.text(String(ln.deliveryDate), 160, y);
+      y += 6;
+      if(y > 260){ doc.addPage(); y = 20; }
+    });
+
+    // Total
+    y += 2;
+    doc.setDrawColor(150,150,150); doc.line(14, y, pw-14, y);
+    y += 6;
+    doc.setFont(undefined, 'bold'); doc.setFontSize(10);
+    doc.text('Total Booking Amount: Rs. ' + d.totalAmt.toLocaleString('en-IN'), 14, y);
+
+    // Payment
+    y += 7;
+    doc.setFont(undefined, 'normal'); doc.setFontSize(9);
+    let payText = 'Payment Mode: ' + d.payMode;
+    if(d.payMode === 'Both') payText += '  (Cash: Rs.' + d.cashAmt + ', Bank: Rs.' + d.bankAmt + ')';
+    doc.text(payText, 14, y);
+    y += 5;
+    doc.text('Payment Date: ' + d.payDate, 14, y);
+
+    // Prepared by + signature
+    y += 16;
+    doc.setFontSize(9);
+    doc.text('Prepared by: ' + d.marketing, 14, y);
+    doc.text('_____________________', pw-14, y, {align:'right'});
+    y += 5;
+    doc.text('Signature', pw-30, y, {align:'right'});
+
+    // Save (auto-download)
+    doc.save('Booking-' + d.bookingId + '.pdf');
+  } catch(err) {
+    toast('⚠️ PDF banane mein dikkat: ' + err.message, 'error');
+  }
+}
+
+// ─────── BOOKING REPORT ───────
+function openBookingReport(){
+  const from = new Date(); from.setDate(from.getDate()-30);
+  document.getElementById('brFrom').valueAsDate = from;
+  document.getElementById('brTo').valueAsDate = new Date();
+  const cropSel = document.getElementById('brCrop');
+  cropSel.innerHTML = '<option value="">-- Sab Crops --</option>';
+  Object.keys(VDATA).forEach(c => cropSel.innerHTML += '<option value="'+c+'">'+c+'</option>');
+  document.getElementById('brVariety').innerHTML = '<option value="">-- Sab Varieties --</option>';
+  document.getElementById('brFarmer').value = '';
+  document.getElementById('brVillage').value = '';
+  show('bookingReportScreen');
+}
+
+function loadBrVariety(){
+  const crop = document.getElementById('brCrop').value;
+  const sel = document.getElementById('brVariety');
+  sel.innerHTML = '<option value="">-- Sab Varieties --</option>';
+  if(crop && VDATA[crop]){
+    VDATA[crop].forEach(v => sel.innerHTML += '<option value="'+v+'">'+v+'</option>');
+  }
+}
+
+function loadBookingReport(){
+  const from = document.getElementById('brFrom').value;
+  const to = document.getElementById('brTo').value;
+  const cropF = document.getElementById('brCrop').value;
+  const varF = document.getElementById('brVariety').value;
+  const farmerF = document.getElementById('brFarmer').value.trim().toLowerCase();
+  const villF = document.getElementById('brVillage').value.trim().toLowerCase();
+  const con = document.getElementById('bookingReportContent');
+  con.innerHTML = '<div class="card" style="text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;color:var(--gd);">Loading...</div></div>';
+
+  fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Booking%20Data&headers=1&t='+Date.now())
+    .then(r=>r.text())
+    .then(txt=>{
+      try{
+        const json = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+        let rows = json.table.rows.filter(r => r.c && r.c[0] && r.c[0].v && r.c[0].v !== 'Booking Date');
+        rows = rows.map(r => {
+          let d = (r.c[0]?.v||'').toString();
+          if(d.startsWith('Date(')){
+            const p = d.replace('Date(','').replace(')','').split(',');
+            d = p[0]+'-'+String(parseInt(p[1])+1).padStart(2,'0')+'-'+String(p[2]).padStart(2,'0');
+          }
+          r._date = d; return r;
+        });
+        rows = rows.filter(r => {
+          if(r._date < from || r._date > to) return false;
+          if(cropF && (r.c[5]?.v||'').toString() !== cropF) return false;
+          if(varF && (r.c[6]?.v||'').toString() !== varF) return false;
+          if(farmerF && !(r.c[1]?.v||'').toString().toLowerCase().includes(farmerF)) return false;
+          if(villF && !(r.c[2]?.v||'').toString().toLowerCase().includes(villF)) return false;
+          return true;
+        });
+
+        if(rows.length === 0){
+          con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--g5);">Koi booking nahi mili is filter mein</div>';
+          return;
+        }
+
+        let totalPlant = 0, totalAmt = 0;
+        rows.forEach(r => { totalPlant += parseInt(r.c[7]?.v)||0; totalAmt += parseFloat(r.c[9]?.v)||0; });
+
+        let html = '<div class="rep-card"><div class="rep-title">📋 '+rows.length+' Bookings</div>'+
+          '<div class="stat-grid">'+
+          '<div class="stat-item"><span class="sv" style="color:var(--gm);">'+totalPlant.toLocaleString('en-IN')+'</span><div class="sl">Total Plants</div></div>'+
+          '<div class="stat-item"><span class="sv" style="color:var(--gd);">Rs.'+totalAmt.toLocaleString('en-IN')+'</span><div class="sl">Total Amount</div></div>'+
+          '</div></div>';
+
+        rows.forEach(r => {
+          const farmer=(r.c[1]?.v||''), village=(r.c[2]?.v||''), mobile=(r.c[4]?.v||'');
+          const crop=(r.c[5]?.v||''), variety=(r.c[6]?.v||''), plant=(r.c[7]?.v||0);
+          const rate=(r.c[8]?.v||0), amt=(r.c[9]?.v||0), deliv=(r.c[10]?.v||'');
+          let delivStr = deliv.toString();
+          if(delivStr.startsWith('Date(')){ const p=delivStr.replace('Date(','').replace(')','').split(','); delivStr=p[2].padStart(2,'0')+'/'+String(parseInt(p[1])+1).padStart(2,'0')+'/'+p[0]; }
+          html += '<div class="card" style="border-left:4px solid var(--gm);">'+
+            '<div style="font-weight:700;color:var(--gd);">👨 '+farmer+' — '+village+'</div>'+
+            '<div style="font-size:13px;color:var(--g8);margin-top:4px;">🌱 '+crop+' / '+variety+' • '+plant+' plants @ ₹'+rate+'</div>'+
+            '<div style="font-size:13px;color:var(--gm);font-weight:700;margin-top:2px;">💰 ₹'+amt+' • 🚚 '+delivStr+'</div>'+
+            '</div>';
+        });
+        con.innerHTML = html;
+      }catch(e){
+        con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--rd);">Report load nahi hui. Sheet check karo.</div>';
+      }
+    }).catch(()=>{
+      con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--rd);">Internet error!</div>';
+    });
+}
+
+// ─────── VARIETY REPORT (Sowing / Booking / Dispatch / Bacha) ───────
+function openVarietyReport(){
+  const cropSel = document.getElementById('vrCrop');
+  cropSel.innerHTML = '<option value="">-- Sab Crops --</option>';
+  Object.keys(VDATA).forEach(c => cropSel.innerHTML += '<option value="'+c+'">'+c+'</option>');
+  document.getElementById('varietyReportContent').innerHTML = '';
+  show('varietyReportScreen');
+}
+
+function loadVarietyReport(){
+  const cropF = document.getElementById('vrCrop').value;
+  const con = document.getElementById('varietyReportContent');
+  con.innerHTML = '<div class="card" style="text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;color:var(--gd);">3 sheets se data jod rahe hain...</div></div>';
+
+  const gv = (sheet) => fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(sheet)+'&headers=1&t='+Date.now()).then(r=>r.text());
+
+  Promise.all([gv('Seed Sowing Data'), gv('Booking Data'), gv('Dispatch Data')])
+    .then(([seedTxt, bookTxt, dispTxt]) => {
+      const parse = (txt) => {
+        try { return JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]).table.rows || []; }
+        catch(e){ return []; }
+      };
+      const seedRows = parse(seedTxt), bookRows = parse(bookTxt), dispRows = parse(dispTxt);
+
+      // Build map: variety -> {crop, sowing, booking, dispatch}
+      const map = {};
+      const ensure = (crop, variety) => {
+        const k = crop+'||'+variety;
+        if(!map[k]) map[k] = {crop, variety, sowing:0, booking:0, dispatch:0};
+        return map[k];
+      };
+
+      // Seed Sowing Data: Vegetable=c[4], Variety=c[5], Total Plants=c[11]
+      seedRows.forEach(r => {
+        if(!r.c || !r.c[5] || !r.c[5].v || r.c[5].v==='Variety') return;
+        const crop=(r.c[4]?.v||'').toString(), variety=(r.c[5]?.v||'').toString();
+        if(cropF && crop !== cropF) return;
+        ensure(crop, variety).sowing += parseInt(r.c[11]?.v)||0;
+      });
+
+      // Booking Data: Crop=c[5], Variety=c[6], Plant=c[7]
+      bookRows.forEach(r => {
+        if(!r.c || !r.c[6] || !r.c[6].v || r.c[6].v==='Variety') return;
+        const crop=(r.c[5]?.v||'').toString(), variety=(r.c[6]?.v||'').toString();
+        if(cropF && crop !== cropF) return;
+        ensure(crop, variety).booking += parseInt(r.c[7]?.v)||0;
+      });
+
+      // Dispatch Data: Crop=c[7], Variety=c[8], Total Plants=c[13]
+      dispRows.forEach(r => {
+        if(!r.c || !r.c[8] || !r.c[8].v || r.c[8].v==='Variety') return;
+        const crop=(r.c[7]?.v||'').toString(), variety=(r.c[8]?.v||'').toString();
+        if(cropF && crop !== cropF) return;
+        ensure(crop, variety).dispatch += parseInt(r.c[13]?.v)||0;
+      });
+
+      const items = Object.values(map).filter(x => x.sowing || x.booking || x.dispatch);
+      if(items.length === 0){
+        con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--g5);">Koi data nahi mila</div>';
+        return;
+      }
+      items.sort((a,b)=> a.crop.localeCompare(b.crop) || a.variety.localeCompare(b.variety));
+
+      let html = '<div class="card" style="padding:0;overflow-x:auto;">'+
+        '<table style="width:100%;border-collapse:collapse;font-size:12px;">'+
+        '<thead><tr style="background:var(--gm);color:white;">'+
+        '<th style="padding:8px;text-align:left;">Variety</th>'+
+        '<th style="padding:8px;">Sowing</th>'+
+        '<th style="padding:8px;">Booking</th>'+
+        '<th style="padding:8px;">Dispatch</th>'+
+        '<th style="padding:8px;">Bacha</th>'+
+        '</tr></thead><tbody>';
+
+      let curCrop = '';
+      items.forEach(x => {
+        if(x.crop !== curCrop){
+          curCrop = x.crop;
+          html += '<tr style="background:var(--gp);"><td colspan="5" style="padding:6px 8px;font-weight:700;color:var(--gd);">🥬 '+curCrop+'</td></tr>';
+        }
+        const bacha = x.sowing - x.dispatch;
+        const bColor = bacha < 0 ? 'var(--rd)' : 'var(--gd)';
+        html += '<tr style="border-bottom:1px solid var(--g2);">'+
+          '<td style="padding:8px;">'+x.variety+'</td>'+
+          '<td style="padding:8px;text-align:center;">'+x.sowing.toLocaleString('en-IN')+'</td>'+
+          '<td style="padding:8px;text-align:center;color:var(--gm);font-weight:700;">'+x.booking.toLocaleString('en-IN')+'</td>'+
+          '<td style="padding:8px;text-align:center;">'+x.dispatch.toLocaleString('en-IN')+'</td>'+
+          '<td style="padding:8px;text-align:center;color:'+bColor+';font-weight:700;">'+bacha.toLocaleString('en-IN')+'</td>'+
+          '</tr>';
+      });
+      html += '</tbody></table></div>'+
+        '<div style="font-size:11px;color:var(--g5);padding:8px;">Bacha = Sowing − Dispatch</div>';
+      con.innerHTML = html;
+    }).catch(()=>{
+      con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--rd);">Data load nahi hua!</div>';
+    });
+}
 
 function openDispatchReport(){
   const from = new Date();
