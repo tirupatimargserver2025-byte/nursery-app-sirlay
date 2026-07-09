@@ -482,6 +482,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div class="ico">📊</div><div class="ttl">Variety Report</div>
           <div class="dsc">Sowing / Booking / Dispatch</div>
         </div>
+        <div class="mcard report" onclick="openMod('seedReport')">
+          <div class="ico">🌱</div><div class="ttl">Seed Sowing Report</div>
+          <div class="dsc">Kitna sowing hua</div>
+        </div>
+        <div class="mcard report" onclick="openDispatchReport()">
+          <div class="ico">🚚</div><div class="ttl">Dispatch Report</div>
+          <div class="dsc">Kitna dispatch hua</div>
+        </div>
       </div>
     </div>
   </div>
@@ -3826,6 +3834,8 @@ function loadDispatchReport(){
   const gadiFilter = document.getElementById('drGaadi').value.trim().toLowerCase();
   const driverFilter = document.getElementById('drDriver').value.trim().toLowerCase();
   const myName = curUser.name;
+  // Manager/Admin/Marketing sabki dekh sakte hain; Supervisor sirf apni
+  const seeAll = (curUser.role === 'Manager' || curUser.role === 'Admin' || curUser.role === 'Marketing');
   const con = document.getElementById('dispatchReportContent');
   
   con.innerHTML = '<div class="card" style="margin-top:10px;text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;color:var(--gd);">Report load ho rahi hai...</div></div>';
@@ -3850,7 +3860,7 @@ function loadDispatchReport(){
         
         rows = rows.filter(r => {
           if(r._date < from || r._date > to) return false;
-          if((r.c[2]?.v||'').toString() !== myName) return false;
+          if(!seeAll && (r.c[2]?.v||'').toString() !== myName) return false;
           if(areaFilter && (r.c[1]?.v||'').toString() !== areaFilter) return false;
           if(cropFilter && (r.c[7]?.v||'').toString() !== cropFilter) return false;
           if(varFilter && (r.c[8]?.v||'').toString() !== varFilter) return false;
