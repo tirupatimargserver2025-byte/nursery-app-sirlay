@@ -1099,6 +1099,16 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <option value="Both">Cash + Bank (dono)</option>
         </select>
       </div>
+      <div class="fr" id="bkBankNameBox" style="display:none;">
+        <label>🏦 Bank Name (kaunsa account)</label>
+        <select id="bkBankName" style="width:100%;">
+          <option value="">-- Bank Chunein --</option>
+          <option value="SBI">SBI</option>
+          <option value="Bank of Baroda">Bank of Baroda</option>
+          <option value="HDFC">HDFC</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
       <div class="g2" id="bkBothBox" style="display:none;">
         <div><label>💵 Cash Amount</label><input type="number" id="bkCash" placeholder="0" min="0"></div>
         <div><label>🏦 Bank Amount</label><input type="number" id="bkBank" placeholder="0" min="0"></div>
@@ -3243,7 +3253,9 @@ function openBookingForm(){
   document.getElementById('bkPayMode').value = 'Cash';
   document.getElementById('bkCash').value = '';
   document.getElementById('bkBank').value = '';
+  document.getElementById('bkBankName').value = '';
   document.getElementById('bkBothBox').style.display = 'none';
+  document.getElementById('bkBankNameBox').style.display = 'none';
   document.getElementById('bkTotalInput').value = '';
 
   document.getElementById('bkLineCon').innerHTML = '';
@@ -3263,6 +3275,8 @@ function bkCropOptions(){
 function bkTogglePayment(){
   const mode = document.getElementById('bkPayMode').value;
   document.getElementById('bkBothBox').style.display = (mode === 'Both' ? 'grid' : 'none');
+  // Bank name sirf Bank ya Both par dikhe
+  document.getElementById('bkBankNameBox').style.display = (mode === 'Bank' || mode === 'Both' ? 'block' : 'none');
 }
 
 function addBkLine(){
@@ -3351,12 +3365,19 @@ function submitBooking(){
 
   // Payment amounts
   let cashAmt = 0, bankAmt = 0;
+  let bankName = '';
   if(payMode === 'Cash'){ cashAmt = totalAmt; }
-  else if(payMode === 'Bank'){ bankAmt = totalAmt; }
+  else if(payMode === 'Bank'){
+    bankAmt = totalAmt;
+    bankName = document.getElementById('bkBankName').value;
+    if(!bankName){ toast('❗ Bank name chuno!', 'error'); return; }
+  }
   else { // Both
     cashAmt = parseFloat(document.getElementById('bkCash').value) || 0;
     bankAmt = parseFloat(document.getElementById('bkBank').value) || 0;
     if(cashAmt + bankAmt === 0){ toast('❗ Cash ya Bank amount daalo!', 'error'); return; }
+    bankName = document.getElementById('bkBankName').value;
+    if(bankAmt > 0 && !bankName){ toast('❗ Bank name chuno!', 'error'); return; }
   }
 
   const bookingId = 'BK' + Date.now().toString().slice(-8);
@@ -3370,13 +3391,13 @@ function submitBooking(){
     module: 'booking',
     bookingDate: bkDate, farmer, village, tehsil, mobile,
     totalAmount: totalAmt,
-    paymentMode: payMode, cashAmount: cashAmt, bankAmount: bankAmt,
+    paymentMode: payMode, cashAmount: cashAmt, bankAmount: bankAmt, bankName: bankName,
     paymentDate: payDate, bookingId, marketing,
     lines: collected
   };
 
   // PDF pehle banao (saara data haath mein hai) - server ke response ka intezaar mat karo
-  generateBookingPDF({bkDate, farmer, village, tehsil, mobile, payMode, cashAmt, bankAmt, payDate, bookingId, marketing, lines: collected, totalAmt});
+  generateBookingPDF({bkDate, farmer, village, tehsil, mobile, payMode, cashAmt, bankAmt, bankName, payDate, bookingId, marketing, lines: collected, totalAmt});
 
   // Ab data server ko bhejo (background mein)
   fetch(API, {
@@ -3416,52 +3437,66 @@ function generateBookingPDF(d){
   });
 
   let payText = 'Payment Mode: ' + clean(d.payMode);
-  if(d.payMode === 'Both') payText += ' (Cash: Rs.' + d.cashAmt + ', Bank: Rs.' + d.bankAmt + ')';
+  if(d.payMode === 'Bank' && d.bankName) payText += ' (' + clean(d.bankName) + ')';
+  if(d.payMode === 'Both') payText += ' (Cash: Rs.' + d.cashAmt + ', Bank: Rs.' + d.bankAmt + (d.bankName ? ' - ' + clean(d.bankName) : '') + ')';
 
   const html =
-    '<div style="width:700px;background:#ffffff;padding:28px;font-family:Arial,sans-serif;color:#222;box-sizing:border-box;">' +
-      // Header: logo + name center
-      '<div style="text-align:center;border-bottom:3px solid #388e3c;padding-bottom:14px;margin-bottom:16px;">' +
-        '<img src="' + TGH_LOGO + '" style="height:70px;margin-bottom:8px;" />' +
-        '<div style="font-size:24px;font-weight:800;color:#1a472a;">Tirupati Green House Nursery</div>' +
-        '<div style="font-size:12px;color:#555;margin-top:3px;">Village Bafalgaon, Barwaha, Khargone, MP 451115</div>' +
+    '<div style="width:720px;background:#ffffff;padding:0;font-family:Arial,sans-serif;color:#222;box-sizing:border-box;border:2px solid #1a472a;">' +
+      // ===== HEADER: logo left + name/contact =====
+      '<div style="display:flex;border-bottom:2px solid #1a472a;">' +
+        // Logo left
+        '<div style="padding:14px 16px;border-right:2px solid #1a472a;display:flex;align-items:center;">' +
+          '<img src="' + TGH_LOGO + '" style="height:78px;width:auto;" />' +
+        '</div>' +
+        // Name + contact
+        '<div style="flex:1;padding:12px 16px;">' +
+          '<div style="font-size:22px;font-weight:800;color:#1a472a;line-height:1.2;">Tirumala Green House Nursery Sirlay</div>' +
+          '<div style="font-size:12px;color:#333;margin-top:5px;line-height:1.6;">' +
+            'Village Sirlay, Tehsil Barwaha, District Khargone (MP)<br/>' +
+            'Phone: 9479457713 / 9479457722<br/>' +
+            'Email: tirupatinursery@gmail.com &nbsp;|&nbsp; www.tirupatinursery.com' +
+          '</div>' +
+        '</div>' +
       '</div>' +
-      // Receipt title
-      '<div style="text-align:center;font-size:18px;font-weight:800;color:#2e7d32;letter-spacing:1px;margin-bottom:14px;">BOOKING RECEIPT</div>' +
-      // Booking ID + date
-      '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px;">' +
-        '<span><b>Booking ID:</b> ' + clean(d.bookingId) + '</span>' +
-        '<span><b>Date:</b> ' + clean(d.bkDate) + '</span>' +
-      '</div>' +
-      // Farmer details
-      '<div style="background:#f1f8f1;border-radius:8px;padding:12px;margin-bottom:14px;font-size:14px;line-height:1.7;">' +
-        '<div><b>Farmer:</b> ' + clean(d.farmer) + '</div>' +
-        '<div><b>Village:</b> ' + clean(d.village) + (d.tehsil ? ', ' + clean(d.tehsil) : '') + '</div>' +
-        '<div><b>Mobile:</b> ' + clean(d.mobile) + '</div>' +
-      '</div>' +
-      // Table
-      '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:14px;">' +
-        '<thead><tr style="background:#2e7d32;color:#fff;">' +
-          '<th style="padding:9px 6px;text-align:left;">Crop</th>' +
-          '<th style="padding:9px 6px;text-align:left;">Variety</th>' +
-          '<th style="padding:9px 6px;">Plant</th>' +
-          '<th style="padding:9px 6px;">Rate</th>' +
-          '<th style="padding:9px 6px;">Delivery</th>' +
-        '</tr></thead><tbody>' + rowsHtml + '</tbody>' +
-      '</table>' +
-      // Total
-      '<div style="border-top:2px solid #999;padding-top:10px;margin-bottom:6px;">' +
-        '<div style="font-size:16px;font-weight:800;color:#1a472a;">Total Booking Amount: Rs. ' + d.totalAmt.toLocaleString('en-IN') + '</div>' +
-      '</div>' +
-      // Payment
-      '<div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:24px;">' +
-        '<div>' + payText + '</div>' +
-        '<div>Payment Date: ' + clean(d.payDate) + '</div>' +
-      '</div>' +
-      // Prepared by + signature
-      '<div style="display:flex;justify-content:space-between;align-items:flex-end;font-size:13px;margin-top:30px;">' +
-        '<span>Prepared by: <b>' + clean(d.marketing) + '</b></span>' +
-        '<span style="text-align:center;">_____________<br/>Signature</span>' +
+      // ===== RECEIPT TITLE =====
+      '<div style="text-align:center;font-size:17px;font-weight:800;color:#fff;background:#2e7d32;padding:7px;letter-spacing:1px;">BOOKING RECEIPT</div>' +
+      // ===== BODY =====
+      '<div style="padding:16px;">' +
+        // Booking ID + date
+        '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px;">' +
+          '<span><b>Booking ID:</b> ' + clean(d.bookingId) + '</span>' +
+          '<span><b>Date:</b> ' + clean(d.bkDate) + '</span>' +
+        '</div>' +
+        // Farmer details
+        '<div style="background:#f1f8f1;border-radius:8px;padding:12px;margin-bottom:14px;font-size:14px;line-height:1.7;">' +
+          '<div><b>Farmer:</b> ' + clean(d.farmer) + '</div>' +
+          '<div><b>Village:</b> ' + clean(d.village) + (d.tehsil ? ', ' + clean(d.tehsil) : '') + '</div>' +
+          '<div><b>Mobile:</b> ' + clean(d.mobile) + '</div>' +
+        '</div>' +
+        // Table
+        '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:14px;">' +
+          '<thead><tr style="background:#2e7d32;color:#fff;">' +
+            '<th style="padding:9px 6px;text-align:left;">Crop</th>' +
+            '<th style="padding:9px 6px;text-align:left;">Variety</th>' +
+            '<th style="padding:9px 6px;">Plant</th>' +
+            '<th style="padding:9px 6px;">Rate</th>' +
+            '<th style="padding:9px 6px;">Delivery</th>' +
+          '</tr></thead><tbody>' + rowsHtml + '</tbody>' +
+        '</table>' +
+        // Total
+        '<div style="border-top:2px solid #999;padding-top:10px;margin-bottom:6px;">' +
+          '<div style="font-size:16px;font-weight:800;color:#1a472a;">Total Booking Amount: Rs. ' + d.totalAmt.toLocaleString('en-IN') + '</div>' +
+        '</div>' +
+        // Payment
+        '<div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:24px;">' +
+          '<div>' + payText + '</div>' +
+          '<div>Payment Date: ' + clean(d.payDate) + '</div>' +
+        '</div>' +
+        // Prepared by + signature
+        '<div style="display:flex;justify-content:space-between;align-items:flex-end;font-size:13px;margin-top:30px;">' +
+          '<span>Prepared by: <b>' + clean(d.marketing) + '</b></span>' +
+          '<span style="text-align:center;">_____________<br/>Signature</span>' +
+        '</div>' +
       '</div>' +
     '</div>';
 
