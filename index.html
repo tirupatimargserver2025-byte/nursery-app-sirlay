@@ -1320,7 +1320,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
       <select id="apMode" onchange="apToggleBank()" style="width:100%;">
         <option value="Cash">Cash</option>
         <option value="Bank">Bank</option>
+        <option value="Both">Cash + Bank (dono)</option>
       </select>
+    </div>
+    <div class="g2" id="apBothBox" style="display:none;">
+      <div><label>💵 Cash</label><input type="number" id="apCash" placeholder="0" min="0"></div>
+      <div><label>🏦 Bank Amt</label><input type="number" id="apBankAmt" placeholder="0" min="0"></div>
     </div>
     <div class="fr" id="apBankBox" style="display:none;"><label>🏦 Bank</label>
       <select id="apBank" style="width:100%;">
@@ -2038,7 +2043,7 @@ function updSS(){
     vb.querySelectorAll('[id^="lr-"]').forEach(lr=>{
       lb++;
       const pts=lr.id.split('-'); const lid=pts[pts.length-1]; const v=pts[pts.length-2];
-      pk+=parseInt(document.getElementById('lp-'+v+'-'+lid)?.value)||0;
+      pk+=parseFloat(document.getElementById('lp-'+v+'-'+lid)?.value)||0;
     });
   });
   document.getElementById('smP').textContent=pl.toLocaleString();
@@ -2063,18 +2068,18 @@ function submitSeed(){
     const t=parseInt(document.getElementById('vt-'+vid)?.value)||0;
     const c=parseInt(document.getElementById('vc-'+vid)?.value)||0;
     const s=parseInt(document.getElementById('vs-'+vid)?.value)||1;
-    const totalPkt=parseInt(document.getElementById('vp-'+vid)?.value)||0;
+    const totalPkt=parseFloat(document.getElementById('vp-'+vid)?.value)||0;
     const labs=[];
     let labourPkt=0;
     vb.querySelectorAll('[id^="lr-"]').forEach(lr=>{
       const pts=lr.id.split('-'); const lid=pts[pts.length-1]; const v=pts[pts.length-2];
       const nm=document.getElementById('ln-'+v+'-'+lid)?.value||'';
-      const lp=parseInt(document.getElementById('lp-'+v+'-'+lid)?.value)||0;
+      const lp=parseFloat(document.getElementById('lp-'+v+'-'+lid)?.value)||0;
       const lt=parseInt(document.getElementById('lt-'+v+'-'+lid)?.value)||0;
       if(nm){labs.push({name:nm,pkt:lp,tray:lt});labourPkt+=lp;}
     });
     // PKT validation
-    if(totalPkt>0 && labs.length>0 && labourPkt!==totalPkt){
+    if(totalPkt>0 && labs.length>0 && Math.abs(labourPkt-totalPkt)>0.001){
       toast('❌ Variety '+vid+' ('+vr+'): Total PKT '+totalPkt+' hai lekin Labour PKT sum '+labourPkt+' hai! Match karo.','error');
       return;
     }
@@ -3619,7 +3624,7 @@ function generateBookingPDF(d){
           '<div style="font-size:12px;color:#333;margin-top:5px;line-height:1.6;">' +
             'Village Sirlay, Tehsil Barwaha, District Khargone (MP)<br/>' +
             'Phone: 9479457713 / 9479457722<br/>' +
-            'Email: tirupatinursery@gmail.com &nbsp;|&nbsp; https://tirupatinursery.com' +
+            'Email: tirupatinursery@gmail.com &nbsp;|&nbsp; www.tirupatinursery.com' +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -3661,7 +3666,7 @@ function generateBookingPDF(d){
         '</div>' +
         // Remarks (agar ho)
         (d.remarks ? '<div style="font-size:13px;color:#444;background:#fff8e1;border-left:3px solid #ff8f00;padding:8px 10px;margin-bottom:14px;"><b>Remarks:</b> ' + clean(d.remarks) + '</div>' : '') +
-        // Niyam & Shartein (Hindi - conditions)
+        // Niyam & Shartein (Hindi - conditions, image ke hisaab se)
         '<div style="font-size:11px;color:#333;border:1px solid #c8e6c9;background:#f6fbf6;border-radius:6px;padding:10px 12px;margin-bottom:16px;line-height:1.6;">' +
           '<div style="font-weight:700;color:#1a472a;margin-bottom:5px;font-size:12px;">नियम व शर्तें</div>' +
           '<div>• मैं/हम ' + clean(d.farmer) + ' ने अग्रिम रूप से बुक कराई गई फसल की किस्म का चयन अपने स्वविवेक से किया है।</div>' +
@@ -3669,10 +3674,10 @@ function generateBookingPDF(d){
           '<div>• बुक कराई गई नर्सरी में फसल के उत्पादन की गुणवत्ता एवं उत्पादन की मात्रा, फसल की देखरेख व फसल में लगने वाली बीमारी/खाद/कीट-नियंत्रण एवं मौसम पर निर्भर है — इसके लिए नर्सरी किसी भी प्रकार जवाबदार नहीं होगी।</div>' +
           '<div>• नर्सरी के परिवहन के दौरान फसल के नुकसान की जवाबदारी नर्सरी की नहीं होगी।</div>' +
           '<div>• बुक कराई गई किस्म नर्सरी तैयार होने पर ही प्रदान की जाएगी।</div>' +
-          '<div>• नर्सरी पौधो के साथ भेजे गए केरेट को उसी वाहन के साथ भेजना अनिवार्य है।</div>' +
-          '<div>• यदि किसान द्वारा नर्सरी से पौधो को निर्धारित समय में नहीं ले जाया जाता है तो होने वाले नुकसान की जवाबदारी नर्सरी की नहीं होगी।</div>' +
-          '<div>• पौधो की डिलेवरी आर्डर की राशि का पूर्ण अग्रिम भुगतान होने के पश्यात परिवहन की व्यवस्था के अनुसार की जावेगी।</div>' +
-          '<div>• पौधो की प्राप्ति के समय यदि पौधो की क्वालिटी से किसान संतुष्ट नही है तो उसी वाहन में पौधे को वापस कर देवे अन्यथा बाद में नर्सरी की कोई भी जवाबदारी नही होगी।</div>' +
+          '<div>• नर्सरी पौधों के साथ भेजे गए केरेट को उसी वाहन के साथ भेजना अनिवार्य है।</div>' +
+          '<div>• यदि किसान द्वारा नर्सरी से पौधों को निर्धारित समय में नहीं ले जाया जाता है तो होने वाले नुकसान की जवाबदारी नर्सरी की नहीं होगी।</div>' +
+          '<div>• पौधों की डिलेवरी आर्डर की राशि का पूर्ण अग्रिम भुगतान होने के पश्चात परिवहन की व्यवस्था के अनुसार की जावेगी।</div>' +
+          '<div>• पौधों की प्राप्ति के समय यदि पौधों की क्वालिटी से किसान संतुष्ट नहीं है तो उसी वाहन में पौधों को वापस कर देवे, अन्यथा बाद में नर्सरी की कोई भी जवाबदारी नहीं होगी।</div>' +
           '<div style="margin-top:5px;">उपरोक्त नियम व शर्तों को मैं/हम ' + clean(d.farmer) + ' अच्छी तरह पढ़ व समझ लिया है, जिसे स्वीकार करता/करते हैं।</div>' +
         '</div>' +
         // Prepared by + signature
@@ -3781,7 +3786,7 @@ function loadBookingReport(){
           if(varF && (r.c[6]?.v||'').toString() !== varF) return false;
           if(farmerF && !(r.c[1]?.v||'').toString().toLowerCase().includes(farmerF)) return false;
           if(villF && !(r.c[2]?.v||'').toString().toLowerCase().includes(villF)) return false;
-          if(statusF && (r.c[19]?.v||'Pending').toString() !== statusF) return false;
+          if(statusF && (r.c[20]?.v||'Pending').toString() !== statusF) return false;
           return true;
         });
 
@@ -3822,7 +3827,7 @@ function loadBookingReport(){
           const crop=(r.c[5]?.v||''), variety=(r.c[6]?.v||''), plant=(r.c[7]?.v||0);
           const rate=(r.c[8]?.v||0);
           const deliv = fixD(r.c[9]?.v);
-          const status = (r.c[19]?.v||'Pending').toString();
+          const status = (r.c[20]?.v||'Pending').toString();
           const stColor = status==='Delivered' ? 'var(--gd)' : '#e65100';
           html += '<tr style="border-bottom:1px solid var(--g2);">'+
             '<td style="padding:7px;">'+r._date+'</td>'+
@@ -4040,7 +4045,7 @@ function loadPayDeliv(){
         // Group by Booking ID (col 21)
         const groups = {};
         rows.forEach(r => {
-          const bid = (r.c[21]?.v||'').toString();
+          const bid = (r.c[22]?.v||'').toString();
           if(!bid) return;
           if(!groups[bid]) groups[bid] = [];
           groups[bid].push(r);
@@ -4056,7 +4061,7 @@ function loadPayDeliv(){
           const bd = fixDate(first.c[0]?.v);
           const farmer = (first.c[1]?.v||'').toString();
           const village = (first.c[2]?.v||'').toString();
-          const status = (first.c[19]?.v||'Pending').toString();
+          const status = (first.c[20]?.v||'Pending').toString();
 
           if(idF && !bid.toLowerCase().includes(idF)) return;
           if(farmerF && !farmer.toLowerCase().includes(farmerF)) return;
@@ -4079,9 +4084,9 @@ function loadPayDeliv(){
           const first = m.g[0];
           const mobile = (first.c[4]?.v||'').toString();
           const firstPay = parseFloat(first.c[10]?.v)||0;
-          const secondPay = parseFloat(first.c[13]?.v)||0;
-          const totalRec = parseFloat(first.c[17]?.v)||firstPay;
-          const delivDate = fixDate(first.c[20]?.v);
+          const secondPay = parseFloat(first.c[14]?.v)||0;
+          const totalRec = parseFloat(first.c[18]?.v)||firstPay;
+          const delivDate = fixDate(first.c[21]?.v);
           const isDeliv = m.status === 'Delivered';
 
           // Varieties list
@@ -4131,26 +4136,43 @@ function openAddPay(bid){
   document.getElementById('apAmount').value = '';
   document.getElementById('apMode').value = 'Cash';
   document.getElementById('apBank').value = '';
+  document.getElementById('apCash').value = '';
+  document.getElementById('apBankAmt').value = '';
   document.getElementById('apBankBox').style.display = 'none';
+  document.getElementById('apBothBox').style.display = 'none';
   document.getElementById('apDate').valueAsDate = new Date();
   document.getElementById('addPayModal').style.display = 'flex';
 }
 function closeAddPay(){ document.getElementById('addPayModal').style.display = 'none'; }
 function apToggleBank(){
-  document.getElementById('apBankBox').style.display = (document.getElementById('apMode').value === 'Bank' ? 'block' : 'none');
+  const mode = document.getElementById('apMode').value;
+  document.getElementById('apBankBox').style.display = (mode === 'Bank' || mode === 'Both' ? 'block' : 'none');
+  document.getElementById('apBothBox').style.display = (mode === 'Both' ? 'grid' : 'none');
 }
 function submitSecondPayment(){
-  const amount = parseFloat(document.getElementById('apAmount').value) || 0;
   const mode = document.getElementById('apMode').value;
-  const bank = mode === 'Bank' ? document.getElementById('apBank').value : '';
+  const bank = (mode === 'Bank' || mode === 'Both') ? document.getElementById('apBank').value : '';
   const date = document.getElementById('apDate').value;
-  if(amount === 0){ toast('❗ Amount daalo!', 'error'); return; }
-  if(mode === 'Bank' && !bank){ toast('❗ Bank chuno!', 'error'); return; }
+
+  let amount = 0;
+  let modeStr = mode;
+  if(mode === 'Both'){
+    const cash = parseFloat(document.getElementById('apCash').value) || 0;
+    const bankAmt = parseFloat(document.getElementById('apBankAmt').value) || 0;
+    amount = cash + bankAmt;
+    if(amount === 0){ toast('❗ Cash ya Bank amount daalo!', 'error'); return; }
+    if(bankAmt > 0 && !bank){ toast('❗ Bank chuno!', 'error'); return; }
+    modeStr = 'Cash:' + cash + ' Bank:' + bankAmt;
+  } else {
+    amount = parseFloat(document.getElementById('apAmount').value) || 0;
+    if(amount === 0){ toast('❗ Amount daalo!', 'error'); return; }
+    if(mode === 'Bank' && !bank){ toast('❗ Bank chuno!', 'error'); return; }
+  }
 
   const payload = {
     module: 'bookingPayment',
     bookingId: apCurrentId,
-    secondAmount: amount, secondMode: mode, secondBank: bank, secondDate: date
+    secondAmount: amount, secondMode: modeStr, secondBank: bank, secondDate: date
   };
   fetch(API, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)})
     .then(()=>{
@@ -4201,18 +4223,19 @@ function redownloadSlip(bid){
 
   const firstMode = (first.c[11]?.v||'').toString();
   const firstBank = (first.c[12]?.v||'').toString();
-  const secondAmt = parseFloat(first.c[13]?.v)||0;
-  const secondMode = (first.c[14]?.v||'').toString();
-  const secondBank = (first.c[15]?.v||'').toString();
-  const secondDate = fixDate(first.c[16]?.v);
+  const firstDate = fixDate(first.c[13]?.v);
+  const secondAmt = parseFloat(first.c[14]?.v)||0;
+  const secondMode = (first.c[15]?.v||'').toString();
+  const secondBank = (first.c[16]?.v||'').toString();
+  const secondDate = fixDate(first.c[17]?.v);
 
   generateBookingPDF({
     bkDate: fixDate(first.c[0]?.v),
     farmer: (first.c[1]?.v||''), village: (first.c[2]?.v||''),
     tehsil: (first.c[3]?.v||''), mobile: (first.c[4]?.v||''),
     payMode: firstMode, cashAmt: 0, bankAmt: 0, bankName: firstBank,
-    payDate: '', bookingId: bid,
-    marketing: (first.c[22]?.v||''), remarks: (first.c[18]?.v||''),
+    payDate: firstDate, bookingId: bid,
+    marketing: (first.c[23]?.v||''), remarks: (first.c[19]?.v||''),
     lines: lines, totalAmt: parseFloat(first.c[10]?.v)||0,
     secondAmt: secondAmt, secondMode: secondMode, secondBank: secondBank, secondDate: secondDate
   });
