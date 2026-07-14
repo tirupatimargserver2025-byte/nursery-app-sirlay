@@ -1148,17 +1148,33 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <option value="Both">Cash + Bank (dono)</option>
         </select>
       </div>
-      <div class="fr" id="bkBankNameBox" style="display:none;">
-        <label>🏦 Bank Name (kaunsa account)</label>
-        <select id="bkBankName" style="width:100%;">
-          <option value="">-- Bank Chunein --</option>
-          <option value="ICICI-01">ICICI-01</option>
-          <option value="ICICI-02">ICICI-02</option>
-          <option value="ICICI-6684">ICICI-6684</option>
-          <option value="PHONE PAY-41">PHONE PAY-41</option>
-          <option value="PHONE PAY-52">PHONE PAY-52</option>
-          <option value="Other">Other</option>
-        </select>
+      <div id="bkBankNameBox" style="display:none;">
+        <div class="g2">
+          <div><label>🏦 Bank 1</label>
+            <select id="bkBankName" style="width:100%;">
+              <option value="">-- Bank Chunein --</option>
+              <option value="ICICI-01">ICICI-01</option>
+              <option value="ICICI-02">ICICI-02</option>
+              <option value="ICICI-6684">ICICI-6684</option>
+              <option value="PHONE PAY-41">PHONE PAY-41</option>
+              <option value="PHONE PAY-52">PHONE PAY-52</option>
+              <option value="Other">Other</option>
+            </select></div>
+          <div><label>💵 Bank 1 Amount</label><input type="number" id="bkBankAmt1" placeholder="0" min="0"></div>
+        </div>
+        <div class="g2">
+          <div><label>🏦 Bank 2 (optional)</label>
+            <select id="bkBankName2" style="width:100%;">
+              <option value="">-- Bank --</option>
+              <option value="ICICI-01">ICICI-01</option>
+              <option value="ICICI-02">ICICI-02</option>
+              <option value="ICICI-6684">ICICI-6684</option>
+              <option value="PHONE PAY-41">PHONE PAY-41</option>
+              <option value="PHONE PAY-52">PHONE PAY-52</option>
+              <option value="Other">Other</option>
+            </select></div>
+          <div><label>💵 Bank 2 Amount</label><input type="number" id="bkBankAmt2" placeholder="0" min="0"></div>
+        </div>
       </div>
       <div id="bkBothBox" style="display:none;">
         <div class="fr"><label>💵 Cash Amount</label><input type="number" id="bkCash" placeholder="0" min="0" style="width:100%;"></div>
@@ -1378,16 +1394,33 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
         <div><label>💵 Bank 2 Amt</label><input type="number" id="apBank2Amt" placeholder="0" min="0"></div>
       </div>
     </div>
-    <div class="fr" id="apBankBox" style="display:none;"><label>🏦 Bank</label>
-      <select id="apBank" style="width:100%;">
-        <option value="">-- Bank Chunein --</option>
-        <option value="ICICI-01">ICICI-01</option>
-        <option value="ICICI-02">ICICI-02</option>
-        <option value="ICICI-6684">ICICI-6684</option>
-        <option value="PHONE PAY-41">PHONE PAY-41</option>
-        <option value="PHONE PAY-52">PHONE PAY-52</option>
-        <option value="Other">Other</option>
-      </select>
+    <div class="fr" id="apBankBox" style="display:none;">
+      <div class="g2">
+        <div><label>🏦 Bank 1</label>
+          <select id="apBank" style="width:100%;">
+            <option value="">-- Bank --</option>
+            <option value="ICICI-01">ICICI-01</option>
+            <option value="ICICI-02">ICICI-02</option>
+            <option value="ICICI-6684">ICICI-6684</option>
+            <option value="PHONE PAY-41">PHONE PAY-41</option>
+            <option value="PHONE PAY-52">PHONE PAY-52</option>
+            <option value="Other">Other</option>
+          </select></div>
+        <div><label>💵 Bank 1 Amt</label><input type="number" id="apBankOnlyAmt1" placeholder="0" min="0"></div>
+      </div>
+      <div class="g2">
+        <div><label>🏦 Bank 2 (optional)</label>
+          <select id="apBankOnly2Name" style="width:100%;">
+            <option value="">-- Bank --</option>
+            <option value="ICICI-01">ICICI-01</option>
+            <option value="ICICI-02">ICICI-02</option>
+            <option value="ICICI-6684">ICICI-6684</option>
+            <option value="PHONE PAY-41">PHONE PAY-41</option>
+            <option value="PHONE PAY-52">PHONE PAY-52</option>
+            <option value="Other">Other</option>
+          </select></div>
+        <div><label>💵 Bank 2 Amt</label><input type="number" id="apBankOnly2Amt" placeholder="0" min="0"></div>
+      </div>
     </div>
     <div class="fr"><label>📅 Payment Date</label><input type="date" id="apDate" style="width:100%;"></div>
     <div style="display:flex;gap:8px;margin-top:14px;">
@@ -3455,6 +3488,9 @@ function openBookingForm(){
   document.getElementById('bkBank2Name').value = '';
   document.getElementById('bkBank2Amt').value = '';
   document.getElementById('bkBankName').value = '';
+  document.getElementById('bkBankAmt1').value = '';
+  document.getElementById('bkBankName2').value = '';
+  document.getElementById('bkBankAmt2').value = '';
   document.getElementById('bkBothBox').style.display = 'none';
   document.getElementById('bkBankNameBox').style.display = 'none';
   document.getElementById('bkTotalInput').value = '';
@@ -3568,11 +3604,30 @@ function submitBooking(){
   // Payment amounts
   let cashAmt = 0, bankAmt = 0;
   let bankName = '';
-  if(payMode === 'Cash'){ cashAmt = totalAmt; }
+  let modeStr = payMode;  // detail string for receipt/sheet
+  if(payMode === 'Cash'){
+    cashAmt = totalAmt;
+    modeStr = 'Cash';
+  }
   else if(payMode === 'Bank'){
-    bankAmt = totalAmt;
-    bankName = document.getElementById('bkBankName').value;
-    if(!bankName){ toast('❗ Bank name chuno!', 'error'); return; }
+    // Bank 1 + Bank 2 (dono)
+    const b1name = document.getElementById('bkBankName').value;
+    const b1amt = parseFloat(document.getElementById('bkBankAmt1').value) || 0;
+    const b2name = document.getElementById('bkBankName2').value;
+    const b2amt = parseFloat(document.getElementById('bkBankAmt2').value) || 0;
+    bankAmt = b1amt + b2amt;
+    if(bankAmt === 0){ toast('❗ Bank amount daalo!', 'error'); return; }
+    if(b1amt > 0 && !b1name){ toast('❗ Bank 1 chuno!', 'error'); return; }
+    if(b2amt > 0 && !b2name){ toast('❗ Bank 2 chuno!', 'error'); return; }
+    // Total match check
+    if(Math.abs(bankAmt - totalAmt) > 0.5){
+      toast('❗ Bank amount ('+bankAmt+') aur Total ('+totalAmt+') match nahi! Sahi karo.', 'error'); return;
+    }
+    let parts = [];
+    if(b1amt > 0) parts.push(b1name + ':' + b1amt);
+    if(b2amt > 0) parts.push(b2name + ':' + b2amt);
+    modeStr = parts.join(', ');
+    bankName = [b1name, b2name].filter(x=>x).join(', ');
   }
   else { // Both: Cash + Bank1 + Bank2
     cashAmt = parseFloat(document.getElementById('bkCash').value) || 0;
@@ -3581,14 +3636,20 @@ function submitBooking(){
     const b2name = document.getElementById('bkBank2Name').value;
     const b2amt = parseFloat(document.getElementById('bkBank2Amt').value) || 0;
     bankAmt = b1amt + b2amt;
-    if(cashAmt + bankAmt === 0){ toast('❗ Cash ya Bank amount daalo!', 'error'); return; }
+    const sum = cashAmt + bankAmt;
+    if(sum === 0){ toast('❗ Cash ya Bank amount daalo!', 'error'); return; }
     if(b1amt > 0 && !b1name){ toast('❗ Bank 1 chuno!', 'error'); return; }
     if(b2amt > 0 && !b2name){ toast('❗ Bank 2 chuno!', 'error'); return; }
-    // bankName string: dono bank + amount
+    // Total match check
+    if(Math.abs(sum - totalAmt) > 0.5){
+      toast('❗ Cash+Bank ('+sum+') aur Total ('+totalAmt+') match nahi! Sahi karo.', 'error'); return;
+    }
     let parts = [];
+    if(cashAmt > 0) parts.push('Cash:' + cashAmt);
     if(b1amt > 0) parts.push(b1name + ':' + b1amt);
     if(b2amt > 0) parts.push(b2name + ':' + b2amt);
-    bankName = parts.join(', ');
+    modeStr = parts.join(', ');
+    bankName = [b1name, b2name].filter(x=>x).join(', ');
   }
 
   const marketing = curUser ? curUser.name : 'Marketing';
@@ -3634,13 +3695,13 @@ function submitBooking(){
       module: 'booking',
       bookingDate: bkDate, farmer, village, tehsil, mobile,
       totalAmount: totalAmt,
-      paymentMode: payMode, cashAmount: cashAmt, bankAmount: bankAmt, bankName: bankName,
+      paymentMode: payMode, modeStr: modeStr, cashAmount: cashAmt, bankAmount: bankAmt, bankName: bankName,
       paymentDate: payDate, bookingId, marketing, remarks: remarks,
       lines: collected
     };
 
     // PDF banao
-    generateBookingPDF({bkDate, farmer, village, tehsil, mobile, payMode, cashAmt, bankAmt, bankName, payDate, bookingId, marketing, remarks, lines: collected, totalAmt});
+    generateBookingPDF({bkDate, farmer, village, tehsil, mobile, payMode, modeStr, cashAmt, bankAmt, bankName, payDate, bookingId, marketing, remarks, lines: collected, totalAmt});
 
     // Server ko bhejo
     fetch(API, {
@@ -3680,9 +3741,7 @@ function generateBookingPDF(d){
       '</tr>';
   });
 
-  let payText = 'Payment Mode: ' + clean(d.payMode);
-  if(d.payMode === 'Bank' && d.bankName) payText += ' (' + clean(d.bankName) + ')';
-  if(d.payMode === 'Both') payText += ' (Cash: Rs.' + d.cashAmt + ', Bank: Rs.' + d.bankAmt + (d.bankName ? ' - ' + clean(d.bankName) : '') + ')';
+  let payText = 'Payment Mode: ' + clean(d.modeStr || d.payMode);
 
   const html =
     '<div style="width:720px;background:#ffffff;padding:0;font-family:Arial,sans-serif;color:#222;box-sizing:border-box;border:2px solid #1a472a;">' +
@@ -4260,6 +4319,9 @@ function openAddPay(bid){
   document.getElementById('apBank1Amt').value = '';
   document.getElementById('apBank2Name').value = '';
   document.getElementById('apBank2Amt').value = '';
+  document.getElementById('apBankOnlyAmt1').value = '';
+  document.getElementById('apBankOnly2Name').value = '';
+  document.getElementById('apBankOnly2Amt').value = '';
   document.getElementById('apBankBox').style.display = 'none';
   document.getElementById('apBothBox').style.display = 'none';
   document.getElementById('apAmount').parentElement.style.display = 'block';
@@ -4271,8 +4333,8 @@ function apToggleBank(){
   const mode = document.getElementById('apMode').value;
   document.getElementById('apBankBox').style.display = (mode === 'Bank' ? 'block' : 'none');
   document.getElementById('apBothBox').style.display = (mode === 'Both' ? 'block' : 'none');
-  // Both mein ek hi total amount ki jagah cash+bank alag, to upar wala Amount chupa do
-  document.getElementById('apAmount').parentElement.style.display = (mode === 'Both' ? 'none' : 'block');
+  // Bank/Both mein alag amounts hain, to upar wala single Amount chupa do
+  document.getElementById('apAmount').parentElement.style.display = ((mode === 'Both' || mode === 'Bank') ? 'none' : 'block');
 }
 function submitSecondPayment(){
   if(isSaving){ return; }
@@ -4299,10 +4361,19 @@ function submitSecondPayment(){
     modeStr = parts.join(', ');
     bank = [b1name, b2name].filter(x=>x).join(', ');
   } else if(mode === 'Bank'){
-    amount = parseFloat(document.getElementById('apAmount').value) || 0;
-    bank = document.getElementById('apBank').value;
-    if(amount === 0){ toast('❗ Amount daalo!', 'error'); return; }
-    if(!bank){ toast('❗ Bank chuno!', 'error'); return; }
+    const b1amt = parseFloat(document.getElementById('apBankOnlyAmt1').value) || 0;
+    const b1name = document.getElementById('apBank').value;
+    const b2amt = parseFloat(document.getElementById('apBankOnly2Amt').value) || 0;
+    const b2name = document.getElementById('apBankOnly2Name').value;
+    amount = b1amt + b2amt;
+    if(amount === 0){ toast('❗ Bank amount daalo!', 'error'); return; }
+    if(b1amt > 0 && !b1name){ toast('❗ Bank 1 chuno!', 'error'); return; }
+    if(b2amt > 0 && !b2name){ toast('❗ Bank 2 chuno!', 'error'); return; }
+    let parts = [];
+    if(b1amt > 0) parts.push(b1name + ':' + b1amt);
+    if(b2amt > 0) parts.push(b2name + ':' + b2amt);
+    modeStr = parts.join(', ');
+    bank = [b1name, b2name].filter(x=>x).join(', ');
   } else { // Cash
     amount = parseFloat(document.getElementById('apAmount').value) || 0;
     if(amount === 0){ toast('❗ Amount daalo!', 'error'); return; }
@@ -4375,7 +4446,7 @@ function redownloadSlip(bid){
     bkDate: fixDate(first.c[0]?.v),
     farmer: (first.c[1]?.v||''), village: (first.c[2]?.v||''),
     tehsil: (first.c[3]?.v||''), mobile: (first.c[4]?.v||''),
-    payMode: firstMode, cashAmt: 0, bankAmt: 0, bankName: firstBank,
+    payMode: firstMode, modeStr: firstMode, cashAmt: 0, bankAmt: 0, bankName: firstBank,
     payDate: firstDate, bookingId: bid,
     marketing: (first.c[23]?.v||''), remarks: (first.c[19]?.v||''),
     lines: lines, totalAmt: parseFloat(first.c[10]?.v)||0,
