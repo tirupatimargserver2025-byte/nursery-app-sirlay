@@ -15,7 +15,8 @@
   --sh:0 4px 24px rgba(26,71,49,0.13);--r:16px;--rs:10px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Baloo 2',sans-serif;background:var(--gd);min-height:100vh;color:var(--g8);}
+html{overscroll-behavior-y:none;}
+body{font-family:'Baloo 2',sans-serif;background:var(--gd);min-height:100vh;color:var(--g8);overscroll-behavior-y:none;}
 .screen{display:none;min-height:100vh;}
 
 /* LOGIN */
@@ -1348,25 +1349,36 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
         <option value="Both">Cash + Bank (dono)</option>
       </select>
     </div>
-    <div class="g2" id="apBothBox" style="display:none;">
-      <div><label>💵 Cash</label><input type="number" id="apCash" placeholder="0" min="0"></div>
-      <div><label>🏦 Bank 1 Amt</label><input type="number" id="apBankAmt" placeholder="0" min="0"></div>
-    </div>
-    <div class="fr" id="apBank2Box" style="display:none;"><label>🏦 Bank 2 (optional)</label>
+    <div id="apBothBox" style="display:none;">
+      <div class="fr"><label>💵 Cash Amount</label><input type="number" id="apCash" placeholder="0" min="0" style="width:100%;"></div>
       <div class="g2">
-        <div><select id="apBank2Name" style="width:100%;">
-          <option value="">-- Bank --</option>
-          <option value="ICICI-01">ICICI-01</option>
-          <option value="ICICI-02">ICICI-02</option>
-          <option value="ICICI-6684">ICICI-6684</option>
-          <option value="PHONE PAY-41">PHONE PAY-41</option>
-          <option value="PHONE PAY-52">PHONE PAY-52</option>
-          <option value="Other">Other</option>
-        </select></div>
-        <div><input type="number" id="apBank2Amt" placeholder="Bank 2 Amt" min="0"></div>
+        <div><label>🏦 Bank 1</label>
+          <select id="apBank1Name" style="width:100%;">
+            <option value="">-- Bank --</option>
+            <option value="ICICI-01">ICICI-01</option>
+            <option value="ICICI-02">ICICI-02</option>
+            <option value="ICICI-6684">ICICI-6684</option>
+            <option value="PHONE PAY-41">PHONE PAY-41</option>
+            <option value="PHONE PAY-52">PHONE PAY-52</option>
+            <option value="Other">Other</option>
+          </select></div>
+        <div><label>💵 Bank 1 Amt</label><input type="number" id="apBank1Amt" placeholder="0" min="0"></div>
+      </div>
+      <div class="g2">
+        <div><label>🏦 Bank 2 (optional)</label>
+          <select id="apBank2Name" style="width:100%;">
+            <option value="">-- Bank --</option>
+            <option value="ICICI-01">ICICI-01</option>
+            <option value="ICICI-02">ICICI-02</option>
+            <option value="ICICI-6684">ICICI-6684</option>
+            <option value="PHONE PAY-41">PHONE PAY-41</option>
+            <option value="PHONE PAY-52">PHONE PAY-52</option>
+            <option value="Other">Other</option>
+          </select></div>
+        <div><label>💵 Bank 2 Amt</label><input type="number" id="apBank2Amt" placeholder="0" min="0"></div>
       </div>
     </div>
-    <div class="fr" id="apBankBox" style="display:none;"><label>🏦 Bank 1</label>
+    <div class="fr" id="apBankBox" style="display:none;"><label>🏦 Bank</label>
       <select id="apBank" style="width:100%;">
         <option value="">-- Bank Chunein --</option>
         <option value="ICICI-01">ICICI-01</option>
@@ -2861,6 +2873,9 @@ function toggleRow(id){
   if(btn) btn.classList.toggle('exp-open');
 }
 
+// Double-click / double-save rokne ke liye global flag
+let isSaving = false;
+
 // yyyy-mm-dd (ya Date object string) ko dd/mm/yyyy banao
 function fmtDate(val){
   if(!val) return '';
@@ -3348,6 +3363,7 @@ function dpValidate(id){
 }
 
 function submitDispatch(){
+  if(isSaving){ return; }
   const date = document.getElementById('dpDate').value;
   const sup = document.getElementById('dpSup').value;
   const gaadi = document.getElementById('dpGaadi').value.trim();
@@ -3406,12 +3422,15 @@ function submitDispatch(){
     entries: entries
   };
 
+  isSaving = true;
   fetch(API, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)})
     .then(() => {
       toast('✅ '+entries.length+' entries save ho gayi!');
+      isSaving = false;
       openDispatchForm();
     }).catch(() => {
       toast('⚠️ Error! Internet check karo.', 'error');
+      isSaving = false;
       btn.disabled = false;
       btn.innerHTML = '💾 Sab Save Karo';
     });
@@ -3500,6 +3519,7 @@ function bkLoadVar(id){
 }
 
 function submitBooking(){
+  if(isSaving){ return; }
   const bkDate = document.getElementById('bkDate').value;
   const farmer = document.getElementById('bkFarmer').value.trim();
   const village = document.getElementById('bkVillage').value.trim();
@@ -3576,6 +3596,7 @@ function submitBooking(){
 
   const btn = event.target;
   btn.disabled = true;
+  isSaving = true;
   btn.innerHTML = '⏳ Serial number le rahe hain...';
 
   // Sheet se last serial padhkar next banao, phir PDF + save
@@ -3634,6 +3655,7 @@ function submitBooking(){
 
     setTimeout(() => {
       btn.disabled = false;
+      isSaving = false;
       btn.innerHTML = '💾 Save + PDF Download';
       openBookingForm();
     }, 1500);
@@ -3718,16 +3740,14 @@ function generateBookingPDF(d){
         '</div>' +
         // Remarks (agar ho)
         (d.remarks ? '<div style="font-size:13px;color:#444;background:#fff8e1;border-left:3px solid #ff8f00;padding:8px 10px;margin-bottom:14px;"><b>Remarks:</b> ' + clean(d.remarks) + '</div>' : '') +
-        // Niyam & Shartein (Hindi - conditions, image ke hisaab se)
+        // Niyam & Shartein (Hindi - conditions, updated list)
         '<div style="font-size:11px;color:#333;border:1px solid #c8e6c9;background:#f6fbf6;border-radius:6px;padding:10px 12px;margin-bottom:16px;line-height:1.6;">' +
           '<div style="font-weight:700;color:#1a472a;margin-bottom:5px;font-size:12px;">नियम व शर्तें</div>' +
           '<div>• मैं/हम ' + clean(d.farmer) + ' ने अग्रिम रूप से बुक कराई गई फसल की किस्म का चयन अपने स्वविवेक से किया है।</div>' +
           '<div>• बुक कराई गई नर्सरी की फसल की खेती में संबंधित जोखिम से भलीभांति अवगत हूँ।</div>' +
-          '<div>• बुक कराई गई नर्सरी में फसल के उत्पादन की गुणवत्ता एवं उत्पादन की मात्रा, फसल की देखरेख व फसल में लगने वाली बीमारी/खाद/कीट-नियंत्रण एवं मौसम पर निर्भर है — इसके लिए नर्सरी किसी भी प्रकार जवाबदार नहीं होगी।</div>' +
-          '<div>• नर्सरी के परिवहन के दौरान फसल के नुकसान की जवाबदारी नर्सरी की नहीं होगी।</div>' +
-          '<div>• बुक कराई गई किस्म नर्सरी तैयार होने पर ही प्रदान की जाएगी।</div>' +
-          '<div>• नर्सरी पौधों के साथ भेजे गए केरेट को उसी वाहन के साथ भेजना अनिवार्य है।</div>' +
+          '<div>• फसल के उत्पादन की गुणवत्ता व मात्रा फसल की देखरेख, बीमारी/खाद/कीट-नियंत्रण एवं मौसम पर निर्भर है।</div>' +
           '<div>• यदि किसान द्वारा नर्सरी से पौधों को निर्धारित समय में नहीं ले जाया जाता है तो होने वाले नुकसान की जवाबदारी नर्सरी की नहीं होगी।</div>' +
+          '<div>• बुक की गई नर्सरी को देखने के लिए किसान डिलेवरी से पहले नर्सरी पर आ सकते हैं।</div>' +
           '<div>• पौधों की डिलेवरी आर्डर की राशि का पूर्ण अग्रिम भुगतान होने के पश्चात परिवहन की व्यवस्था के अनुसार की जावेगी।</div>' +
           '<div>• पौधों की प्राप्ति के समय यदि पौधों की क्वालिटी से किसान संतुष्ट नहीं है तो उसी वाहन में पौधों को वापस कर देवे, अन्यथा बाद में नर्सरी की कोई भी जवाबदारी नहीं होगी।</div>' +
           '<div style="margin-top:5px;">उपरोक्त नियम व शर्तों को मैं/हम ' + clean(d.farmer) + ' अच्छी तरह पढ़ व समझ लिया है, जिसे स्वीकार करता/करते हैं।</div>' +
@@ -4201,6 +4221,7 @@ function avLoadVar(){
   if(crop && VDATA[crop]){ VDATA[crop].forEach(v => sel.innerHTML += '<option>'+v+'</option>'); }
 }
 function submitAddVariety(){
+  if(isSaving){ return; }
   const crop = document.getElementById('avCrop').value;
   const variety = document.getElementById('avVar').value;
   const plant = parseInt(document.getElementById('avPlant').value) || 0;
@@ -4214,12 +4235,13 @@ function submitAddVariety(){
     module: 'bookingAddVariety', bookingId: avCurrentId,
     crop, variety, plant, rate, deliveryDate: deliv
   };
+  isSaving = true;
   fetch(API, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)})
     .then(()=>{
       toast('✅ Variety add ho gayi!');
       closeAddVar();
-      setTimeout(loadPayDeliv, 1200);
-    }).catch(()=>{ toast('⚠️ Error! Internet check karo.', 'error'); });
+      setTimeout(()=>{ isSaving = false; loadPayDeliv(); }, 1200);
+    }).catch(()=>{ isSaving = false; toast('⚠️ Error! Internet check karo.', 'error'); });
 }
 
 // ── Add Payment modal ──
@@ -4234,12 +4256,13 @@ function openAddPay(bid){
   document.getElementById('apMode').value = 'Cash';
   document.getElementById('apBank').value = '';
   document.getElementById('apCash').value = '';
-  document.getElementById('apBankAmt').value = '';
+  document.getElementById('apBank1Name').value = '';
+  document.getElementById('apBank1Amt').value = '';
   document.getElementById('apBank2Name').value = '';
   document.getElementById('apBank2Amt').value = '';
   document.getElementById('apBankBox').style.display = 'none';
   document.getElementById('apBothBox').style.display = 'none';
-  document.getElementById('apBank2Box').style.display = 'none';
+  document.getElementById('apAmount').parentElement.style.display = 'block';
   document.getElementById('apDate').valueAsDate = new Date();
   document.getElementById('addPayModal').style.display = 'flex';
 }
@@ -4247,10 +4270,12 @@ function closeAddPay(){ document.getElementById('addPayModal').style.display = '
 function apToggleBank(){
   const mode = document.getElementById('apMode').value;
   document.getElementById('apBankBox').style.display = (mode === 'Bank' ? 'block' : 'none');
-  document.getElementById('apBothBox').style.display = (mode === 'Both' ? 'grid' : 'none');
-  document.getElementById('apBank2Box').style.display = (mode === 'Both' ? 'block' : 'none');
+  document.getElementById('apBothBox').style.display = (mode === 'Both' ? 'block' : 'none');
+  // Both mein ek hi total amount ki jagah cash+bank alag, to upar wala Amount chupa do
+  document.getElementById('apAmount').parentElement.style.display = (mode === 'Both' ? 'none' : 'block');
 }
 function submitSecondPayment(){
+  if(isSaving){ return; }
   const mode = document.getElementById('apMode').value;
   const date = document.getElementById('apDate').value;
 
@@ -4259,8 +4284,8 @@ function submitSecondPayment(){
   let bank = '';
   if(mode === 'Both'){
     const cash = parseFloat(document.getElementById('apCash').value) || 0;
-    const b1amt = parseFloat(document.getElementById('apBankAmt').value) || 0;
-    const b1name = document.getElementById('apBank').value;
+    const b1amt = parseFloat(document.getElementById('apBank1Amt').value) || 0;
+    const b1name = document.getElementById('apBank1Name').value;
     const b2amt = parseFloat(document.getElementById('apBank2Amt').value) || 0;
     const b2name = document.getElementById('apBank2Name').value;
     amount = cash + b1amt + b2amt;
@@ -4288,12 +4313,13 @@ function submitSecondPayment(){
     bookingId: apCurrentId,
     secondAmount: amount, secondMode: modeStr, secondBank: bank, secondDate: date
   };
+  isSaving = true;
   fetch(API, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)})
     .then(()=>{
       toast('✅ Second payment add ho gaya!');
       closeAddPay();
-      setTimeout(loadPayDeliv, 1200);
-    }).catch(()=>{ toast('⚠️ Error! Internet check karo.', 'error'); });
+      setTimeout(()=>{ isSaving = false; loadPayDeliv(); }, 1200);
+    }).catch(()=>{ isSaving = false; toast('⚠️ Error! Internet check karo.', 'error'); });
 }
 
 // ── Mark Delivered modal ──
@@ -4307,15 +4333,17 @@ function openDeliv(bid){
 }
 function closeDeliv(){ document.getElementById('delivModal').style.display = 'none'; }
 function submitDelivered(){
+  if(isSaving){ return; }
   const date = document.getElementById('dvDate').value;
   if(!date){ toast('❗ Delivery date daalo!', 'error'); return; }
   const payload = { module:'bookingDeliver', bookingId: dvCurrentId, deliveredDate: date };
+  isSaving = true;
   fetch(API, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)})
     .then(()=>{
       toast('✅ Delivered mark ho gaya!');
       closeDeliv();
-      setTimeout(loadPayDeliv, 1200);
-    }).catch(()=>{ toast('⚠️ Error! Internet check karo.', 'error'); });
+      setTimeout(()=>{ isSaving = false; loadPayDeliv(); }, 1200);
+    }).catch(()=>{ isSaving = false; toast('⚠️ Error! Internet check karo.', 'error'); });
 }
 
 // ── Slip re-download (updated data ke saath) ──
