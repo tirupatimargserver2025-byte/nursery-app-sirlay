@@ -1051,9 +1051,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
       </div>
     </div>
 
-    <div id="dpFarmerCon" style="display:flex;flex-direction:column;gap:12px;"></div>
+    <div id="dpLineCon" style="display:flex;flex-direction:column;gap:12px;"></div>
 
-    <button onclick="addDpFarmer()" style="width:100%;padding:12px;background:var(--gl);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;margin:12px 0;">➕ Naya Farmer Jodo</button>
+    <button onclick="addDpLine()" style="width:100%;padding:12px;background:var(--gl);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;margin:12px 0;">➕ Variety Jodo</button>
 
     <div class="card">
       <button onclick="submitDispatch()" style="width:100%;padding:14px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;">💾 Sab Save Karo</button>
@@ -1159,9 +1159,34 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <option value="Other">Other</option>
         </select>
       </div>
-      <div class="g2" id="bkBothBox" style="display:none;">
-        <div><label>💵 Cash Amount</label><input type="number" id="bkCash" placeholder="0" min="0"></div>
-        <div><label>🏦 Bank Amount</label><input type="number" id="bkBank" placeholder="0" min="0"></div>
+      <div id="bkBothBox" style="display:none;">
+        <div class="fr"><label>💵 Cash Amount</label><input type="number" id="bkCash" placeholder="0" min="0" style="width:100%;"></div>
+        <div class="g2">
+          <div><label>🏦 Bank 1</label>
+            <select id="bkBank1Name" style="width:100%;">
+              <option value="">-- Bank --</option>
+              <option value="ICICI-01">ICICI-01</option>
+              <option value="ICICI-02">ICICI-02</option>
+              <option value="ICICI-6684">ICICI-6684</option>
+              <option value="PHONE PAY-41">PHONE PAY-41</option>
+              <option value="PHONE PAY-52">PHONE PAY-52</option>
+              <option value="Other">Other</option>
+            </select></div>
+          <div><label>💵 Bank 1 Amount</label><input type="number" id="bkBank1Amt" placeholder="0" min="0"></div>
+        </div>
+        <div class="g2">
+          <div><label>🏦 Bank 2 (optional)</label>
+            <select id="bkBank2Name" style="width:100%;">
+              <option value="">-- Bank --</option>
+              <option value="ICICI-01">ICICI-01</option>
+              <option value="ICICI-02">ICICI-02</option>
+              <option value="ICICI-6684">ICICI-6684</option>
+              <option value="PHONE PAY-41">PHONE PAY-41</option>
+              <option value="PHONE PAY-52">PHONE PAY-52</option>
+              <option value="Other">Other</option>
+            </select></div>
+          <div><label>💵 Bank 2 Amount</label><input type="number" id="bkBank2Amt" placeholder="0" min="0"></div>
+        </div>
       </div>
       <div class="fr">
         <label>📅 Payment Date</label>
@@ -1325,9 +1350,23 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
     </div>
     <div class="g2" id="apBothBox" style="display:none;">
       <div><label>💵 Cash</label><input type="number" id="apCash" placeholder="0" min="0"></div>
-      <div><label>🏦 Bank Amt</label><input type="number" id="apBankAmt" placeholder="0" min="0"></div>
+      <div><label>🏦 Bank 1 Amt</label><input type="number" id="apBankAmt" placeholder="0" min="0"></div>
     </div>
-    <div class="fr" id="apBankBox" style="display:none;"><label>🏦 Bank</label>
+    <div class="fr" id="apBank2Box" style="display:none;"><label>🏦 Bank 2 (optional)</label>
+      <div class="g2">
+        <div><select id="apBank2Name" style="width:100%;">
+          <option value="">-- Bank --</option>
+          <option value="ICICI-01">ICICI-01</option>
+          <option value="ICICI-02">ICICI-02</option>
+          <option value="ICICI-6684">ICICI-6684</option>
+          <option value="PHONE PAY-41">PHONE PAY-41</option>
+          <option value="PHONE PAY-52">PHONE PAY-52</option>
+          <option value="Other">Other</option>
+        </select></div>
+        <div><input type="number" id="apBank2Amt" placeholder="Bank 2 Amt" min="0"></div>
+      </div>
+    </div>
+    <div class="fr" id="apBankBox" style="display:none;"><label>🏦 Bank 1</label>
       <select id="apBank" style="width:100%;">
         <option value="">-- Bank Chunein --</option>
         <option value="ICICI-01">ICICI-01</option>
@@ -1359,8 +1398,29 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   </div>
 </div>
 
+<!-- Add Variety Modal -->
+<div id="addVarModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:white;border-radius:12px;padding:20px;max-width:400px;width:100%;">
+    <div style="font-weight:800;color:var(--gd);font-size:16px;margin-bottom:14px;">🌱 Nayi Variety Jodo</div>
+    <div style="font-size:13px;color:var(--g8);margin-bottom:12px;" id="avInfo"></div>
+    <div class="g2">
+      <div><label>🥬 Crop</label><select id="avCrop" onchange="avLoadVar()" style="width:100%;"><option value="">-- Crop --</option></select></div>
+      <div><label>🌱 Variety</label><select id="avVar" style="width:100%;"><option value="">-- Variety --</option></select></div>
+    </div>
+    <div class="g2">
+      <div><label>🌿 Plant</label><input type="number" id="avPlant" placeholder="0" min="0"></div>
+      <div><label>💵 Rate</label><input type="number" id="avRate" placeholder="0" min="0" step="0.01"></div>
+    </div>
+    <div class="fr"><label>🚚 Delivery Date</label><input type="date" id="avDeliv" style="width:100%;"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button onclick="closeAddVar()" style="flex:1;padding:11px;background:var(--g2);color:var(--g8);border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">Cancel</button>
+      <button onclick="submitAddVariety()" style="flex:1;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">Add</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbxa58KGZxRzYeCELF4Mt3KdJezYICxv7bml9L5dbrUloXnt-MdwP8qN09ez_3UC-KuNlg/exec';
+const API = 'https://script.google.com/macros/s/AKfycbzfdI-8l1ba0nL_5ssyq4YgPcQnAUXvmqu9Oeb6ukfA9tZzN8NaiS8ZsNN3qhNjc4xY5A/exec';
 const SHEET_ID = '1nItPv5Jk4baU4Rg6fgQMYchRK7exQk-KDsRkHLl34Ew';
 
 let SUP_DATA = {}; // {name: {pin, role}}
@@ -2801,6 +2861,21 @@ function toggleRow(id){
   if(btn) btn.classList.toggle('exp-open');
 }
 
+// yyyy-mm-dd (ya Date object string) ko dd/mm/yyyy banao
+function fmtDate(val){
+  if(!val) return '';
+  let s = val.toString();
+  // Google "Date(2026,6,13)" format
+  if(s.startsWith('Date(')){
+    const p = s.replace('Date(','').replace(')','').split(',');
+    return String(p[2]).padStart(2,'0')+'/'+String(parseInt(p[1])+1).padStart(2,'0')+'/'+p[0];
+  }
+  // yyyy-mm-dd
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return m[3]+'/'+m[2]+'/'+m[1];
+  return s;
+}
+
 function toast(msg,type='success'){
   const t=document.getElementById('toast');
   t.textContent=msg; t.className='toast '+type+' show';
@@ -3152,146 +3227,96 @@ function loadShiftingReport(){
 
 // ════ DISPATCH FUNCTIONS ════
 
-// ═══════════ DISPATCH (naya: farmer blocks, har line ka apna area) ═══════════
-let dpFarmerCnt = 0;              // unique farmer block id
-let dpLineCnt = {};               // per-farmer line counter
-
-const DP_AREAS = ['Net House', 'Kavery', 'Poras', 'Gayatry', '1 No. PH', 'Narmada'];
-
+// ═══════════ DISPATCH (naya: farmer nahi, sirf variety lines, sowing date range) ═══════════
 function openDispatchForm(){
   document.getElementById('dpDate').valueAsDate = new Date();
   document.getElementById('dpSup').value = curUser ? curUser.name : 'Supervisor';
   document.getElementById('dpGaadi').value = '';
   document.getElementById('dpDriver').value = '';
   document.getElementById('dpMeter').value = '';
-
-  // Reset farmer blocks
-  document.getElementById('dpFarmerCon').innerHTML = '';
-  dpFarmerCnt = 0;
-  dpLineCnt = {};
-
-  addDpFarmer(); // pehla farmer block
+  document.getElementById('dpLineCon').innerHTML = '';
+  dpLineCnt = 0;
+  addDpLine();
   show('dispatchScreen');
 }
 
-// ---- Area dropdown options (reusable) ----
+let dpLineCnt = 0;
+const DP_AREAS_D = ['Net House','Kavery','Poras','Gayatry','1 No. PH','Narmada'];
+
 function dpAreaOptions(){
-  return '<option value="">-- Area --</option>' +
-    DP_AREAS.map(a => '<option value="'+a+'">'+a+'</option>').join('');
+  return '<option value="">-- Area --</option>' + DP_AREAS_D.map(a=>'<option value="'+a+'">'+a+'</option>').join('');
 }
-
-// ---- Crop dropdown options from VDATA (jaise Seed Sowing) ----
 function dpCropOptions(){
-  return '<option value="">-- Crop --</option>' +
-    Object.keys(VDATA).map(c => '<option value="'+c+'">'+c+'</option>').join('');
+  return '<option value="">-- Crop --</option>' + Object.keys(VDATA).map(c=>'<option value="'+c+'">'+c+'</option>').join('');
 }
 
-// ---- Naya Farmer block jodo ----
-function addDpFarmer(){
-  const fid = ++dpFarmerCnt;
-  dpLineCnt[fid] = 0;
-
-  const con = document.getElementById('dpFarmerCon');
-  const block = document.createElement('div');
-  block.className = 'card';
-  block.id = 'dpf-' + fid;
-  block.innerHTML =
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
-      '<div style="flex:1;margin-right:8px;">' +
-        '<label style="font-size:13px;font-weight:700;color:var(--gd);">👨 Farmer Naam</label>' +
-        '<input type="text" id="dpf-name-'+fid+'" placeholder="Farmer ka naam" style="width:100%;">' +
-      '</div>' +
-      '<button onclick="removeDpFarmer('+fid+')" style="background:var(--rd);color:white;border:none;padding:8px 10px;border-radius:6px;cursor:pointer;font-weight:700;margin-top:18px;">❌</button>' +
-    '</div>' +
-    '<div id="dpf-lines-'+fid+'" style="display:flex;flex-direction:column;gap:10px;"></div>' +
-    '<button onclick="addDpLine('+fid+')" style="width:100%;padding:9px;background:var(--gl);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;margin-top:10px;">➕ Is Farmer Mein Variety Jodo</button>';
-  con.appendChild(block);
-
-  addDpLine(fid); // pehli line
-}
-
-function removeDpFarmer(fid){
-  const el = document.getElementById('dpf-' + fid);
-  if(el) el.remove();
-  // Agar koi farmer nahi bacha, ek naya de do
-  if(document.getElementById('dpFarmerCon').children.length === 0){
-    addDpFarmer();
-  }
-}
-
-// ---- Farmer ke andar nayi variety line jodo ----
-function addDpLine(fid){
-  const lid = ++dpLineCnt[fid];
-  const linesCon = document.getElementById('dpf-lines-' + fid);
-  const key = fid + '_' + lid;
-
+// Nayi variety line (farmer nahi - sirf variety details)
+function addDpLine(){
+  const id = ++dpLineCnt;
+  const con = document.getElementById('dpLineCon');
   const line = document.createElement('div');
-  line.id = 'dpl-' + key;
-  line.style.cssText = 'background:var(--gp);border-radius:var(--rs);padding:10px;border-left:4px solid var(--gl);';
+  line.className = 'card';
+  line.id = 'dpl-' + id;
   line.innerHTML =
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-      '<span style="font-size:12px;font-weight:700;color:var(--gd);">🌱 Variety Line</span>' +
-      '<button onclick="removeDpLine(\''+key+'\','+fid+')" style="background:var(--rd);color:white;border:none;padding:4px 9px;border-radius:4px;cursor:pointer;font-weight:700;font-size:12px;">❌</button>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+      '<span style="font-size:13px;font-weight:700;color:var(--gd);">🌱 Variety Details</span>' +
+      '<button onclick="removeDpLine('+id+')" style="background:var(--rd);color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-weight:700;font-size:12px;">❌</button>' +
     '</div>' +
     '<div class="g2">' +
-      '<div><label>📍 Area</label><select id="dp-area-'+key+'">'+dpAreaOptions()+'</select></div>' +
-      '<div><label>🥬 Crop</label><select id="dp-crop-'+key+'" onchange="dpLoadVar(\''+key+'\')">'+dpCropOptions()+'</select></div>' +
+      '<div><label>📍 Area</label><select id="dp-area-'+id+'">'+dpAreaOptions()+'</select></div>' +
+      '<div><label>🥬 Crop</label><select id="dp-crop-'+id+'" onchange="dpLoadVar('+id+')">'+dpCropOptions()+'</select></div>' +
     '</div>' +
     '<div class="g2">' +
-      '<div><label>🌱 Variety</label><select id="dp-var-'+key+'"><option value="">-- Variety --</option></select></div>' +
-      '<div><label>📦 Carret</label><input type="number" id="dp-car-'+key+'" placeholder="0" min="0" step="1" oninput="dpCalc(\''+key+'\')"></div>' +
+      '<div><label>🌱 Variety</label><select id="dp-var-'+id+'"><option value="">-- Variety --</option></select></div>' +
+      '<div><label>📦 Carret</label><input type="number" id="dp-car-'+id+'" placeholder="0" min="0" step="1" oninput="dpCalc('+id+')"></div>' +
     '</div>' +
     '<div class="g2">' +
-      '<div><label>🌿 Per Carret</label><input type="number" id="dp-ppc-'+key+'" placeholder="0" min="0" step="1" oninput="dpCalc(\''+key+'\')"></div>' +
-      '<div><label>🌱 Direct Plants</label><input type="number" id="dp-dir-'+key+'" placeholder="0" min="0" step="1" oninput="dpCalc(\''+key+'\')"></div>' +
+      '<div><label>🌿 Per Carret</label><input type="number" id="dp-ppc-'+id+'" placeholder="0" min="0" step="1" oninput="dpCalc('+id+')"></div>' +
+      '<div><label>🌱 Direct Plants</label><input type="number" id="dp-dir-'+id+'" placeholder="0" min="0" step="1" oninput="dpCalc('+id+')"></div>' +
     '</div>' +
-    '<div class="fr"><label>📅 Date of Sowing</label><input type="date" id="dp-sow-'+key+'" onchange="dpValidate(\''+key+'\')" style="width:100%;"></div>' +
-    '<div id="dp-msg-'+key+'" style="padding:6px;border-radius:6px;display:none;font-size:12px;font-weight:600;margin-bottom:6px;"></div>' +
+    '<div style="background:#f1f8f1;border-radius:6px;padding:8px;margin:6px 0;">' +
+      '<div style="font-size:12px;color:var(--gd);font-weight:600;margin-bottom:6px;">📅 Sowing Date Range (is variety ki sowing kab-kab hui)</div>' +
+      '<div class="g2">' +
+        '<div><label>From</label><input type="date" id="dp-sowfrom-'+id+'" onchange="dpValidate('+id+')"></div>' +
+        '<div><label>To</label><input type="date" id="dp-sowto-'+id+'" onchange="dpValidate('+id+')"></div>' +
+      '</div>' +
+    '</div>' +
+    '<div id="dp-msg-'+id+'" style="padding:6px;border-radius:6px;display:none;font-size:12px;font-weight:600;margin-bottom:6px;"></div>' +
     '<div style="background:#e8f5e9;padding:8px;border-radius:6px;text-align:center;border:1px solid var(--gl);">' +
       '<span style="font-size:12px;color:var(--gd);font-weight:600;">Total Plants: </span>' +
-      '<span style="font-size:18px;font-weight:800;color:var(--gd);" id="dp-tot-'+key+'">0</span>' +
+      '<span style="font-size:18px;font-weight:800;color:var(--gd);" id="dp-tot-'+id+'">0</span>' +
     '</div>';
-  linesCon.appendChild(line);
+  con.appendChild(line);
 }
 
-function removeDpLine(key, fid){
-  const el = document.getElementById('dpl-' + key);
+function removeDpLine(id){
+  const el = document.getElementById('dpl-'+id);
   if(el) el.remove();
-  // Farmer mein koi line na bache to ek de do
-  const linesCon = document.getElementById('dpf-lines-' + fid);
-  if(linesCon && linesCon.children.length === 0){
-    addDpLine(fid);
-  }
+  if(document.getElementById('dpLineCon').children.length === 0) addDpLine();
 }
 
-// ---- Line ki variety load (VDATA se, crop ke hisaab se) ----
-function dpLoadVar(key){
-  const crop = document.getElementById('dp-crop-'+key).value;
-  const sel = document.getElementById('dp-var-'+key);
+function dpLoadVar(id){
+  const crop = document.getElementById('dp-crop-'+id).value;
+  const sel = document.getElementById('dp-var-'+id);
   sel.innerHTML = '<option value="">-- Variety --</option>';
-  if(crop && VDATA[crop]){
-    VDATA[crop].forEach(v => sel.innerHTML += '<option>'+v+'</option>');
-  }
-  // variety badli to dobara validate
-  dpValidate(key);
+  if(crop && VDATA[crop]){ VDATA[crop].forEach(v => sel.innerHTML += '<option>'+v+'</option>'); }
+  dpValidate(id);
 }
 
-// ---- Line ka live total ----
-function dpCalc(key){
-  const car = parseInt(document.getElementById('dp-car-'+key).value) || 0;
-  const ppc = parseInt(document.getElementById('dp-ppc-'+key).value) || 0;
-  const dir = parseInt(document.getElementById('dp-dir-'+key).value) || 0;
-  const tot = (car * ppc) + dir;
-  document.getElementById('dp-tot-'+key).textContent = tot.toLocaleString();
+function dpCalc(id){
+  const car = parseInt(document.getElementById('dp-car-'+id).value)||0;
+  const ppc = parseInt(document.getElementById('dp-ppc-'+id).value)||0;
+  const dir = parseInt(document.getElementById('dp-dir-'+id).value)||0;
+  document.getElementById('dp-tot-'+id).textContent = ((car*ppc)+dir).toLocaleString();
 }
 
-// ---- Sowing date ko Seed Sowing Data se verify ----
-function dpValidate(key){
-  const variety = document.getElementById('dp-var-'+key).value;
-  const sowingDate = document.getElementById('dp-sow-'+key).value;
-  const msg = document.getElementById('dp-msg-'+key);
-
-  if(!variety || !sowingDate){ msg.style.display='none'; return; }
+// Date RANGE mein us variety ka sowing check karo
+function dpValidate(id){
+  const variety = document.getElementById('dp-var-'+id).value;
+  const sowFrom = document.getElementById('dp-sowfrom-'+id).value;
+  const sowTo = document.getElementById('dp-sowto-'+id).value;
+  const msg = document.getElementById('dp-msg-'+id);
+  if(!variety || !sowFrom || !sowTo){ msg.style.display='none'; return; }
 
   fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Seed%20Sowing%20Data&headers=1&t='+Date.now())
     .then(r=>r.text())
@@ -3299,28 +3324,29 @@ function dpValidate(key){
       try{
         const json = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
         const rows = json.table.rows.filter(r => r.c && r.c[0] && r.c[0].v && r.c[0].v !== 'Date');
-        const found = rows.some(r => {
+        let totalPlants = 0, count = 0;
+        rows.forEach(r => {
           let d = (r.c[0]?.v||'').toString();
-          if(d.startsWith('Date(')){
-            const pts = d.replace('Date(','').replace(')','').split(',');
-            d = pts[0] + '-' + String(parseInt(pts[1])+1).padStart(2,'0') + '-' + String(pts[2]).padStart(2,'0');
+          if(d.startsWith('Date(')){ const p=d.replace('Date(','').replace(')','').split(','); d=p[0]+'-'+String(parseInt(p[1])+1).padStart(2,'0')+'-'+String(p[2]).padStart(2,'0'); }
+          const vr = (r.c[5]?.v||'').toString();
+          if(vr === variety && d >= sowFrom && d <= sowTo){
+            totalPlants += parseFloat(r.c[11]?.v)||0;
+            count++;
           }
-          return d === sowingDate && (r.c[5]?.v||'').toString() === variety;
         });
-        if(found){
+        if(count > 0){
           msg.style.display='block'; msg.style.background='var(--g3)'; msg.style.color='var(--gd)'; msg.style.border='1px solid var(--gl)';
-          msg.innerHTML = '✅ Verified! Is date mein sowing mila.';
-          document.getElementById('dp-sow-'+key).setAttribute('data-validated','true');
+          msg.innerHTML = '✅ Is range mein '+count+' sowing mili — total '+totalPlants.toLocaleString()+' plants.';
+          document.getElementById('dp-sowfrom-'+id).setAttribute('data-validated','true');
         } else {
           msg.style.display='block'; msg.style.background='#fff3cd'; msg.style.color='#856404'; msg.style.border='1px solid #ffc107';
-          msg.innerHTML = '⚠️ Is variety ki is date mein sowing record nahi mila!';
-          document.getElementById('dp-sow-'+key).setAttribute('data-validated','false');
+          msg.innerHTML = '⚠️ Is variety ki is date range mein koi sowing record nahi mila!';
+          document.getElementById('dp-sowfrom-'+id).setAttribute('data-validated','false');
         }
       }catch(e){ msg.style.display='none'; }
     }).catch(()=>{ msg.style.display='none'; });
 }
 
-// ---- Sab collect karke ek saath Save ----
 function submitDispatch(){
   const date = document.getElementById('dpDate').value;
   const sup = document.getElementById('dpSup').value;
@@ -3333,48 +3359,40 @@ function submitDispatch(){
     return;
   }
 
-  // Har farmer block, har line se data nikalo
   const entries = [];
-  const farmerBlocks = document.querySelectorAll('[id^="dpf-"]');
   let errorMsg = '';
+  document.querySelectorAll('#dpLineCon > .card').forEach(line => {
+    const id = line.id.split('-')[1];
+    const area = document.getElementById('dp-area-'+id)?.value || '';
+    const crop = document.getElementById('dp-crop-'+id)?.value || '';
+    const variety = document.getElementById('dp-var-'+id)?.value || '';
+    const sowFrom = document.getElementById('dp-sowfrom-'+id)?.value || '';
+    const sowTo = document.getElementById('dp-sowto-'+id)?.value || '';
+    const car = parseInt(document.getElementById('dp-car-'+id)?.value)||0;
+    const ppc = parseInt(document.getElementById('dp-ppc-'+id)?.value)||0;
+    const dir = parseInt(document.getElementById('dp-dir-'+id)?.value)||0;
+    const tot = (car*ppc)+dir;
+    const validated = document.getElementById('dp-sowfrom-'+id)?.getAttribute('data-validated') === 'true';
 
-  document.querySelectorAll('#dpFarmerCon > .card').forEach(block => {
-    const fid = block.id.split('-')[1];
-    const farmer = (document.getElementById('dpf-name-'+fid)?.value || '').trim();
+    const empty = !crop && !variety && car===0 && dir===0;
+    if(empty) return;
 
-    const lines = block.querySelectorAll('[id^="dpl-"]');
-    lines.forEach(line => {
-      const key = line.id.replace('dpl-','');
-      const area = document.getElementById('dp-area-'+key)?.value || '';
-      const crop = document.getElementById('dp-crop-'+key)?.value || '';
-      const variety = document.getElementById('dp-var-'+key)?.value || '';
-      const sow = document.getElementById('dp-sow-'+key)?.value || '';
-      const car = parseInt(document.getElementById('dp-car-'+key)?.value) || 0;
-      const ppc = parseInt(document.getElementById('dp-ppc-'+key)?.value) || 0;
-      const dir = parseInt(document.getElementById('dp-dir-'+key)?.value) || 0;
-      const tot = (car * ppc) + dir;
-      const validated = document.getElementById('dp-sow-'+key)?.getAttribute('data-validated') === 'true';
+    if(!area){ errorMsg = 'Area select karo!'; return; }
+    if(!crop || !variety){ errorMsg = 'Crop aur Variety select karo!'; return; }
+    if(!sowFrom || !sowTo){ errorMsg = variety+': Sowing date range daalo!'; return; }
+    if(car===0 && dir===0){ errorMsg = variety+': Carret ya Direct Plants daalo!'; return; }
 
-      // Line bilkul khaali hai to skip (na farmer, na kuch)
-      const empty = !farmer && !crop && !variety && !sow && car===0 && dir===0;
-      if(empty) return;
+    // Sowing date range ko ek string mein (From se To)
+    const sowRange = sowFrom + ' se ' + sowTo;
 
-      // Validation
-      if(!farmer){ errorMsg = '❗ Har farmer ka naam zaroori hai!'; return; }
-      if(!area){ errorMsg = '❗ '+farmer+': Area select karo!'; return; }
-      if(!crop || !variety){ errorMsg = '❗ '+farmer+': Crop aur Variety select karo!'; return; }
-      if(!sow){ errorMsg = '❗ '+farmer+': Sowing date zaroori hai!'; return; }
-      if(car===0 && dir===0){ errorMsg = '❗ '+farmer+' ('+variety+'): Carret ya Direct Plants daalo!'; return; }
-
-      entries.push({
-        farmer: farmer, area: area, crop: crop, variety: variety,
-        sowingDate: sow, carret: car, ppc: ppc, direct: dir,
-        totalPlants: tot, remarks: '', isValidated: validated
-      });
+    entries.push({
+      area: area, crop: crop, variety: variety,
+      sowingDate: sowRange, carret: car, ppc: ppc, direct: dir,
+      totalPlants: tot, remarks: '', isValidated: validated
     });
   });
 
-  if(errorMsg){ toast(errorMsg, 'error'); return; }
+  if(errorMsg){ toast('❗ '+errorMsg, 'error'); return; }
   if(entries.length === 0){ toast('❗ Kam se kam ek variety line bharo!', 'error'); return; }
 
   const btn = event.target;
@@ -3383,27 +3401,20 @@ function submitDispatch(){
 
   const payload = {
     module: 'dispatch',
-    date: date,
-    supervisor: sup,
-    gaadi: gaadi,
-    driver: driver,
+    date: date, supervisor: sup, gaadi: gaadi, driver: driver,
     meter: parseFloat(meter),
-    entries: entries   // har entry ka apna area
+    entries: entries
   };
 
-  fetch(API, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {'Content-Type': 'text/plain'},
-    body: JSON.stringify(payload)
-  }).then(() => {
-    toast('✅ '+entries.length+' entries save ho gayi!');
-    openDispatchForm(); // form fresh
-  }).catch(() => {
-    toast('⚠️ Error! Internet check karo.', 'error');
-    btn.disabled = false;
-    btn.innerHTML = '💾 Sab Save Karo';
-  });
+  fetch(API, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)})
+    .then(() => {
+      toast('✅ '+entries.length+' entries save ho gayi!');
+      openDispatchForm();
+    }).catch(() => {
+      toast('⚠️ Error! Internet check karo.', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '💾 Sab Save Karo';
+    });
 }
 
 
@@ -3420,7 +3431,10 @@ function openBookingForm(){
   document.getElementById('bkMobile').value = '';
   document.getElementById('bkPayMode').value = 'Cash';
   document.getElementById('bkCash').value = '';
-  document.getElementById('bkBank').value = '';
+  document.getElementById('bkBank1Name').value = '';
+  document.getElementById('bkBank1Amt').value = '';
+  document.getElementById('bkBank2Name').value = '';
+  document.getElementById('bkBank2Amt').value = '';
   document.getElementById('bkBankName').value = '';
   document.getElementById('bkBothBox').style.display = 'none';
   document.getElementById('bkBankNameBox').style.display = 'none';
@@ -3443,9 +3457,8 @@ function bkCropOptions(){
 
 function bkTogglePayment(){
   const mode = document.getElementById('bkPayMode').value;
-  document.getElementById('bkBothBox').style.display = (mode === 'Both' ? 'grid' : 'none');
-  // Bank name sirf Bank ya Both par dikhe
-  document.getElementById('bkBankNameBox').style.display = (mode === 'Bank' || mode === 'Both' ? 'block' : 'none');
+  document.getElementById('bkBothBox').style.display = (mode === 'Both' ? 'block' : 'none');
+  document.getElementById('bkBankNameBox').style.display = (mode === 'Bank' ? 'block' : 'none');
 }
 
 function addBkLine(){
@@ -3541,51 +3554,90 @@ function submitBooking(){
     bankName = document.getElementById('bkBankName').value;
     if(!bankName){ toast('❗ Bank name chuno!', 'error'); return; }
   }
-  else { // Both
+  else { // Both: Cash + Bank1 + Bank2
     cashAmt = parseFloat(document.getElementById('bkCash').value) || 0;
-    bankAmt = parseFloat(document.getElementById('bkBank').value) || 0;
+    const b1name = document.getElementById('bkBank1Name').value;
+    const b1amt = parseFloat(document.getElementById('bkBank1Amt').value) || 0;
+    const b2name = document.getElementById('bkBank2Name').value;
+    const b2amt = parseFloat(document.getElementById('bkBank2Amt').value) || 0;
+    bankAmt = b1amt + b2amt;
     if(cashAmt + bankAmt === 0){ toast('❗ Cash ya Bank amount daalo!', 'error'); return; }
-    bankName = document.getElementById('bkBankName').value;
-    if(bankAmt > 0 && !bankName){ toast('❗ Bank name chuno!', 'error'); return; }
+    if(b1amt > 0 && !b1name){ toast('❗ Bank 1 chuno!', 'error'); return; }
+    if(b2amt > 0 && !b2name){ toast('❗ Bank 2 chuno!', 'error'); return; }
+    // bankName string: dono bank + amount
+    let parts = [];
+    if(b1amt > 0) parts.push(b1name + ':' + b1amt);
+    if(b2amt > 0) parts.push(b2name + ':' + b2amt);
+    bankName = parts.join(', ');
   }
 
-  const bookingId = 'BK' + Date.now().toString().slice(-8);
   const marketing = curUser ? curUser.name : 'Marketing';
   const remarks = document.getElementById('bkRemarks').value.trim();
 
   const btn = event.target;
   btn.disabled = true;
-  btn.innerHTML = '⏳ Save Ho Raha Hai...';
+  btn.innerHTML = '⏳ Serial number le rahe hain...';
 
-  const payload = {
-    module: 'booking',
-    bookingDate: bkDate, farmer, village, tehsil, mobile,
-    totalAmount: totalAmt,
-    paymentMode: payMode, cashAmount: cashAmt, bankAmount: bankAmt, bankName: bankName,
-    paymentDate: payDate, bookingId, marketing, remarks: remarks,
-    lines: collected
-  };
+  // Sheet se last serial padhkar next banao, phir PDF + save
+  const yr = new Date().getFullYear();
+  const prefix = 'BK' + yr + '-';
+  fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Booking%20Data&headers=1&t='+Date.now())
+    .then(r=>r.text())
+    .then(txt=>{
+      let maxNum = 0;
+      try{
+        const json = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+        const rows = json.table.rows || [];
+        rows.forEach(r => {
+          // Booking ID col index 22
+          const bid = String(r.c && r.c[22] && r.c[22].v || '');
+          if(bid.indexOf(prefix) === 0){
+            const n = parseInt(bid.substring(prefix.length)) || 0;
+            if(n > maxNum) maxNum = n;
+          }
+        });
+      }catch(e){ /* sheet khaali ya nahi bani - maxNum=0 */ }
 
-  // PDF pehle banao (saara data haath mein hai) - server ke response ka intezaar mat karo
-  generateBookingPDF({bkDate, farmer, village, tehsil, mobile, payMode, cashAmt, bankAmt, bankName, payDate, bookingId, marketing, remarks, lines: collected, totalAmt});
+      const bookingId = prefix + String(maxNum + 1).padStart(5, '0');
+      finishBooking(bookingId);
+    })
+    .catch(()=>{
+      // Serial fetch fail - fallback timestamp ID
+      finishBooking(prefix + String(Date.now()).slice(-5));
+    });
 
-  // Ab data server ko bhejo (background mein)
-  fetch(API, {
-    method: 'POST', mode: 'no-cors',
-    headers: {'Content-Type': 'text/plain'},
-    body: JSON.stringify(payload)
-  }).then(() => {
-    toast('✅ Booking save ho gaya!');
-  }).catch(() => {
-    toast('⚠️ Data bhejne mein dikkat — internet check karo', 'error');
-  });
+  function finishBooking(bookingId){
+    btn.innerHTML = '⏳ Save Ho Raha Hai...';
 
-  // Form thodi der baad reset (PDF ban jaane ke baad)
-  setTimeout(() => {
-    btn.disabled = false;
-    btn.innerHTML = '💾 Save + PDF Download';
-    openBookingForm();
-  }, 1500);
+    const payload = {
+      module: 'booking',
+      bookingDate: bkDate, farmer, village, tehsil, mobile,
+      totalAmount: totalAmt,
+      paymentMode: payMode, cashAmount: cashAmt, bankAmount: bankAmt, bankName: bankName,
+      paymentDate: payDate, bookingId, marketing, remarks: remarks,
+      lines: collected
+    };
+
+    // PDF banao
+    generateBookingPDF({bkDate, farmer, village, tehsil, mobile, payMode, cashAmt, bankAmt, bankName, payDate, bookingId, marketing, remarks, lines: collected, totalAmt});
+
+    // Server ko bhejo
+    fetch(API, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain'},
+      body: JSON.stringify(payload)
+    }).then(() => {
+      toast('✅ Booking save ho gaya! ID: ' + bookingId);
+    }).catch(() => {
+      toast('⚠️ Data bhejne mein dikkat — internet check karo', 'error');
+    });
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = '💾 Save + PDF Download';
+      openBookingForm();
+    }, 1500);
+  }
 }
 
 function generateBookingPDF(d){
@@ -3602,7 +3654,7 @@ function generateBookingPDF(d){
         '<td style="padding:8px 6px;border-bottom:1px solid #e0e0e0;font-weight:600;">' + clean(ln.variety) + '</td>' +
         '<td style="padding:8px 6px;border-bottom:1px solid #e0e0e0;text-align:center;">' + ln.plant + '</td>' +
         '<td style="padding:8px 6px;border-bottom:1px solid #e0e0e0;text-align:center;">' + ln.rate + '</td>' +
-        '<td style="padding:8px 6px;border-bottom:1px solid #e0e0e0;text-align:center;">' + clean(ln.deliveryDate) + '</td>' +
+        '<td style="padding:8px 6px;border-bottom:1px solid #e0e0e0;text-align:center;">' + fmtDate(ln.deliveryDate) + '</td>' +
       '</tr>';
   });
 
@@ -3624,7 +3676,7 @@ function generateBookingPDF(d){
           '<div style="font-size:12px;color:#333;margin-top:5px;line-height:1.6;">' +
             'Village Sirlay, Tehsil Barwaha, District Khargone (MP)<br/>' +
             'Phone: 9479457713 / 9479457722<br/>' +
-            'Email: tirupatinursery@gmail.com &nbsp;|&nbsp; www.tirupatinursery.com' +
+            'Email: tirupatinursery@gmail.com &nbsp;|&nbsp; https://tirupatinursery.com' +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -3635,7 +3687,7 @@ function generateBookingPDF(d){
         // Booking ID + date
         '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px;">' +
           '<span><b>Booking ID:</b> ' + clean(d.bookingId) + '</span>' +
-          '<span><b>Date:</b> ' + clean(d.bkDate) + '</span>' +
+          '<span><b>Date:</b> ' + fmtDate(d.bkDate) + '</span>' +
         '</div>' +
         // Farmer details
         '<div style="background:#f1f8f1;border-radius:8px;padding:12px;margin-bottom:14px;font-size:14px;line-height:1.7;">' +
@@ -3660,8 +3712,8 @@ function generateBookingPDF(d){
         // Payment
         '<div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:12px;">' +
           '<div>' + payText + '</div>' +
-          '<div>Payment Date: ' + clean(d.payDate) + '</div>' +
-          (d.secondAmt ? '<div style="margin-top:4px;color:#1a472a;"><b>Second Payment:</b> Rs.' + d.secondAmt + ' (' + clean(d.secondMode||'') + (d.secondBank?' - '+clean(d.secondBank):'') + ') ' + clean(d.secondDate||'') + '</div>' +
+          '<div>Payment Date: ' + fmtDate(d.payDate) + '</div>' +
+          (d.secondAmt ? '<div style="margin-top:4px;color:#1a472a;"><b>Second Payment:</b> Rs.' + d.secondAmt + ' (' + clean(d.secondMode||'') + (d.secondBank?' - '+clean(d.secondBank):'') + ') ' + fmtDate(d.secondDate||'') + '</div>' +
                          '<div style="font-weight:700;color:#1a472a;">Total Received: Rs. ' + ((parseFloat(d.totalAmt)||0)+(parseFloat(d.secondAmt)||0)).toLocaleString("en-IN") + '</div>' : '') +
         '</div>' +
         // Remarks (agar ho)
@@ -3830,14 +3882,14 @@ function loadBookingReport(){
           const status = (r.c[20]?.v||'Pending').toString();
           const stColor = status==='Delivered' ? 'var(--gd)' : '#e65100';
           html += '<tr style="border-bottom:1px solid var(--g2);">'+
-            '<td style="padding:7px;">'+r._date+'</td>'+
+            '<td style="padding:7px;">'+fmtDate(r._date)+'</td>'+
             '<td style="padding:7px;">'+farmer+'</td>'+
             '<td style="padding:7px;">'+village+'</td>'+
             '<td style="padding:7px;">'+crop+'</td>'+
             '<td style="padding:7px;font-weight:600;">'+variety+'</td>'+
             '<td style="padding:7px;text-align:center;">'+plant+'</td>'+
             '<td style="padding:7px;text-align:center;">'+rate+'</td>'+
-            '<td style="padding:7px;text-align:center;">'+deliv+'</td>'+
+            '<td style="padding:7px;text-align:center;">'+fmtDate(deliv)+'</td>'+
             '<td style="padding:7px;text-align:center;color:'+stColor+';font-weight:700;">'+status+'</td>'+
             '</tr>';
         });
@@ -3898,7 +3950,7 @@ function loadSupActivity(){
     {key:'assign', sheet:'Morning Assignment', supCol:1, label:'Assignment', icon:'📋',
       line:(r)=> (r.c[3]?.v||'')+' • '+(r.c[2]?.v||'')+' • '+((r.c[4]?.v||'').toString().split(',').length)+' labour'},
     {key:'dispatch', sheet:'Dispatch Data', supCol:2, label:'Dispatch', icon:'🚚',
-      line:(r)=> (r.c[6]?.v||'')+' • '+(r.c[8]?.v||'')+' • '+(parseFloat(r.c[13]?.v)||0)+' plants'},
+      line:(r)=> (r.c[6]?.v||'')+' / '+(r.c[7]?.v||'')+' • '+(parseFloat(r.c[12]?.v)||0)+' plants'},
     {key:'shift', sheet:'Shifting Data', supCol:1, label:'Shifting', icon:'🔄',
       line:(r)=> (r.c[2]?.v||'')+' • '+(r.c[4]?.v||'')+' • '+(r.c[6]?.v||0)+' tray'}
   ];
@@ -4099,7 +4151,7 @@ function loadPayDeliv(){
           html += '<div class="card" style="border-left:4px solid '+(isDeliv?'var(--gm)':'#ff8f00')+';">'+
             '<div style="display:flex;justify-content:space-between;align-items:start;">'+
               '<div><div style="font-weight:700;color:var(--gd);">👨 '+m.farmer+' — '+m.village+'</div>'+
-                '<div style="font-size:12px;color:var(--g5);margin-top:2px;">'+m.bid+' • '+m.bd+'</div></div>'+
+                '<div style="font-size:12px;color:var(--g5);margin-top:2px;">'+m.bid+' • '+fmtDate(m.bd)+'</div></div>'+
               '<span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;background:'+(isDeliv?'#e8f5e9':'#fff3e0')+';color:'+(isDeliv?'var(--gd)':'#e65100')+';">'+(isDeliv?'✅ Delivered':'⏳ Pending')+'</span>'+
             '</div>'+
             '<div style="font-size:12px;color:var(--g8);margin-top:6px;">🌱 '+varList+'</div>'+
@@ -4107,11 +4159,12 @@ function loadPayDeliv(){
               '<div>First Payment: <b>Rs.'+firstPay.toLocaleString("en-IN")+'</b></div>'+
               (secondPay>0 ? '<div>Second Payment: <b>Rs.'+secondPay.toLocaleString("en-IN")+'</b></div>' : '')+
               '<div style="color:var(--gd);font-weight:700;">Total Received: Rs.'+totalRec.toLocaleString("en-IN")+'</div>'+
-              (isDeliv && delivDate ? '<div style="color:var(--gm);font-size:12px;">Delivered: '+delivDate+'</div>' : '')+
+              (isDeliv && delivDate ? '<div style="color:var(--gm);font-size:12px;">Delivered: '+fmtDate(delivDate)+'</div>' : '')+
             '</div>'+
             '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">'+
               (secondPay>0 ? '' : '<button onclick="openAddPay(\''+m.bid+'\')" style="flex:1;min-width:90px;padding:9px;background:var(--gm);color:white;border:none;border-radius:6px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">💰 Add Payment</button>')+
               (isDeliv ? '' : '<button onclick="openDeliv(\''+m.bid+'\')" style="flex:1;min-width:90px;padding:9px;background:#388e3c;color:white;border:none;border-radius:6px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">✅ Delivered</button>')+
+              (isDeliv ? '' : '<button onclick="openAddVar(\''+m.bid+'\')" style="flex:1;min-width:90px;padding:9px;background:var(--gl);color:white;border:none;border-radius:6px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">🌱 Add Variety</button>')+
               '<button onclick="redownloadSlip(\''+m.bid+'\')" style="flex:1;min-width:90px;padding:9px;background:var(--g8);color:white;border:none;border-radius:6px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">📄 Slip</button>'+
             '</div>'+
           '</div>';
@@ -4123,6 +4176,50 @@ function loadPayDeliv(){
     }).catch(()=>{
       con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--rd);">Internet error!</div>';
     });
+}
+
+// ── Add Variety modal ──
+let avCurrentId = '';
+function openAddVar(bid){
+  avCurrentId = bid;
+  const first = pdBookings[bid][0];
+  document.getElementById('avInfo').innerHTML = '<b>'+(first.c[1]?.v||'')+'</b> — '+bid;
+  const cropSel = document.getElementById('avCrop');
+  cropSel.innerHTML = '<option value="">-- Crop --</option>';
+  Object.keys(VDATA).forEach(c => cropSel.innerHTML += '<option value="'+c+'">'+c+'</option>');
+  document.getElementById('avVar').innerHTML = '<option value="">-- Variety --</option>';
+  document.getElementById('avPlant').value = '';
+  document.getElementById('avRate').value = '';
+  document.getElementById('avDeliv').value = '';
+  document.getElementById('addVarModal').style.display = 'flex';
+}
+function closeAddVar(){ document.getElementById('addVarModal').style.display = 'none'; }
+function avLoadVar(){
+  const crop = document.getElementById('avCrop').value;
+  const sel = document.getElementById('avVar');
+  sel.innerHTML = '<option value="">-- Variety --</option>';
+  if(crop && VDATA[crop]){ VDATA[crop].forEach(v => sel.innerHTML += '<option>'+v+'</option>'); }
+}
+function submitAddVariety(){
+  const crop = document.getElementById('avCrop').value;
+  const variety = document.getElementById('avVar').value;
+  const plant = parseInt(document.getElementById('avPlant').value) || 0;
+  const rate = parseFloat(document.getElementById('avRate').value) || 0;
+  const deliv = document.getElementById('avDeliv').value;
+  if(!crop || !variety){ toast('❗ Crop aur Variety chuno!', 'error'); return; }
+  if(plant === 0){ toast('❗ Plant daalo!', 'error'); return; }
+  if(!deliv){ toast('❗ Delivery date daalo!', 'error'); return; }
+
+  const payload = {
+    module: 'bookingAddVariety', bookingId: avCurrentId,
+    crop, variety, plant, rate, deliveryDate: deliv
+  };
+  fetch(API, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)})
+    .then(()=>{
+      toast('✅ Variety add ho gayi!');
+      closeAddVar();
+      setTimeout(loadPayDeliv, 1200);
+    }).catch(()=>{ toast('⚠️ Error! Internet check karo.', 'error'); });
 }
 
 // ── Add Payment modal ──
@@ -4138,35 +4235,52 @@ function openAddPay(bid){
   document.getElementById('apBank').value = '';
   document.getElementById('apCash').value = '';
   document.getElementById('apBankAmt').value = '';
+  document.getElementById('apBank2Name').value = '';
+  document.getElementById('apBank2Amt').value = '';
   document.getElementById('apBankBox').style.display = 'none';
   document.getElementById('apBothBox').style.display = 'none';
+  document.getElementById('apBank2Box').style.display = 'none';
   document.getElementById('apDate').valueAsDate = new Date();
   document.getElementById('addPayModal').style.display = 'flex';
 }
 function closeAddPay(){ document.getElementById('addPayModal').style.display = 'none'; }
 function apToggleBank(){
   const mode = document.getElementById('apMode').value;
-  document.getElementById('apBankBox').style.display = (mode === 'Bank' || mode === 'Both' ? 'block' : 'none');
+  document.getElementById('apBankBox').style.display = (mode === 'Bank' ? 'block' : 'none');
   document.getElementById('apBothBox').style.display = (mode === 'Both' ? 'grid' : 'none');
+  document.getElementById('apBank2Box').style.display = (mode === 'Both' ? 'block' : 'none');
 }
 function submitSecondPayment(){
   const mode = document.getElementById('apMode').value;
-  const bank = (mode === 'Bank' || mode === 'Both') ? document.getElementById('apBank').value : '';
   const date = document.getElementById('apDate').value;
 
   let amount = 0;
   let modeStr = mode;
+  let bank = '';
   if(mode === 'Both'){
     const cash = parseFloat(document.getElementById('apCash').value) || 0;
-    const bankAmt = parseFloat(document.getElementById('apBankAmt').value) || 0;
-    amount = cash + bankAmt;
-    if(amount === 0){ toast('❗ Cash ya Bank amount daalo!', 'error'); return; }
-    if(bankAmt > 0 && !bank){ toast('❗ Bank chuno!', 'error'); return; }
-    modeStr = 'Cash:' + cash + ' Bank:' + bankAmt;
-  } else {
+    const b1amt = parseFloat(document.getElementById('apBankAmt').value) || 0;
+    const b1name = document.getElementById('apBank').value;
+    const b2amt = parseFloat(document.getElementById('apBank2Amt').value) || 0;
+    const b2name = document.getElementById('apBank2Name').value;
+    amount = cash + b1amt + b2amt;
+    if(amount === 0){ toast('❗ Amount daalo!', 'error'); return; }
+    if(b1amt > 0 && !b1name){ toast('❗ Bank 1 chuno!', 'error'); return; }
+    if(b2amt > 0 && !b2name){ toast('❗ Bank 2 chuno!', 'error'); return; }
+    let parts = [];
+    if(cash > 0) parts.push('Cash:' + cash);
+    if(b1amt > 0) parts.push(b1name + ':' + b1amt);
+    if(b2amt > 0) parts.push(b2name + ':' + b2amt);
+    modeStr = parts.join(', ');
+    bank = [b1name, b2name].filter(x=>x).join(', ');
+  } else if(mode === 'Bank'){
+    amount = parseFloat(document.getElementById('apAmount').value) || 0;
+    bank = document.getElementById('apBank').value;
+    if(amount === 0){ toast('❗ Amount daalo!', 'error'); return; }
+    if(!bank){ toast('❗ Bank chuno!', 'error'); return; }
+  } else { // Cash
     amount = parseFloat(document.getElementById('apAmount').value) || 0;
     if(amount === 0){ toast('❗ Amount daalo!', 'error'); return; }
-    if(mode === 'Bank' && !bank){ toast('❗ Bank chuno!', 'error'); return; }
   }
 
   const payload = {
@@ -4317,12 +4431,12 @@ function loadVarietyReport(){
         ensure(crop, variety).booking += parseInt(r.c[7]?.v)||0;
       });
 
-      // Dispatch: Crop=c[7], Variety=c[8], Total Plants=c[13] (total, no date filter)
+      // Dispatch: Crop=c[6], Variety=c[7], Total Plants=c[12] (no farmer now)
       dispRows.forEach(r => {
-        if(!r.c || !r.c[8] || !r.c[8].v || r.c[8].v==='Variety') return;
-        const crop=(r.c[7]?.v||'').toString(), variety=(r.c[8]?.v||'').toString();
+        if(!r.c || !r.c[7] || !r.c[7].v || r.c[7].v==='Variety') return;
+        const crop=(r.c[6]?.v||'').toString(), variety=(r.c[7]?.v||'').toString();
         if(!passFilter(crop, variety)) return;
-        ensure(crop, variety).dispatch += parseInt(r.c[13]?.v)||0;
+        ensure(crop, variety).dispatch += parseInt(r.c[12]?.v)||0;
       });
 
       const items = Object.values(map).filter(x => x.sowing || x.booking || x.dispatch);
@@ -4437,8 +4551,8 @@ function loadDispatchReport(){
           if(r._date < from || r._date > to) return false;
           if(!seeAll && (r.c[2]?.v||'').toString() !== myName) return false;
           if(areaFilter && (r.c[1]?.v||'').toString() !== areaFilter) return false;
-          if(cropFilter && (r.c[7]?.v||'').toString() !== cropFilter) return false;
-          if(varFilter && (r.c[8]?.v||'').toString() !== varFilter) return false;
+          if(cropFilter && (r.c[6]?.v||'').toString() !== cropFilter) return false;
+          if(varFilter && (r.c[7]?.v||'').toString() !== varFilter) return false;
           const gaadi = (r.c[3]?.v||'').toString().toLowerCase();
           if(gadiFilter && !gaadi.includes(gadiFilter)) return false;
           const driver = (r.c[4]?.v||'').toString().toLowerCase();
@@ -4461,7 +4575,7 @@ function loadDispatchReport(){
         let html = '<div class="rep-card" style="margin-top:10px;"><div class="rep-title">🚚 Dispatch — '+rows.length+' Records</div>';
         html += '<div class="rep-sub">'+from+' to '+to+'</div>';
         
-        const totalPlants = rows.reduce((s, r) => s + (parseFloat(r.c[13]?.v)||0), 0);
+        const totalPlants = rows.reduce((s, r) => s + (parseFloat(r.c[12]?.v)||0), 0);
         const verifiedCount = rows.filter(r => (r.c[14]?.v||'').toString().toUpperCase() === 'YES').length;
         const unverifiedCount = rows.length - verifiedCount;
         html += '<div class="stat-grid">';
@@ -4473,7 +4587,7 @@ function loadDispatchReport(){
         
         html += '<div class="rep-card"><div class="rep-title">📋 Dispatch Detail <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div>';
         html += '<div style="overflow-x:auto;"><table class="att-table">';
-        html += '<thead><tr><th></th><th>Date</th><th>Gaadi</th><th>Driver</th><th>Farmer</th><th>Crop</th><th>Variety</th><th>Sowing Date</th><th>Carret</th><th>Total Plants</th><th>Status</th></tr></thead><tbody>';
+        html += '<thead><tr><th></th><th>Date</th><th>Gaadi</th><th>Driver</th><th>Crop</th><th>Variety</th><th>Sowing Range</th><th>Carret</th><th>Total Plants</th><th>Status</th></tr></thead><tbody>';
         
         let ridCounter = 0;
         rows.forEach(r => {
@@ -4502,9 +4616,9 @@ function loadDispatchReport(){
           html += '<tr class="exp-toggle" onclick="toggleRow(\''+rid+'\')" style="'+(isVerified ? '' : 'background:#fff5f5;')+'"><td><span class="exp-arrow">▶</span></td>';
           html += '<td>'+r._date+'</td><td>'+(r.c[3]?.v||'')+'</td><td>'+(r.c[4]?.v||'')+'</td>';
           html += '<td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||'')+'</td>';
-          html += '<td>'+(r.c[8]?.v||'')+'</td><td><span style="color:'+statusColor+';font-weight:700;">'+sowingDate+'</span></td>';
+          html += '<td><span style="color:'+statusColor+';font-weight:700;">'+sowingDate+'</span></td>';
           html += '<td>'+(r.c[10]?.v||0)+'</td>';
-          html += '<td><strong>'+(r.c[13]?.v||0)+'</strong></td>';
+          html += '<td><strong>'+(r.c[12]?.v||0)+'</strong></td>';
           html += '<td style="color:'+statusColor+';font-weight:700;">'+statusBadge+'</td></tr>';
           html += '<tr class="exp-row" id="'+rid+'"><td colspan="11" class="exp-inner">'+inner+'</td></tr>';
         });
