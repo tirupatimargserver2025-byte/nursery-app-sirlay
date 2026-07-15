@@ -3325,6 +3325,7 @@ function loadShiftingReport(){
 
 // ═══════════ DISPATCH (naya: farmer nahi, sirf variety lines, sowing date range) ═══════════
 function openDispatchForm(){
+  populateCropVarietyLists(); // Ensure datalists are filled
   document.getElementById('dpDate').valueAsDate = new Date();
   document.getElementById('dpSup').value = curUser ? curUser.name : 'Supervisor';
   document.getElementById('dpGaadi').value = '';
@@ -3348,6 +3349,7 @@ function dpCropOptions(){
 
 // Nayi variety line (farmer nahi - sirf variety details)
 function addDpLine(){
+  populateCropVarietyLists(); // Ensure datalists fresh
   const id = ++dpLineCnt;
   const con = document.getElementById('dpLineCon');
   const line = document.createElement('div');
@@ -3523,6 +3525,7 @@ const TGH_LOGO = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQ
 let bkLineCnt = 0;
 
 function openBookingForm(){
+  populateCropVarietyLists(); // Ensure datalists are filled
   document.getElementById('bkDate').valueAsDate = new Date();
   document.getElementById('bkPayDate').valueAsDate = new Date();
   document.getElementById('bkFarmer').value = '';
@@ -3565,6 +3568,7 @@ function bkTogglePayment(){
 }
 
 function addBkLine(){
+  populateCropVarietyLists(); // Ensure datalists fresh
   const id = ++bkLineCnt;
   const con = document.getElementById('bkLineCon');
   const line = document.createElement('div');
@@ -3685,7 +3689,7 @@ function submitBooking(){
     const b2amt = parseFloat(document.getElementById('bkBank2Amt').value) || 0;
     bankAmt = b1amt + b2amt;
     const sum = cashAmt + bankAmt;
-    if(sum === 0){ toast('❗ Cash ya Bank amount daalo!', 'error'); return; }
+    // Payment अब optional है - 0 amount booking भी allowed है
     if(b1amt > 0 && !b1name){ toast('❗ Bank 1 chuno!', 'error'); return; }
     if(b2amt > 0 && !b2name){ toast('❗ Bank 2 chuno!', 'error'); return; }
     // Total match check
@@ -4055,138 +4059,104 @@ function loadSupActivity(){
   const from = document.getElementById('saFrom').value;
   const to = document.getElementById('saTo').value;
   const con = document.getElementById('supActivityContent');
-  con.innerHTML = '<div class="card" style="text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;color:var(--gd);">Saari sheets padh rahe hain... thoda ruko</div></div>';
+  
+  con.innerHTML = '<div class="card" style="text-align:center;padding:20px;">Loading...</div>';
 
   const gv = (sheet) => fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(sheet)+'&headers=1&t='+Date.now()).then(r=>r.text()).catch(()=>'');
-
-  const fixDate = (val) => {
+  
+  const parse = txt => {
+    try {
+      const match = txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+      return match ? JSON.parse(match[1]).table.rows : [];
+    } catch(e) {
+      return [];
+    }
+  };
+  
+  const fixDate = val => {
     let d = (val||'').toString();
-    if(d.startsWith('Date(')){ const p=d.replace('Date(','').replace(')','').split(','); d=p[0]+'-'+String(parseInt(p[1])+1).padStart(2,'0')+'-'+String(p[2]).padStart(2,'0'); }
+    if(d.startsWith('Date(')) {
+      const p = d.replace('Date(','').replace(')','').split(',');
+      d = p[0] + '-' + String(parseInt(p[1])+1).padStart(2,'0') + '-' + String(p[2]).padStart(2,'0');
+    }
     return d;
   };
-  const parse = (txt) => { try { return JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]).table.rows || []; } catch(e){ return []; } };
 
-  // Module config: sheet, supervisor column, label, icon, aur summary line banane wala
-  const MODULES = [
-    {key:'seed', sheet:'Seed Sowing Data', supCol:1, label:'Seed Sowing', icon:'🌱',
-      line:(r)=> (r.c[4]?.v||'')+' / '+(r.c[5]?.v||'')+' • '+(r.c[2]?.v||'')+' • '+(parseFloat(r.c[11]?.v)||0)+' plants'},
-    {key:'water', sheet:'Watering Records', supCol:1, label:'Watering', icon:'💧',
-      line:(r)=> (r.c[2]?.v||'')+' • '+(r.c[7]?.v||0)+'L • '+(r.c[6]?.v||'')},
-    {key:'spray', sheet:'Spraying Records', supCol:1, label:'Spraying', icon:'🌿',
-      line:(r)=> (r.c[2]?.v||'')+' • '+(r.c[7]?.v||0)+' pumps'},
-    {key:'attend', sheet:'Attendance Records', supCol:1, label:'Attendance', icon:'👷',
-      line:(r)=> (r.c[4]?.v||'')+' • '+(r.c[5]?.v||'')+' • '+(r.c[2]?.v||'')},
-    {key:'assign', sheet:'Morning Assignment', supCol:1, label:'Assignment', icon:'📋',
-      line:(r)=> (r.c[3]?.v||'')+' • '+(r.c[2]?.v||'')+' • '+((r.c[4]?.v||'').toString().split(',').length)+' labour'},
-    {key:'dispatch', sheet:'Dispatch Data', supCol:2, label:'Dispatch', icon:'🚚',
-      line:(r)=> (r.c[6]?.v||'')+' / '+(r.c[7]?.v||'')+' • '+(parseFloat(r.c[12]?.v)||0)+' plants'},
-    {key:'shift', sheet:'Shifting Data', supCol:1, label:'Shifting', icon:'🔄',
-      line:(r)=> (r.c[2]?.v||'')+' • '+(r.c[4]?.v||'')+' • '+(r.c[6]?.v||0)+' tray'}
+  const SHEETS = [
+    {key:'seed', sheet:'Seed Sowing Data', supCol:1, label:'🌱 Sowing'},
+    {key:'water', sheet:'Watering Records', supCol:1, label:'💧 Watering'},
+    {key:'spray', sheet:'Spraying Records', supCol:1, label:'🌿 Spray'},
+    {key:'attend', sheet:'Attendance Records', supCol:1, label:'👷 Attend'},
+    {key:'assign', sheet:'Morning Assignment', supCol:1, label:'📋 Assign'},
+    {key:'dispatch', sheet:'Dispatch Data', supCol:2, label:'🚚 Dispatch'},
+    {key:'shift', sheet:'Shifting Data', supCol:1, label:'🔄 Shift'}
   ];
 
-  Promise.all(MODULES.map(m => gv(m.sheet))).then(results => {
-    // Har supervisor ke liye: {module: [rows]}
-    const supData = {}; // name -> { modKey -> [ {date, line} ], _total, _last }
-    const ensureSup = (name) => {
-      if(!supData[name]) supData[name] = {_total:0, _last:''};
-      return supData[name];
-    };
-
-    MODULES.forEach((m, mi) => {
-      const rows = parse(results[mi]);
-      rows.forEach(r => {
-        if(!r.c || !r.c[0] || !r.c[0].v) return;
-        const hdr = r.c[0].v.toString();
-        if(hdr==='Date' || hdr==='Booking Date') return;
+  Promise.all(SHEETS.map(s => gv(s.sheet))).then(results => {
+    const supCount = {}; // supervisor -> {seed: 2, water: 3, ...}
+    
+    SHEETS.forEach((sheet, idx) => {
+      parse(results[idx]).forEach(r => {
+        if(!r.c || !r.c[0]) return;
+        const hdr = (r.c[0].v||'').toString();
+        if(hdr === 'Date' || hdr === 'Booking Date') return;
+        
         const d = fixDate(r.c[0].v);
         if(from && d < from) return;
         if(to && d > to) return;
-        const sup = (r.c[m.supCol]?.v||'').toString().trim();
+        
+        const sup = (r.c[sheet.supCol]?.v||'').toString().trim();
         if(!sup) return;
-        const s = ensureSup(sup);
-        if(!s[m.key]) s[m.key] = [];
-        s[m.key].push({date:d, line:m.line(r)});
-        s._total++;
-        if(d > s._last) s._last = d;
+        
+        if(!supCount[sup]) supCount[sup] = {};
+        supCount[sup][sheet.key] = (supCount[sup][sheet.key] || 0) + 1;
       });
     });
 
-    // Sabhi known supervisors bhi list mein (jinhone kuch nahi kiya wo bhi dikhein)
-    Object.keys(SUP_DATA).forEach(n => { if(!supData[n]) supData[n] = {_total:0, _last:''}; });
+    // Sabhi known supervisors add करो
+    Object.keys(SUP_DATA).forEach(n => { if(!supCount[n]) supCount[n] = {}; });
 
-    const names = Object.keys(supData).sort();
-    if(names.length === 0){
-      con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--g5);">Koi supervisor data nahi mila</div>';
+    const names = Object.keys(supCount).sort();
+    if(names.length === 0) {
+      con.innerHTML = '<div class="card" style="text-align:center;color:var(--g5);">No data found</div>';
       return;
     }
 
-    // Summary header
-    const activeCnt = names.filter(n => supData[n]._total > 0).length;
-    const inactiveCnt = names.length - activeCnt;
-    let html = '<div class="rep-card"><div class="rep-title">🧑‍🌾 '+names.length+' Supervisors</div>'+
-      '<div class="stat-grid">'+
-      '<div class="stat-item"><span class="sv" style="color:var(--gm);">'+activeCnt+'</span><div class="sl">Active</div></div>'+
-      '<div class="stat-item"><span class="sv" style="color:var(--rd);">'+inactiveCnt+'</span><div class="sl">Koi Entry Nahi</div></div>'+
-      '</div><div class="rep-sub">'+from+' to '+to+'</div></div>';
+    // TABLE बनाओ
+    let html = '<div class="rep-card"><div class="rep-title">📊 Supervisor Summary ('+from+' to '+to+')</div></div>';
+    html += '<div style="overflow-x:auto;"><table class="att-table">';
+    html += '<thead><tr><th>Supervisor</th>';
+    SHEETS.forEach(s => html += '<th>'+s.label+'</th>');
+    html += '<th>Total</th></tr></thead><tbody>';
 
-    // Har supervisor ka card
-    names.forEach((name, ni) => {
-      const s = supData[name];
-      const total = s._total;
-      const isActive = total > 0;
-      const rowId = 'sarow_'+ni;
-
-      // Module counts strip
-      let countStrip = '';
-      MODULES.forEach(m => {
-        const cnt = s[m.key] ? s[m.key].length : 0;
-        const col = cnt > 0 ? 'var(--gd)' : '#ccc';
-        countStrip += '<span style="display:inline-block;margin:2px 6px 2px 0;font-size:11px;color:'+col+';">'+m.icon+' '+cnt+'</span>';
+    names.forEach((sup, idx) => {
+      const counts = supCount[sup];
+      const total = Object.values(counts).reduce((a,b)=>a+b, 0);
+      const rid = 'sarow-' + idx;
+      
+      html += '<tr class="exp-toggle" onclick="saToggle(\''+rid+'\')" style="cursor:pointer;'+(total>0?'':'opacity:0.6')+';"><td style="font-weight:700;">▶ '+sup+'</td>';
+      SHEETS.forEach(s => {
+        const cnt = counts[s.key] || 0;
+        html += '<td style="text-align:center;font-weight:600;color:'+(cnt>0?'var(--gd)':'#999')+';">'+cnt+'</td>';
       });
-
-      // Header row (clickable)
-      html += '<div class="card" style="border-left:4px solid '+(isActive?'var(--gm)':'var(--rd)')+';padding:0;overflow:hidden;">';
-      html += '<div onclick="saToggle(\''+rowId+'\')" style="padding:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">'+
-        '<div style="flex:1;">'+
-          '<div style="font-weight:700;color:var(--gd);"><span id="arw-'+rowId+'" style="color:var(--gm);">▶</span> '+name+'</div>'+
-          '<div style="margin-top:5px;">'+countStrip+'</div>'+
-        '</div>'+
-        '<div style="text-align:right;font-size:12px;">'+
-          (isActive ? '<div style="font-weight:800;color:var(--gd);font-size:18px;">'+total+'</div><div style="color:var(--g5);">'+(s._last||'')+'</div>'
-                    : '<div style="color:var(--rd);font-weight:700;">❌ Koi entry<br>nahi</div>')+
-        '</div>'+
-      '</div>';
-
-      // Expandable detail (module-wise summary + full lines)
-      html += '<div id="'+rowId+'" style="display:none;padding:0 12px 12px;border-top:1px solid var(--g2);">';
-      if(isActive){
-        MODULES.forEach(m => {
-          const entries = s[m.key];
-          if(!entries || entries.length===0) return;
-          html += '<div style="margin-top:10px;">'+
-            '<div style="font-weight:700;color:var(--gm);font-size:13px;margin-bottom:4px;">'+m.icon+' '+m.label+' ('+entries.length+')</div>';
-          entries.sort((a,b)=> b.date.localeCompare(a.date));
-          entries.forEach(en => {
-            html += '<div style="font-size:12px;color:var(--g8);padding:4px 8px;border-bottom:1px solid #f0f0f0;">'+
-              '<b>'+en.date+'</b> — '+en.line+'</div>';
-          });
-          html += '</div>';
+      html += '<td style="text-align:center;font-weight:700;">'+total+'</td></tr>';
+      
+      // Expandable detail
+      if(total > 0) {
+        html += '<tr class="exp-row" id="'+rid+'" style="display:none;"><td colspan="'+(SHEETS.length+2)+'" class="exp-inner">';
+        html += '<div style="padding:8px;"><div style="font-size:13px;color:var(--g8);">Work breakdown:</div>';
+        SHEETS.forEach(s => {
+          const cnt = counts[s.key] || 0;
+          if(cnt > 0) html += '<div style="padding:4px 0;color:var(--gd);font-weight:600;">'+s.label+': '+cnt+' entries</div>';
         });
-      } else {
-        html += '<div style="color:var(--rd);font-size:13px;padding:10px 0;">Is period mein koi entry nahi ki.</div>';
+        html += '</div></td></tr>';
       }
-      html += '</div>'; // close expandable
-      html += '</div>'; // close card
     });
 
+    html += '</tbody></table></div>';
     con.innerHTML = html;
-  }).catch(()=>{
-    con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--rd);">Data load nahi hua! Internet check karo.</div>';
   });
 }
-
-// ═══════════════════ PAYMENT & DELIVERY ═══════════════════
-let pdBookings = {};  // bookingId -> {rows data} for slip regeneration
 
 function openPayDeliv(){
   document.getElementById('pdBookingId').value = '';
@@ -4345,6 +4315,7 @@ function loadPayDeliv(){
 // ── Add Variety modal ──
 let avCurrentId = '';
 function openAddVar(bid){
+  populateCropVarietyLists(); // Ensure datalists are filled
   avCurrentId = bid;
   const first = pdBookings[bid][0];
   document.getElementById('avInfo').innerHTML = '<b>'+(first.c[1]?.v||'')+'</b> — '+bid;
