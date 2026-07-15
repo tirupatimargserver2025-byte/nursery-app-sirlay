@@ -948,16 +948,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
             <option value="">-- Select Area --</option>
           </select></div>
         <div><label>🥬 Crop</label>
-          <select id="shCrop" onchange="loadShiftingVarieties()">
-            <option value="">-- Select Crop --</option>
-          </select></div>
+          <input type="text" id="shCrop" list="cropList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;" onchange="loadShiftingVarieties()"></div>
       </div>
       
       <div class="fr">
         <label>🌱 Variety</label>
-        <select id="shVariety">
-          <option value="">-- Select Variety --</option>
-        </select>
+        <input type="text" id="shVariety" list="varietyList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;">
       </div>
 
       <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--g2);">
@@ -1006,15 +1002,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
             <option value="">-- Sab Areas --</option>
           </select></div>
         <div><label>🥬 Crop</label>
-          <select id="shrCrop" onchange="loadShrVariety()">
-            <option value="">-- Sab Crops --</option>
-          </select></div>
+          <input type="text" id="shrCrop" list="cropList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;" onchange="loadShrVariety()"></div>
       </div>
       <div class="fr">
         <label>🌱 Variety</label>
-        <select id="shrVariety">
-          <option value="">-- Sab Varieties --</option>
-        </select>
+        <input type="text" id="shrVariety" list="varietyList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;">
       </div>
       <button onclick="loadShiftingReport()" style="width:100%;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">🔍 Report Dekho</button>
     </div>
@@ -1083,15 +1075,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
             <option value="">-- Sab Areas --</option>
           </select></div>
         <div><label>🥬 Crop</label>
-          <select id="drCrop" onchange="loadDrVariety()">
-            <option value="">-- Sab Crops --</option>
-          </select></div>
+          <input type="text" id="drCrop" list="cropList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;" onchange="loadDrVariety()"></div>
       </div>
       <div class="g2">
         <div><label>🌱 Variety</label>
-          <select id="drVariety">
-            <option value="">-- Sab Varieties --</option>
-          </select></div>
+          <input type="text" id="drVariety" list="varietyList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;"></div>
         <div><label>🚙 Gaadi No</label>
           <input type="text" id="drGaadi" placeholder="Vehicle number"></div>
       </div>
@@ -1238,13 +1226,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
       </div>
       <div class="g2">
         <div><label>🥬 Crop</label>
-          <select id="brCrop" onchange="loadBrVariety()">
-            <option value="">-- Sab Crops --</option>
-          </select></div>
+          <input type="text" id="brCrop" list="cropList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;" onchange="loadBrVariety()"></div>
         <div><label>🌱 Variety</label>
-          <select id="brVariety">
-            <option value="">-- Sab Varieties --</option>
-          </select></div>
+          <input type="text" id="brVariety" list="varietyList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;"></div>
       </div>
       <div class="g2">
         <div><label>👨 Farmer</label><input type="text" id="brFarmer" placeholder="Naam..."></div>
@@ -1282,13 +1266,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
       </div>
       <div class="g2">
         <div><label>🥬 Crop</label>
-          <select id="vrCrop" onchange="loadVrVariety()">
-            <option value="">-- Sab Crops --</option>
-          </select></div>
+          <input type="text" id="vrCrop" list="cropList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;" onchange="loadVrVariety()"></div>
         <div><label>🌱 Variety</label>
-          <select id="vrVariety">
-            <option value="">-- Sab Varieties --</option>
-          </select></div>
+          <input type="text" id="vrVariety" list="varietyList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;"></div>
       </div>
       <div style="font-size:11px;color:var(--g5);margin-bottom:8px;">📅 Date filter sirf Booking par lagta hai. Sowing/Dispatch total rahega.</div>
       <button onclick="loadVarietyReport()" style="width:100%;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">🔍 Report Dekho</button>
@@ -2997,6 +2977,7 @@ const LOCATION = 'bafalgaon';
 let shiftingLabours = {};
 
 function openShiftingForm(){
+  populateCropVarietyLists();
   document.getElementById('shDate').valueAsDate = new Date();
   document.getElementById('shSup').value = curUser ? curUser.name : 'Supervisor';
   
@@ -3219,12 +3200,7 @@ function openShiftingReport(){
 }
 
 function loadShrVariety(){
-  const crop = document.getElementById('shrCrop').value;
-  const sel = document.getElementById('shrVariety');
-  sel.innerHTML = '<option value="">-- Sab Varieties --</option>';
-  if(crop && VDATA[crop]){
-    VDATA[crop].forEach(v => sel.innerHTML += '<option value="'+v+'">'+v+'</option>');
-  }
+  // Datalist से suggestions आएँगी
 }
 
 function loadShiftingReport(){
@@ -3651,7 +3627,7 @@ function submitBooking(){
 
   // Total booking amount (manual)
   const totalAmt = parseFloat(document.getElementById('bkTotalInput').value) || 0;
-  if(totalAmt === 0){ toast('❗ Total Booking Amount daalo!', 'error'); return; }
+  // totalAmt 0 भी allowed है - payment बाद में आएगा
 
   // Payment amounts
   let cashAmt = 0, bankAmt = 0;
@@ -3930,12 +3906,7 @@ function openBookingReport(){
 }
 
 function loadBrVariety(){
-  const crop = document.getElementById('brCrop').value;
-  const sel = document.getElementById('brVariety');
-  sel.innerHTML = '<option value="">-- Sab Varieties --</option>';
-  if(crop && VDATA[crop]){
-    VDATA[crop].forEach(v => sel.innerHTML += '<option value="'+v+'">'+v+'</option>');
-  }
+  // Datalist से suggestions आएँगी
 }
 
 function loadBookingReport(){
@@ -4046,13 +4017,20 @@ function openSupActivity(){
   show('supActivityScreen');
 }
 
-// Toggle for supervisor expand (apna simple toggle)
+// Toggle for supervisor expand
 function saToggle(id){
   const el = document.getElementById(id);
   if(!el) return;
-  el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
-  const arrow = document.getElementById('arw-'+id);
-  if(arrow) arrow.textContent = (el.style.display === 'block') ? '▼' : '▶';
+  const isHidden = el.style.display === 'none' || !el.style.display;
+  el.style.display = isHidden ? 'block' : 'none';
+}
+
+// Also for exp-toggle rows
+function toggleRow(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const isHidden = el.style.display === 'none' || !el.style.display;
+  el.style.display = isHidden ? 'block' : 'none';
 }
 
 function loadSupActivity(){
@@ -4592,12 +4570,7 @@ function openVarietyReport(){
 }
 
 function loadVrVariety(){
-  const crop = document.getElementById('vrCrop').value;
-  const sel = document.getElementById('vrVariety');
-  sel.innerHTML = '<option value="">-- Sab Varieties --</option>';
-  if(crop && VDATA[crop]){
-    VDATA[crop].forEach(v => sel.innerHTML += '<option value="'+v+'">'+v+'</option>');
-  }
+  // Datalist से suggestions आएँगी
 }
 
 function loadVarietyReport(){
@@ -4730,12 +4703,7 @@ function openDispatchReport(){
 }
 
 function loadDrVariety(){
-  const crop = document.getElementById('drCrop').value;
-  const sel = document.getElementById('drVariety');
-  sel.innerHTML = '<option value="">-- Sab Varieties --</option>';
-  if(crop && VDATA[crop]){
-    VDATA[crop].forEach(v => sel.innerHTML += '<option value="'+v+'">'+v+'</option>');
-  }
+  // Datalist से suggestions आएँगी
 }
 
 function loadDispatchReport(){
