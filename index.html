@@ -1407,7 +1407,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
     <div class="fr"><label>📅 Payment Date</label><input type="date" id="apDate" style="width:100%;"></div>
     <div style="display:flex;gap:8px;margin-top:14px;">
       <button onclick="closeAddPay()" style="flex:1;padding:11px;background:var(--g2);color:var(--g8);border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">Cancel</button>
-      <button onclick="submitSecondPayment()" style="flex:1;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">Save</button>
+      <button onclick="submitPayment()" style="flex:1;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">Save</button>
     </div>
   </div>
 </div>
@@ -4071,7 +4071,8 @@ function loadSupActivity(){
   ];
 
   Promise.all(SHEETS.map(s => gv(s.sheet))).then(results => {
-    const supCount = {}; // supervisor -> {seed: 2, water: 3, ...}
+    // supData: {supervisor -> {seed: {count, entries: [{date, detail}]}, water: {...}, ...}}
+    const supData = {};
     
     SHEETS.forEach((sheet, idx) => {
       parse(results[idx]).forEach(r => {
@@ -4086,48 +4087,75 @@ function loadSupActivity(){
         const sup = (r.c[sheet.supCol]?.v||'').toString().trim();
         if(!sup) return;
         
-        if(!supCount[sup]) supCount[sup] = {};
-        supCount[sup][sheet.key] = (supCount[sup][sheet.key] || 0) + 1;
+        if(!supData[sup]) supData[sup] = {};
+        if(!supData[sup][sheet.key]) supData[sup][sheet.key] = { count: 0, entries: [] };
+        
+        // Detail: crops, area, quantity, etc (task-specific)
+        let detail = '';
+        if(sheet.key === 'seed') detail = (r.c[4]?.v||'')+' / '+(r.c[5]?.v||'')+' • '+(r.c[2]?.v||'')+' • '+(parseFloat(r.c[11]?.v)||0)+' plants';
+        else if(sheet.key === 'water') detail = (r.c[2]?.v||'')+' • '+(r.c[7]?.v||0)+'L • '+(r.c[6]?.v||'');
+        else if(sheet.key === 'spray') detail = (r.c[2]?.v||'')+' • '+(r.c[7]?.v||0)+' pumps';
+        else if(sheet.key === 'attend') detail = (r.c[4]?.v||'')+' • '+(r.c[5]?.v||'')+' • '+(r.c[2]?.v||'');
+        else if(sheet.key === 'assign') detail = (r.c[3]?.v||'')+' • '+((r.c[4]?.v||'').toString().split(',').length)+' labour';
+        else if(sheet.key === 'dispatch') detail = (r.c[6]?.v||'')+' / '+(r.c[7]?.v||'')+' • '+(parseFloat(r.c[12]?.v)||0)+' plants';
+        else if(sheet.key === 'shift') detail = (r.c[2]?.v||'')+' • '+(r.c[4]?.v||'')+' • '+(r.c[6]?.v||0)+' tray';
+        
+        supData[sup][sheet.key].count++;
+        supData[sup][sheet.key].entries.push({date: d, detail});
       });
     });
 
-    // Sabhi known supervisors add करो
-    Object.keys(SUP_DATA).forEach(n => { if(!supCount[n]) supCount[n] = {}; });
+    // सब known supervisors add करो
+    Object.keys(SUP_DATA).forEach(n => { 
+      if(!supData[n]) supData[n] = {}; 
+    });
 
-    const names = Object.keys(supCount).sort();
+    const names = Object.keys(supData).sort();
     if(names.length === 0) {
       con.innerHTML = '<div class="card" style="text-align:center;color:var(--g5);">No data found</div>';
       return;
     }
 
-    // TABLE बनाओ
-    let html = '<div class="rep-card"><div class="rep-title">📊 Supervisor Summary ('+from+' to '+to+')</div></div>';
+    // TABLE
+    let html = '<div class="rep-card"><div class="rep-title">Supervisor Summary ('+from+' to '+to+')</div></div>';
     html += '<div style="overflow-x:auto;"><table class="att-table">';
     html += '<thead><tr><th>Supervisor</th>';
     SHEETS.forEach(s => html += '<th>'+s.label+'</th>');
     html += '<th>Total</th></tr></thead><tbody>';
 
     names.forEach((sup, idx) => {
-      const counts = supCount[sup];
-      const total = Object.values(counts).reduce((a,b)=>a+b, 0);
+      const counts = supData[sup];
+      const total = Object.values(counts).reduce((a,b)=>a+(b.count||0), 0);
       const rid = 'sarow-' + idx;
       
-      html += '<tr class="exp-toggle" onclick="saToggle(\''+rid+'\')" style="cursor:pointer;'+(total>0?'':'opacity:0.6')+';"><td style="font-weight:700;">▶ '+sup+'</td>';
+      html += '<tr class="exp-toggle" onclick="toggleRow(\''+rid+'\')" style="cursor:pointer;'+(total>0?'':'opacity:0.6')+';"><td style="font-weight:700;">'+sup+'</td>';
       SHEETS.forEach(s => {
-        const cnt = counts[s.key] || 0;
+        const cnt = counts[s.key]?.count || 0;
         html += '<td style="text-align:center;font-weight:600;color:'+(cnt>0?'var(--gd)':'#999')+';">'+cnt+'</td>';
       });
       html += '<td style="text-align:center;font-weight:700;">'+total+'</td></tr>';
       
-      // Expandable detail
+      // EXPAND ROW with detailed entries
       if(total > 0) {
-        html += '<tr class="exp-row" id="'+rid+'" style="display:none;"><td colspan="'+(SHEETS.length+2)+'" class="exp-inner">';
-        html += '<div style="padding:8px;"><div style="font-size:13px;color:var(--g8);">Work breakdown:</div>';
+        let detailHtml = '<div style="padding:12px;">';
         SHEETS.forEach(s => {
-          const cnt = counts[s.key] || 0;
-          if(cnt > 0) html += '<div style="padding:4px 0;color:var(--gd);font-weight:600;">'+s.label+': '+cnt+' entries</div>';
+          const data = counts[s.key];
+          if(data && data.count > 0) {
+            detailHtml += '<div style="margin-bottom:12px;padding:8px;background:var(--gp);border-radius:6px;">';
+            detailHtml += '<div style="font-weight:700;color:var(--gd);margin-bottom:6px;">'+s.label+': '+data.count+' entries</div>';
+            // List entries
+            data.entries.slice(0, 5).forEach(e => {
+              detailHtml += '<div style="font-size:12px;color:var(--g8);padding:3px 0;">• '+e.date+' — '+e.detail+'</div>';
+            });
+            if(data.entries.length > 5) {
+              detailHtml += '<div style="font-size:12px;color:#999;font-style:italic;padding:3px 0;">+ '+(data.entries.length-5)+' more...</div>';
+            }
+            detailHtml += '</div>';
+          }
         });
-        html += '</div></td></tr>';
+        detailHtml += '</div>';
+        
+        html += '<tr class="exp-row" id="'+rid+'" style="display:none;"><td colspan="'+(SHEETS.length+2)+'" class="exp-inner">'+detailHtml+'</td></tr>';
       }
     });
 
@@ -4342,7 +4370,22 @@ function openAddPay(bid){
   const g = pdBookings[bid];
   const first = g[0];
   const firstPay = parseFloat(first.c[10]?.v)||0;
-  document.getElementById('apInfo').innerHTML = '<b>'+(first.c[1]?.v||'')+'</b> — '+bid+'<br>First Payment: Rs.'+firstPay.toLocaleString("en-IN");
+  const secondPay = parseFloat(first.c[14]?.v)||0;
+  
+  // Check: क्या first payment खाली है?
+  const isFirstPayment = (firstPay === 0);
+  
+  // Title change करो
+  const titleEl = document.querySelector('#addPayModal .g2:first-child div:first-child');
+  if(titleEl) titleEl.innerHTML = (isFirstPayment ? '💰 First Payment जोड़ो' : '💰 Second Payment जोड़ो');
+  
+  document.getElementById('apInfo').innerHTML = '<b>'+(first.c[1]?.v||'')+'</b> — '+bid
+    + (isFirstPayment ? '' : '<br>First Payment: Rs.'+firstPay.toLocaleString("en-IN"));
+  
+  // Store flag for later
+  window.apIsFirstPayment = isFirstPayment;
+  
+  // Clear सब fields
   document.getElementById('apAmount').value = '';
   document.getElementById('apMode').value = 'Cash';
   document.getElementById('apBank').value = '';
@@ -4368,14 +4411,14 @@ function apToggleBank(){
   // Bank/Both mein alag amounts hain, to upar wala single Amount chupa do
   document.getElementById('apAmount').parentElement.style.display = ((mode === 'Both' || mode === 'Bank') ? 'none' : 'block');
 }
-function submitSecondPayment(){
+function submitPayment(){
   if(isSaving){ return; }
+  const isFirst = window.apIsFirstPayment === true;
   const mode = document.getElementById('apMode').value;
   const date = document.getElementById('apDate').value;
 
-  let amount = 0;
-  let modeStr = mode;
-  let bank = '';
+  let amount = 0, modeStr = mode, bank = '';
+  
   if(mode === 'Both'){
     const cash = parseFloat(document.getElementById('apCash').value) || 0;
     const b1amt = parseFloat(document.getElementById('apBank1Amt').value) || 0;
@@ -4412,18 +4455,21 @@ function submitSecondPayment(){
   }
 
   const payload = {
-    module: 'bookingPayment',
+    module: isFirst ? 'bookingFirstPayment' : 'bookingSecondPayment',
     bookingId: apCurrentId,
-    secondAmount: amount, secondMode: modeStr, secondBank: bank, secondDate: date
+    amount, mode: modeStr, bank, date
   };
   isSaving = true;
   fetch(API, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)})
     .then(()=>{
-      toast('✅ Second payment add ho gaya!');
+      toast('✅ ' + (isFirst ? 'First' : 'Second') + ' payment add ho gaya!');
       closeAddPay();
       setTimeout(()=>{ isSaving = false; loadPayDeliv(); }, 1200);
     }).catch(()=>{ isSaving = false; toast('⚠️ Error! Internet check karo.', 'error'); });
 }
+
+// Backward compatibility
+function submitSecondPayment(){ submitPayment(); }
 
 // ── Mark Delivered modal ──
 let dvCurrentId = '';
