@@ -1255,6 +1255,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
         <select id="brStatus" style="width:100%;">
           <option value="">-- Sab --</option>
           <option value="Pending">Pending</option>
+          <option value="Partial">Partial</option>
           <option value="Delivered">Delivered</option>
         </select>
       </div>
@@ -1339,6 +1340,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <select id="pdStatus">
             <option value="">-- Sab --</option>
             <option value="Pending">Pending</option>
+            <option value="Partial">Partial</option>
             <option value="Delivered">Delivered</option>
           </select></div>
       </div>
@@ -1439,6 +1441,21 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
     <div style="display:flex;gap:8px;margin-top:14px;">
       <button onclick="closeDeliv()" style="flex:1;padding:11px;background:var(--g2);color:var(--g8);border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">Cancel</button>
       <button onclick="submitDelivered()" style="flex:1;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Variety-wise Delivery Modal -->
+<div id="varDelivModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:white;border-radius:12px;padding:20px;max-width:480px;width:100%;max-height:88vh;overflow-y:auto;">
+    <div style="font-weight:800;color:var(--gd);font-size:16px;margin-bottom:10px;">📦 Variety-wise Delivery</div>
+    <div style="font-size:13px;color:var(--g8);margin-bottom:10px;" id="vdInfo"></div>
+    <div class="fr"><label>🚚 Delivery Date (sabke liye)</label><input type="date" id="vdDate" style="width:100%;"></div>
+    <div style="font-size:11px;color:var(--g5);margin:8px 0 4px;">Jitne plant abhi diye wo bharo. Ya "Pura done" tick karo (agar us variety ka kaam khatam).</div>
+    <div id="vdLines" style="display:flex;flex-direction:column;gap:10px;"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button onclick="closeVarDeliv()" style="flex:1;padding:11px;background:var(--g2);color:var(--g8);border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">Cancel</button>
+      <button onclick="submitVarietyDeliv()" style="flex:1;padding:11px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-weight:700;cursor:pointer;">Save</button>
     </div>
   </div>
 </div>
@@ -3948,6 +3965,7 @@ function loadBookingReport(){
           '<th style="padding:7px;text-align:left;">Crop</th>'+
           '<th style="padding:7px;text-align:left;">Variety</th>'+
           '<th style="padding:7px;">Plant</th>'+
+          '<th style="padding:7px;">Diya</th>'+
           '<th style="padding:7px;">Rate</th>'+
           '<th style="padding:7px;">Delivery</th>'+
           '<th style="padding:7px;">Status</th>'+
@@ -3959,7 +3977,7 @@ function loadBookingReport(){
           const rate=(r.c[8]?.v||0);
           const deliv = fixD(r.c[9]?.v);
           const status = (r.c[20]?.v||'Pending').toString();
-          const stColor = status==='Delivered' ? 'var(--gd)' : '#e65100';
+          const stColor = status==='Delivered' ? 'var(--gd)' : (status==='Partial' ? '#ef6c00' : '#e65100');
           html += '<tr style="border-bottom:1px solid var(--g2);">'+
             '<td style="padding:7px;">'+fmtDate(r._date)+'</td>'+
             '<td style="padding:7px;">'+farmer+'</td>'+
@@ -3967,6 +3985,7 @@ function loadBookingReport(){
             '<td style="padding:7px;">'+crop+'</td>'+
             '<td style="padding:7px;font-weight:600;">'+variety+'</td>'+
             '<td style="padding:7px;text-align:center;">'+plant+'</td>'+
+            '<td style="padding:7px;text-align:center;color:var(--gd);font-weight:600;">'+(parseFloat(r.c[24]?.v)||0)+'</td>'+
             '<td style="padding:7px;text-align:center;">'+rate+'</td>'+
             '<td style="padding:7px;text-align:center;">'+fmtDate(deliv)+'</td>'+
             '<td style="padding:7px;text-align:center;color:'+stColor+';font-weight:700;">'+status+'</td>'+
@@ -4192,7 +4211,15 @@ function loadPayDeliv(){
           const bd = fixDate(first.c[0]?.v);
           const farmer = (first.c[1]?.v||'').toString();
           const village = (first.c[2]?.v||'').toString();
-          const status = (first.c[20]?.v||'Pending').toString();
+
+          // Overall status saari variety rows se (Pending / Partial / Delivered)
+          let allDone = true, anyDone = false;
+          g.forEach(r => {
+            const st = (r.c[20]?.v||'Pending').toString();
+            if(st !== 'Delivered') allDone = false;
+            if(st !== 'Pending') anyDone = true;
+          });
+          const status = allDone ? 'Delivered' : (anyDone ? 'Partial' : 'Pending');
 
           if(idF && !bid.toLowerCase().includes(idF)) return;
           if(farmerF && !farmer.toLowerCase().includes(farmerF)) return;
@@ -4218,7 +4245,6 @@ function loadPayDeliv(){
           const secondPay = parseFloat(first.c[14]?.v)||0;
           const totalRec = parseFloat(first.c[18]?.v)||firstPay;
           const delivDate = fixDate(first.c[21]?.v);
-          const isDeliv = m.status === 'Delivered';
 
           // Varieties list
           let varList = '';
@@ -4227,24 +4253,52 @@ function loadPayDeliv(){
           });
           varList = varList.replace(/, $/, '');
 
-          html += '<div class="card" style="border-left:4px solid '+(isDeliv?'var(--gm)':'#ff8f00')+';">'+
+          // Overall status: saari variety rows se nikalo
+          let totBooked = 0, totDeliv = 0, allDone = true, anyDone = false;
+          m.g.forEach(r => {
+            const bk = parseFloat(r.c[7]?.v)||0;
+            const dv = parseFloat(r.c[24]?.v)||0;
+            const st = (r.c[20]?.v||'Pending').toString();
+            totBooked += bk; totDeliv += dv;
+            if(st !== 'Delivered') allDone = false;
+            if(st !== 'Pending') anyDone = true;
+          });
+          const oStatus = allDone ? 'Delivered' : (anyDone ? 'Partial' : 'Pending');
+          const isDone = oStatus === 'Delivered';
+          const stBg = isDone ? '#e8f5e9' : (oStatus==='Partial' ? '#fff8e1' : '#fff3e0');
+          const stCol = isDone ? 'var(--gd)' : (oStatus==='Partial' ? '#ef6c00' : '#e65100');
+          const stIcon = isDone ? '✅ Delivered' : (oStatus==='Partial' ? '📦 Partial' : '⏳ Pending');
+          const barCol = isDone ? 'var(--gm)' : '#ff9800';
+
+          html += '<div class="card" style="border-left:4px solid '+(isDone?'var(--gm)':(oStatus==='Partial'?'#ff9800':'#ff8f00'))+';">'+
             '<div style="display:flex;justify-content:space-between;align-items:start;">'+
               '<div><div style="font-weight:700;color:var(--gd);">👨 '+m.farmer+' — '+m.village+'</div>'+
                 '<div style="font-size:12px;color:var(--g5);margin-top:2px;">'+m.bid+' • '+fmtDate(m.bd)+'</div></div>'+
-              '<span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;background:'+(isDeliv?'#e8f5e9':'#fff3e0')+';color:'+(isDeliv?'var(--gd)':'#e65100')+';">'+(isDeliv?'✅ Delivered':'⏳ Pending')+'</span>'+
+              '<span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;background:'+stBg+';color:'+stCol+';">'+stIcon+'</span>'+
             '</div>'+
             '<div style="font-size:12px;color:var(--g8);margin-top:6px;">🌱 '+varList+'</div>'+
-            '<div style="font-size:13px;margin-top:6px;padding:8px;background:var(--gp);border-radius:6px;">'+
+            // Plant progress
+            '<div style="margin-top:8px;">'+
+              '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--g5);margin-bottom:3px;">'+
+                '<span>Diya: <b style="color:var(--gd);">'+totDeliv.toLocaleString("en-IN")+'</b> / '+totBooked.toLocaleString("en-IN")+'</span>'+
+                '<span>Baaki: <b style="color:#e65100;">'+(totBooked-totDeliv > 0 ? (totBooked-totDeliv).toLocaleString("en-IN") : 0)+'</b></span>'+
+              '</div>'+
+              '<div style="height:6px;background:var(--g2);border-radius:3px;overflow:hidden;">'+
+                '<div style="height:100%;width:'+(totBooked>0?Math.min(100,(totDeliv/totBooked)*100):0)+'%;background:'+barCol+';"></div>'+
+              '</div>'+
+            '</div>'+
+            '<div style="font-size:13px;margin-top:8px;padding:8px;background:var(--gp);border-radius:6px;">'+
               '<div>First Payment: <b>Rs.'+firstPay.toLocaleString("en-IN")+'</b></div>'+
               (secondPay>0 ? '<div>Second Payment: <b>Rs.'+secondPay.toLocaleString("en-IN")+'</b></div>' : '')+
               '<div style="color:var(--gd);font-weight:700;">Total Received: Rs.'+totalRec.toLocaleString("en-IN")+'</div>'+
-              (isDeliv && delivDate ? '<div style="color:var(--gm);font-size:12px;">Delivered: '+fmtDate(delivDate)+'</div>' : '')+
+              (isDone && delivDate ? '<div style="color:var(--gm);font-size:12px;">Delivered: '+fmtDate(delivDate)+'</div>' : '')+
             '</div>'+
             '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">'+
-              (secondPay>0 ? '' : '<button onclick="openAddPay(\''+m.bid+'\')" style="flex:1;min-width:90px;padding:9px;background:var(--gm);color:white;border:none;border-radius:6px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">💰 Add Payment</button>')+
-              (isDeliv ? '' : '<button onclick="openDeliv(\''+m.bid+'\')" style="flex:1;min-width:90px;padding:9px;background:#388e3c;color:white;border:none;border-radius:6px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">✅ Delivered</button>')+
-              (isDeliv ? '' : '<button onclick="openAddVar(\''+m.bid+'\')" style="flex:1;min-width:90px;padding:9px;background:var(--gl);color:white;border:none;border-radius:6px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">🌱 Add Variety</button>')+
-              '<button onclick="redownloadSlip(\''+m.bid+'\')" style="flex:1;min-width:90px;padding:9px;background:var(--g8);color:white;border:none;border-radius:6px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">📄 Slip</button>'+
+              (secondPay>0 ? '' : '<button onclick="openAddPay(\''+m.bid+'\')" style="flex:1;min-width:88px;padding:9px;background:var(--gm);color:white;border:none;border-radius:6px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">💰 Payment</button>')+
+              (isDone ? '' : '<button onclick="openDeliv(\''+m.bid+'\')" style="flex:1;min-width:88px;padding:9px;background:#388e3c;color:white;border:none;border-radius:6px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">✅ Pura Delivered</button>')+
+              (isDone ? '' : '<button onclick="openVarDeliv(\''+m.bid+'\')" style="flex:1;min-width:88px;padding:9px;background:#ff9800;color:white;border:none;border-radius:6px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">📦 Variety Delivery</button>')+
+              (isDone ? '' : '<button onclick="openAddVar(\''+m.bid+'\')" style="flex:1;min-width:88px;padding:9px;background:var(--gl);color:white;border:none;border-radius:6px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">🌱 Add Variety</button>')+
+              '<button onclick="redownloadSlip(\''+m.bid+'\')" style="flex:1;min-width:88px;padding:9px;background:var(--g8);color:white;border:none;border-radius:6px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">📄 Slip</button>'+
             '</div>'+
           '</div>';
         });
@@ -4398,7 +4452,8 @@ let dvCurrentId = '';
 function openDeliv(bid){
   dvCurrentId = bid;
   const first = pdBookings[bid][0];
-  document.getElementById('dvInfo').innerHTML = '<b>'+(first.c[1]?.v||'')+'</b> — '+bid;
+  document.getElementById('dvInfo').innerHTML = '<b>'+(first.c[1]?.v||'')+'</b> — '+bid+
+    '<br><span style="color:#e65100;font-size:12px;">Poori booking Delivered ho jayegi (jo bhi pending/partial hai, sab).</span>';
   document.getElementById('dvDate').valueAsDate = new Date();
   document.getElementById('delivModal').style.display = 'flex';
 }
@@ -4407,12 +4462,82 @@ function submitDelivered(){
   if(isSaving){ return; }
   const date = document.getElementById('dvDate').value;
   if(!date){ toast('❗ Delivery date daalo!', 'error'); return; }
-  const payload = { module:'bookingDeliver', bookingId: dvCurrentId, deliveredDate: date };
+  const payload = { module:'bookingDeliverAll', bookingId: dvCurrentId, deliveredDate: date };
   isSaving = true;
   fetch(API, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)})
     .then(()=>{
-      toast('✅ Delivered mark ho gaya!');
+      toast('✅ Pura delivered ho gaya!');
       closeDeliv();
+      setTimeout(()=>{ isSaving = false; loadPayDeliv(); }, 1200);
+    }).catch(()=>{ isSaving = false; toast('⚠️ Error! Internet check karo.', 'error'); });
+}
+
+// ── Variety-wise Delivery ──
+let vdCurrentId = '';
+function openVarDeliv(bid){
+  vdCurrentId = bid;
+  const g = pdBookings[bid];
+  const first = g[0];
+  document.getElementById('vdInfo').innerHTML = '<b>'+(first.c[1]?.v||'')+'</b> — '+bid;
+  document.getElementById('vdDate').valueAsDate = new Date();
+
+  let html = '';
+  g.forEach((r, i) => {
+    const lineId = (r.c[26]?.v||'').toString();
+    const crop = (r.c[5]?.v||''), variety = (r.c[6]?.v||'');
+    const booked = parseFloat(r.c[7]?.v)||0;
+    const delivered = parseFloat(r.c[24]?.v)||0;
+    const pending = booked - delivered;
+    const status = (r.c[20]?.v||'Pending').toString();
+    const stColor = status==='Delivered' ? 'var(--gd)' : (status==='Partial' ? '#e65100' : '#999');
+    const done = status === 'Delivered';
+
+    html += '<div style="border:1px solid var(--g2);border-radius:8px;padding:10px;'+(done?'opacity:0.55;background:#f5f5f5;':'')+'">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;">'+
+        '<div style="font-weight:700;color:var(--gd);font-size:13px;">'+crop+' / '+variety+'</div>'+
+        '<span style="font-size:11px;font-weight:700;color:'+stColor+';">'+status+'</span>'+
+      '</div>'+
+      '<div style="font-size:11px;color:var(--g5);margin:4px 0 6px;">Book: <b>'+booked.toLocaleString("en-IN")+'</b> • Diya: <b>'+delivered.toLocaleString("en-IN")+'</b> • Baaki: <b style="color:#e65100;">'+(pending>0?pending.toLocaleString("en-IN"):0)+'</b></div>'+
+      (done ? '<div style="font-size:12px;color:var(--gd);font-weight:600;">✅ Ye variety ho chuki</div>' :
+        '<div class="g2">'+
+          '<div><label style="font-size:11px;">Abhi kitne diye</label><input type="number" id="vd-qty-'+i+'" placeholder="0" min="0" data-lineid="'+lineId+'"></div>'+
+          '<div style="display:flex;align-items:end;padding-bottom:6px;">'+
+            '<label style="font-size:12px;display:flex;align-items:center;gap:6px;cursor:pointer;">'+
+              '<input type="checkbox" id="vd-done-'+i+'" style="width:16px;height:16px;"> Pura done'+
+            '</label>'+
+          '</div>'+
+        '</div>')+
+    '</div>';
+  });
+  document.getElementById('vdLines').innerHTML = html;
+  document.getElementById('varDelivModal').style.display = 'flex';
+}
+function closeVarDeliv(){ document.getElementById('varDelivModal').style.display = 'none'; }
+function submitVarietyDeliv(){
+  if(isSaving){ return; }
+  const date = document.getElementById('vdDate').value;
+  if(!date){ toast('❗ Delivery date daalo!', 'error'); return; }
+
+  const g = pdBookings[vdCurrentId];
+  const lines = [];
+  g.forEach((r, i) => {
+    const qtyEl = document.getElementById('vd-qty-'+i);
+    const doneEl = document.getElementById('vd-done-'+i);
+    if(!qtyEl) return; // already delivered line
+    const qty = parseFloat(qtyEl.value) || 0;
+    const markDone = doneEl && doneEl.checked;
+    if(qty === 0 && !markDone) return; // is line mein kuch nahi bhara
+    lines.push({ lineId: qtyEl.getAttribute('data-lineid'), deliverQty: qty, markDone: markDone, date: date });
+  });
+
+  if(lines.length === 0){ toast('❗ Kam se kam ek variety mein qty daalo ya "Pura done" tick karo!', 'error'); return; }
+
+  const payload = { module:'bookingDeliverLines', lines: lines };
+  isSaving = true;
+  fetch(API, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)})
+    .then(()=>{
+      toast('✅ '+lines.length+' variety update ho gayi!');
+      closeVarDeliv();
       setTimeout(()=>{ isSaving = false; loadPayDeliv(); }, 1200);
     }).catch(()=>{ isSaving = false; toast('⚠️ Error! Internet check karo.', 'error'); });
 }
