@@ -275,8 +275,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 
 /* EXCEL ATTENDANCE TABLE */
 .att-table{width:100%;border-collapse:collapse;font-size:13px;}
-.att-table th{background:var(--gd);color:white;padding:8px 6px;text-align:left;font-size:11px;font-weight:700;white-space:nowrap;}
-.att-table td{padding:6px 4px;border-bottom:1px solid var(--g2);vertical-align:middle;}
+.att-table th{background:var(--gd);color:white;padding:8px 6px;text-align:center;font-size:11px;font-weight:700;white-space:nowrap;}
+.att-table td{padding:6px 4px;border-bottom:1px solid var(--g2);vertical-align:middle;text-align:center;}
 .att-table tr:hover td{background:var(--g1);}
 .att-table tr.row-present td{background:#f1f8f4;}
 .att-table tr.row-half td{background:#fffde7;}
@@ -3268,7 +3268,7 @@ function loadShiftingReport(){
           
           ridCounter++;
           const rid = 'sr_exp_' + ridCounter;
-          const inner = '<table style="width:100%;"><tr><th style="text-align:left;">Field</th><th style="text-align:left;">Value</th></tr>' +
+          const inner = '<table style="width:100%;"><tr><th style="text-align:center;">Field</th><th style="text-align:center;">Value</th></tr>' +
             '<tr><td>Supervisor</td><td>'+(r.c[1]?.v||'')+'</td></tr>' +
             '</table>';
           
@@ -3959,11 +3959,11 @@ function loadBookingReport(){
         html += '<div class="card" style="padding:0;overflow-x:auto;">'+
           '<table style="width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;">'+
           '<thead><tr style="background:var(--gm);color:white;">'+
-          '<th style="padding:7px;text-align:left;">Date</th>'+
-          '<th style="padding:7px;text-align:left;">Farmer</th>'+
-          '<th style="padding:7px;text-align:left;">Village</th>'+
-          '<th style="padding:7px;text-align:left;">Crop</th>'+
-          '<th style="padding:7px;text-align:left;">Variety</th>'+
+          '<th style="padding:7px;text-align:center;">Date</th>'+
+          '<th style="padding:7px;text-align:center;">Farmer</th>'+
+          '<th style="padding:7px;text-align:center;">Village</th>'+
+          '<th style="padding:7px;text-align:center;">Crop</th>'+
+          '<th style="padding:7px;text-align:center;">Variety</th>'+
           '<th style="padding:7px;">Plant</th>'+
           '<th style="padding:7px;">Diya</th>'+
           '<th style="padding:7px;">Rate</th>'+
@@ -3979,11 +3979,11 @@ function loadBookingReport(){
           const status = (r.c[20]?.v||'Pending').toString();
           const stColor = status==='Delivered' ? 'var(--gd)' : (status==='Partial' ? '#ef6c00' : '#e65100');
           html += '<tr style="border-bottom:1px solid var(--g2);">'+
-            '<td style="padding:7px;">'+fmtDate(r._date)+'</td>'+
-            '<td style="padding:7px;">'+farmer+'</td>'+
-            '<td style="padding:7px;">'+village+'</td>'+
-            '<td style="padding:7px;">'+crop+'</td>'+
-            '<td style="padding:7px;font-weight:600;">'+variety+'</td>'+
+            '<td style="padding:7px;text-align:center;">'+fmtDate(r._date)+'</td>'+
+            '<td style="padding:7px;text-align:center;">'+farmer+'</td>'+
+            '<td style="padding:7px;text-align:center;">'+village+'</td>'+
+            '<td style="padding:7px;text-align:center;">'+crop+'</td>'+
+            '<td style="padding:7px;text-align:center;font-weight:600;">'+variety+'</td>'+
             '<td style="padding:7px;text-align:center;">'+plant+'</td>'+
             '<td style="padding:7px;text-align:center;color:var(--gd);font-weight:600;">'+(parseFloat(r.c[24]?.v)||0)+'</td>'+
             '<td style="padding:7px;text-align:center;">'+rate+'</td>'+
@@ -4673,7 +4673,7 @@ function loadVarietyReport(){
       let html = '<div class="card" style="padding:0;overflow-x:auto;">'+
         '<table style="width:100%;border-collapse:collapse;font-size:12px;">'+
         '<thead><tr style="background:var(--gm);color:white;">'+
-        '<th style="padding:8px;text-align:left;">Variety</th>'+
+        '<th style="padding:8px;text-align:center;">Variety</th>'+
         '<th style="padding:8px;">Sowing</th>'+
         '<th style="padding:8px;">Booking</th>'+
         '<th style="padding:8px;">Dispatch</th>'+
@@ -4684,12 +4684,12 @@ function loadVarietyReport(){
       items.forEach(x => {
         if(x.crop !== curCrop){
           curCrop = x.crop;
-          html += '<tr style="background:var(--gp);"><td colspan="5" style="padding:6px 8px;font-weight:700;color:var(--gd);">🥬 '+curCrop+'</td></tr>';
+          html += '<tr style="background:var(--gp);"><td colspan="5" style="padding:6px 8px;text-align:center;font-weight:700;color:var(--gd);">🥬 '+curCrop+'</td></tr>';
         }
         const bacha = x.sowing - x.dispatch;
         const bColor = bacha < 0 ? 'var(--rd)' : 'var(--gd)';
         html += '<tr style="border-bottom:1px solid var(--g2);">'+
-          '<td style="padding:8px;">'+x.variety+'</td>'+
+          '<td style="padding:8px;text-align:center;">'+x.variety+'</td>'+
           '<td style="padding:8px;text-align:center;">'+x.sowing.toLocaleString('en-IN')+'</td>'+
           '<td style="padding:8px;text-align:center;color:var(--gm);font-weight:700;">'+x.booking.toLocaleString('en-IN')+'</td>'+
           '<td style="padding:8px;text-align:center;">'+x.dispatch.toLocaleString('en-IN')+'</td>'+
@@ -4800,7 +4800,7 @@ function loadDispatchReport(){
         html += '<div class="rep-sub">'+from+' to '+to+'</div>';
         
         const totalPlants = rows.reduce((s, r) => s + (parseFloat(r.c[12]?.v)||0), 0);
-        const verifiedCount = rows.filter(r => (r.c[14]?.v||'').toString().toUpperCase() === 'YES').length;
+        const verifiedCount = rows.filter(r => (r.c[13]?.v||'').toString().toUpperCase() === 'YES').length;
         const unverifiedCount = rows.length - verifiedCount;
         html += '<div class="stat-grid">';
         html += '<div class="stat-item"><span class="sv">'+rows.length+'</span><div class="sl">Total Entries</div></div>';
@@ -4818,18 +4818,19 @@ function loadDispatchReport(){
           ridCounter++;
           const rid = 'dr_exp_' + ridCounter;
           
-          const sowingDate = (r.c[9]?.v||'');
-          const ppc = (r.c[11]?.v||0);
-          const direct = (r.c[12]?.v||0);
-          const verified = (r.c[14]?.v||'');
-          const remarks = (r.c[15]?.v||'');
+          const sowingDate = (r.c[8]?.v||'');
+          const carret = (r.c[9]?.v||0);
+          const ppc = (r.c[10]?.v||0);
+          const direct = (r.c[11]?.v||0);
+          const verified = (r.c[13]?.v||'');
+          const remarks = (r.c[14]?.v||'');
           
           const isVerified = verified.toString().toUpperCase() === 'YES';
           const statusBadge = isVerified ? '✅' : '⚠️';
           const statusColor = isVerified ? 'var(--gl)' : '#ff6b6b';
           
-          const inner = '<table style="width:100%;"><tr><th style="text-align:left;">Field</th><th style="text-align:left;">Value</th></tr>' +
-            '<tr><td>Date of Sowing</td><td>'+sowingDate+'</td></tr>' +
+          const inner = '<table style="width:100%;"><tr><th style="text-align:center;">Field</th><th style="text-align:center;">Value</th></tr>' +
+            '<tr><td>Sowing Date Range</td><td>'+sowingDate+'</td></tr>' +
             '<tr><td>Sowing Verified</td><td>'+statusBadge+' '+(isVerified ? 'YES' : 'NO')+'</td></tr>' +
             '<tr><td>Meter Reading</td><td>'+(r.c[5]?.v||0)+'</td></tr>' +
             '<tr><td>Plant Per Carret</td><td>'+ppc+'</td></tr>' +
@@ -4841,13 +4842,13 @@ function loadDispatchReport(){
           html += '<td>'+r._date+'</td><td>'+(r.c[3]?.v||'')+'</td><td>'+(r.c[4]?.v||'')+'</td>';
           html += '<td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||'')+'</td>';
           html += '<td><span style="color:'+statusColor+';font-weight:700;">'+sowingDate+'</span></td>';
-          html += '<td>'+(r.c[10]?.v||0)+'</td>';
+          html += '<td>'+carret+'</td>';
           html += '<td><strong>'+(r.c[12]?.v||0)+'</strong></td>';
           html += '<td style="color:'+statusColor+';font-weight:700;">'+statusBadge+'</td></tr>';
-          html += '<tr class="exp-row" id="'+rid+'"><td colspan="11" class="exp-inner">'+inner+'</td></tr>';
+          html += '<tr class="exp-row" id="'+rid+'"><td colspan="10" class="exp-inner">'+inner+'</td></tr>';
         });
         
-        html += '<tr style="background:var(--gd);color:white;font-weight:800;"><td colspan="9">TOTAL</td><td>'+totalPlants.toLocaleString()+'</td><td></td></tr>';
+        html += '<tr style="background:var(--gd);color:white;font-weight:800;"><td colspan="8">TOTAL</td><td>'+totalPlants.toLocaleString()+'</td><td></td></tr>';
         html += '</tbody></table></div></div>';
         
         con.innerHTML = html;
