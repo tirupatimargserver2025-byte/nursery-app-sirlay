@@ -1466,8 +1466,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
     <div style="font-weight:800;color:var(--gd);font-size:16px;margin-bottom:14px;">🌱 Nayi Variety Jodo</div>
     <div style="font-size:13px;color:var(--g8);margin-bottom:12px;" id="avInfo"></div>
     <div class="g2">
-      <div><label>🥬 Crop</label><select id="avCrop" onchange="avLoadVar()" style="width:100%;"><option value="">-- Crop --</option></select></div>
-      <div><label>🌱 Variety</label><select id="avVar" style="width:100%;"><option value="">-- Variety --</option></select></div>
+      <div><label>🥬 Crop</label><input type="text" id="avCrop" list="cropList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;" onchange="avLoadVar()"></div>
+      <div><label>🌱 Variety</label><input type="text" id="avVar" list="varietyList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;"></div>
     </div>
     <div class="g2">
       <div><label>🌿 Plant</label><input type="number" id="avPlant" placeholder="0" min="0"></div>
@@ -2941,6 +2941,37 @@ function fmtDate(val){
   return s;
 }
 
+
+// Datalists को VDATA से populate करो
+function populateCropVarietyLists() {
+  // Crops
+  const cropList = document.getElementById('cropList');
+  if(cropList) {
+    cropList.innerHTML = '';
+    Object.keys(VDATA).forEach(crop => {
+      const opt = document.createElement('option');
+      opt.value = crop;
+      cropList.appendChild(opt);
+    });
+  }
+  
+  // Varieties (all)
+  const varietyList = document.getElementById('varietyList');
+  if(varietyList) {
+    varietyList.innerHTML = '';
+    Object.keys(VDATA).forEach(crop => {
+      VDATA[crop].forEach(variety => {
+        const opt = document.createElement('option');
+        opt.value = variety;
+        varietyList.appendChild(opt);
+      });
+    });
+  }
+}
+
+// Page load पर call करो
+window.addEventListener('load', populateCropVarietyLists);
+
 function toast(msg,type='success'){
   const t=document.getElementById('toast');
   t.textContent=msg; t.className='toast '+type+' show';
@@ -3329,10 +3360,10 @@ function addDpLine(){
     '</div>' +
     '<div class="g2">' +
       '<div><label>📍 Area</label><select id="dp-area-'+id+'">'+dpAreaOptions()+'</select></div>' +
-      '<div><label>🥬 Crop</label><select id="dp-crop-'+id+'" onchange="dpLoadVar('+id+')">'+dpCropOptions()+'</select></div>' +
+      '<div><label>🥬 Crop</label><input type="text" id="dp-crop-'+id+'" list="cropList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;" onchange="dpLoadVar('+id+')"></div>' +
     '</div>' +
     '<div class="g2">' +
-      '<div><label>🌱 Variety</label><select id="dp-var-'+id+'"><option value="">-- Variety --</option></select></div>' +
+      '<div><label>🌱 Variety</label><input type="text" id="dp-var-'+id+'" list="varietyList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;"></div>' +
       '<div><label>📦 Carret</label><input type="number" id="dp-car-'+id+'" placeholder="0" min="0" step="1" oninput="dpCalc('+id+')"></div>' +
     '</div>' +
     '<div class="g2">' +
@@ -3545,8 +3576,8 @@ function addBkLine(){
       '<button onclick="removeBkLine('+id+')" style="background:var(--rd);color:white;border:none;padding:4px 9px;border-radius:4px;cursor:pointer;font-weight:700;font-size:12px;">❌</button>' +
     '</div>' +
     '<div class="g2">' +
-      '<div><label>🥬 Crop</label><select id="bk-crop-'+id+'" onchange="bkLoadVar('+id+')">'+bkCropOptions()+'</select></div>' +
-      '<div><label>🌱 Variety</label><select id="bk-var-'+id+'"><option value="">-- Variety --</option></select></div>' +
+      '<div><label>🥬 Crop</label><input type="text" id="bk-crop-'+id+'" list="cropList" placeholder="🔍 Search crop..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;" onchange="bkLoadVar('+id+')"></div>' +
+      '<div><label>🌱 Variety</label><input type="text" id="bk-var-'+id+'" list="varietyList" placeholder="🔍 Search variety..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;"></div>' +
     '</div>' +
     '<div class="g2">' +
       '<div><label>🌿 Plant</label><input type="number" id="bk-plant-'+id+'" placeholder="0" min="0" oninput="bkCalcTotal()"></div>' +
@@ -4317,10 +4348,8 @@ function openAddVar(bid){
   avCurrentId = bid;
   const first = pdBookings[bid][0];
   document.getElementById('avInfo').innerHTML = '<b>'+(first.c[1]?.v||'')+'</b> — '+bid;
-  const cropSel = document.getElementById('avCrop');
-  cropSel.innerHTML = '<option value="">-- Crop --</option>';
-  Object.keys(VDATA).forEach(c => cropSel.innerHTML += '<option value="'+c+'">'+c+'</option>');
-  document.getElementById('avVar').innerHTML = '<option value="">-- Variety --</option>';
+  document.getElementById('avCrop').value = '';
+  document.getElementById('avVar').value = '';
   document.getElementById('avPlant').value = '';
   document.getElementById('avRate').value = '';
   document.getElementById('avDeliv').value = '';
@@ -4861,5 +4890,9 @@ function loadDispatchReport(){
 }
 
 </script>
+
+    <!-- CROP AND VARIETY DATALISTS FOR SEARCH -->
+    <datalist id="cropList"></datalist>
+    <datalist id="varietyList"></datalist>
 </body>
 </html>
