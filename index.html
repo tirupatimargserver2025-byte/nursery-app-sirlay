@@ -4366,9 +4366,13 @@ function submitAddVariety(){
 // ── Add Payment modal ──
 let apCurrentId = '';
 function openAddPay(bid){
-  apCurrentId = bid;
-  const g = pdBookings[bid];
-  const first = g[0];
+  try {
+    console.log('Opening Payment for:', bid);
+    apCurrentId = bid;
+    const g = pdBookings[bid];
+    if(!g){ console.error('pdBookings['+bid+'] not found'); toast('❗ Booking data nahi mila!', 'error'); return; }
+    const first = g[0];
+    if(!first){ console.error('First row not found'); toast('❗ Booking details nahi mila!', 'error'); return; }
   const firstPay = parseFloat(first.c[10]?.v)||0;
   const secondPay = parseFloat(first.c[14]?.v)||0;
   
@@ -4376,7 +4380,8 @@ function openAddPay(bid){
   const isFirstPayment = (firstPay === 0);
   
   // Title change करो
-  const titleEl = document.querySelector('#addPayModal .g2:first-child div:first-child');
+  // Set title directly
+  const titleEl = document.querySelector('#addPayModal > div > div:first-child');
   if(titleEl) titleEl.innerHTML = (isFirstPayment ? '💰 First Payment जोड़ो' : '💰 Second Payment जोड़ो');
   
   document.getElementById('apInfo').innerHTML = '<b>'+(first.c[1]?.v||'')+'</b> — '+bid
@@ -4402,6 +4407,10 @@ function openAddPay(bid){
   document.getElementById('apAmount').parentElement.style.display = 'block';
   document.getElementById('apDate').valueAsDate = new Date();
   document.getElementById('addPayModal').style.display = 'flex';
+  } catch(e) {
+    console.error('Error opening payment modal:', e);
+    toast('❗ Error: '+e.message, 'error');
+  }
 }
 function closeAddPay(){ document.getElementById('addPayModal').style.display = 'none'; }
 function apToggleBank(){
