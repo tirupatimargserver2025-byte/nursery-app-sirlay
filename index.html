@@ -4044,7 +4044,7 @@ function loadSupActivity(){
   
   const parse = txt => {
     try {
-      const match = txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+      const match = txt.match(/google\\.visualization\\.Query\\.setResponse\\(([\\s\\S]*)\\)/);
       return match ? JSON.parse(match[1]).table.rows : [];
     } catch(e) {
       return [];
@@ -4061,17 +4061,17 @@ function loadSupActivity(){
   };
 
   const SHEETS = [
-    {key:'seed', sheet:'Seed Sowing Data', supCol:1, label:'🌱 Sowing'},
-    {key:'water', sheet:'Watering Records', supCol:1, label:'💧 Watering'},
-    {key:'spray', sheet:'Spraying Records', supCol:1, label:'🌿 Spray'},
-    {key:'attend', sheet:'Attendance Records', supCol:1, label:'👷 Attend'},
-    {key:'assign', sheet:'Morning Assignment', supCol:1, label:'📋 Assign'},
-    {key:'dispatch', sheet:'Dispatch Data', supCol:2, label:'🚚 Dispatch'},
-    {key:'shift', sheet:'Shifting Data', supCol:1, label:'🔄 Shift'}
+    {key:'seed', sheet:'Seed Sowing Data', supCol:1, label:'🌱 Sowing', cols:[4,5,2,11]},
+    {key:'water', sheet:'Watering Records', supCol:1, label:'💧 Watering', cols:[2,7,6]},
+    {key:'spray', sheet:'Spraying Records', supCol:1, label:'🌿 Spray', cols:[2,7]},
+    {key:'attend', sheet:'Attendance Records', supCol:1, label:'👷 Attend', cols:[4,5,2]},
+    {key:'assign', sheet:'Morning Assignment', supCol:1, label:'📋 Assign', cols:[3,2,4]},
+    {key:'dispatch', sheet:'Dispatch Data', supCol:2, label:'🚚 Dispatch', cols:[6,7,12]},
+    {key:'shift', sheet:'Shifting Data', supCol:1, label:'🔄 Shift', cols:[2,4,6]}
   ];
 
   Promise.all(SHEETS.map(s => gv(s.sheet))).then(results => {
-    // supData: {supervisor -> {seed: {count, entries: [{date, detail}]}, water: {...}, ...}}
+    // Store raw rows for detail display
     const supData = {};
     
     SHEETS.forEach((sheet, idx) => {
@@ -4088,27 +4088,14 @@ function loadSupActivity(){
         if(!sup) return;
         
         if(!supData[sup]) supData[sup] = {};
-        if(!supData[sup][sheet.key]) supData[sup][sheet.key] = { count: 0, entries: [] };
-        
-        // Detail: crops, area, quantity, etc (task-specific)
-        let detail = '';
-        if(sheet.key === 'seed') detail = (r.c[4]?.v||'')+' / '+(r.c[5]?.v||'')+' • '+(r.c[2]?.v||'')+' • '+(parseFloat(r.c[11]?.v)||0)+' plants';
-        else if(sheet.key === 'water') detail = (r.c[2]?.v||'')+' • '+(r.c[7]?.v||0)+'L • '+(r.c[6]?.v||'');
-        else if(sheet.key === 'spray') detail = (r.c[2]?.v||'')+' • '+(r.c[7]?.v||0)+' pumps';
-        else if(sheet.key === 'attend') detail = (r.c[4]?.v||'')+' • '+(r.c[5]?.v||'')+' • '+(r.c[2]?.v||'');
-        else if(sheet.key === 'assign') detail = (r.c[3]?.v||'')+' • '+((r.c[4]?.v||'').toString().split(',').length)+' labour';
-        else if(sheet.key === 'dispatch') detail = (r.c[6]?.v||'')+' / '+(r.c[7]?.v||'')+' • '+(parseFloat(r.c[12]?.v)||0)+' plants';
-        else if(sheet.key === 'shift') detail = (r.c[2]?.v||'')+' • '+(r.c[4]?.v||'')+' • '+(r.c[6]?.v||0)+' tray';
+        if(!supData[sup][sheet.key]) supData[sup][sheet.key] = { count: 0, rows: [] };
         
         supData[sup][sheet.key].count++;
-        supData[sup][sheet.key].entries.push({date: d, detail});
+        supData[sup][sheet.key].rows.push({date: d, row: r});
       });
     });
 
-    // सब known supervisors add करो
-    Object.keys(SUP_DATA).forEach(n => { 
-      if(!supData[n]) supData[n] = {}; 
-    });
+    Object.keys(SUP_DATA).forEach(n => { if(!supData[n]) supData[n] = {}; });
 
     const names = Object.keys(supData).sort();
     if(names.length === 0) {
@@ -4116,46 +4103,126 @@ function loadSupActivity(){
       return;
     }
 
-    // TABLE
+    // MAIN TABLE
     let html = '<div class="rep-card"><div class="rep-title">Supervisor Summary ('+from+' to '+to+')</div></div>';
-    html += '<div style="overflow-x:auto;"><table class="att-table">';
-    html += '<thead><tr><th>Supervisor</th>';
-    SHEETS.forEach(s => html += '<th>'+s.label+'</th>');
-    html += '<th>Total</th></tr></thead><tbody>';
+    html += '<div style="overflow-x:auto;"><table class="att-table" style="width:100%;border-collapse:collapse;">';
+    html += '<thead><tr style="background:var(--gd);color:white;"><th style="padding:10px;text-align:left;">Supervisor</th>';
+    SHEETS.forEach(s => html += '<th style="padding:10px;text-align:center;">'+s.label+'</th>');
+    html += '<th style="padding:10px;text-align:center;">Total</th></tr></thead><tbody>';
 
     names.forEach((sup, idx) => {
       const counts = supData[sup];
       const total = Object.values(counts).reduce((a,b)=>a+(b.count||0), 0);
       const rid = 'sarow-' + idx;
       
-      html += '<tr class="exp-toggle" onclick="toggleRow(\''+rid+'\')" style="cursor:pointer;'+(total>0?'':'opacity:0.6')+';"><td style="font-weight:700;">'+sup+'</td>';
+      html += '<tr style="border-bottom:1px solid var(--g2);cursor:pointer;" onclick="toggleRow(\''+rid+'\')" class="exp-toggle">';
+      html += '<td style="padding:10px;font-weight:700;">'+sup+'</td>';
       SHEETS.forEach(s => {
         const cnt = counts[s.key]?.count || 0;
-        html += '<td style="text-align:center;font-weight:600;color:'+(cnt>0?'var(--gd)':'#999')+';">'+cnt+'</td>';
+        html += '<td style="padding:10px;text-align:center;font-weight:600;color:'+(cnt>0?'var(--gd)':'#999')+';">'+cnt+'</td>';
       });
-      html += '<td style="text-align:center;font-weight:700;">'+total+'</td></tr>';
+      html += '<td style="padding:10px;text-align:center;font-weight:700;">'+total+'</td></tr>';
       
-      // EXPAND ROW with detailed entries
+      // EXPAND ROW WITH NESTED TABLES
       if(total > 0) {
-        let detailHtml = '<div style="padding:12px;">';
+        let detailHtml = '<div style="padding:16px;background:var(--gp);border-radius:6px;">';
+        detailHtml += '<div style="font-weight:700;margin-bottom:14px;color:var(--gd);">'+sup+' का विस्तृत विवरण:</div>';
+        
         SHEETS.forEach(s => {
           const data = counts[s.key];
           if(data && data.count > 0) {
-            detailHtml += '<div style="margin-bottom:12px;padding:8px;background:var(--gp);border-radius:6px;">';
-            detailHtml += '<div style="font-weight:700;color:var(--gd);margin-bottom:6px;">'+s.label+': '+data.count+' entries</div>';
-            // List entries
-            data.entries.slice(0, 5).forEach(e => {
-              detailHtml += '<div style="font-size:12px;color:var(--g8);padding:3px 0;">• '+e.date+' — '+e.detail+'</div>';
-            });
-            if(data.entries.length > 5) {
-              detailHtml += '<div style="font-size:12px;color:#999;font-style:italic;padding:3px 0;">+ '+(data.entries.length-5)+' more...</div>';
+            detailHtml += '<div style="margin-bottom:16px;">';
+            detailHtml += '<div style="font-weight:700;color:var(--gd);margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--gd);">'+s.label+' ('+data.count+' entries)</div>';
+            
+            // Nested table
+            detailHtml += '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px;">';
+            detailHtml += '<thead>';
+            detailHtml += '<tr style="background:var(--g2);border-bottom:1px solid var(--g3);">';
+            detailHtml += '<th style="padding:6px;text-align:left;width:80px;">Date</th>';
+            
+            // Column headers based on sheet type
+            if(s.key === 'seed') {
+              detailHtml += '<th style="padding:6px;text-align:left;">Crop/Variety</th>';
+              detailHtml += '<th style="padding:6px;text-align:left;">Area</th>';
+              detailHtml += '<th style="padding:6px;text-align:right;">Plants</th>';
+            } else if(s.key === 'water') {
+              detailHtml += '<th style="padding:6px;text-align:left;">Area</th>';
+              detailHtml += '<th style="padding:6px;text-align:right;">Quantity</th>';
+              detailHtml += '<th style="padding:6px;text-align:left;">Type</th>';
+            } else if(s.key === 'spray') {
+              detailHtml += '<th style="padding:6px;text-align:left;">Area</th>';
+              detailHtml += '<th style="padding:6px;text-align:right;">Pumps</th>';
+            } else if(s.key === 'attend') {
+              detailHtml += '<th style="padding:6px;text-align:left;">In Time</th>';
+              detailHtml += '<th style="padding:6px;text-align:left;">Out Time</th>';
+              detailHtml += '<th style="padding:6px;text-align:left;">Area</th>';
+            } else if(s.key === 'assign') {
+              detailHtml += '<th style="padding:6px;text-align:left;">Task</th>';
+              detailHtml += '<th style="padding:6px;text-align:left;">Area</th>';
+              detailHtml += '<th style="padding:6px;text-align:right;">Labour</th>';
+            } else if(s.key === 'dispatch') {
+              detailHtml += '<th style="padding:6px;text-align:left;">Crop/Variety</th>';
+              detailHtml += '<th style="padding:6px;text-align:left;">Area</th>';
+              detailHtml += '<th style="padding:6px;text-align:right;">Plants</th>';
+            } else if(s.key === 'shift') {
+              detailHtml += '<th style="padding:6px;text-align:left;">Area</th>';
+              detailHtml += '<th style="padding:6px;text-align:left;">Task</th>';
+              detailHtml += '<th style="padding:6px;text-align:right;">Trays</th>';
             }
+            
+            detailHtml += '</tr></thead>';
+            detailHtml += '<tbody>';
+            
+            // Data rows
+            data.rows.slice(0, 10).forEach((entry, ridx) => {
+              const r = entry.row;
+              const bgColor = ridx % 2 === 0 ? 'white' : 'var(--gp)';
+              detailHtml += '<tr style="background:'+bgColor+';border-bottom:1px solid var(--g3);">';
+              detailHtml += '<td style="padding:6px;font-weight:600;color:var(--gd);">'+entry.date.split('-')[2]+' '+['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(entry.date.split('-')[1])].substring(0,3)+'</td>';
+              
+              if(s.key === 'seed') {
+                detailHtml += '<td style="padding:6px;">'+(r.c[4]?.v||'')+' / '+(r.c[5]?.v||'')+'</td>';
+                detailHtml += '<td style="padding:6px;">'+(r.c[2]?.v||'')+'</td>';
+                detailHtml += '<td style="padding:6px;text-align:right;">'+(parseFloat(r.c[11]?.v)||0)+'</td>';
+              } else if(s.key === 'water') {
+                detailHtml += '<td style="padding:6px;">'+(r.c[2]?.v||'')+'</td>';
+                detailHtml += '<td style="padding:6px;text-align:right;">'+(parseFloat(r.c[7]?.v)||0)+'L</td>';
+                detailHtml += '<td style="padding:6px;">'+(r.c[6]?.v||'')+'</td>';
+              } else if(s.key === 'spray') {
+                detailHtml += '<td style="padding:6px;">'+(r.c[2]?.v||'')+'</td>';
+                detailHtml += '<td style="padding:6px;text-align:right;">'+(parseFloat(r.c[7]?.v)||0)+' pumps</td>';
+              } else if(s.key === 'attend') {
+                detailHtml += '<td style="padding:6px;">'+(r.c[4]?.v||'')+'</td>';
+                detailHtml += '<td style="padding:6px;">'+(r.c[5]?.v||'')+'</td>';
+                detailHtml += '<td style="padding:6px;">'+(r.c[2]?.v||'')+'</td>';
+              } else if(s.key === 'assign') {
+                detailHtml += '<td style="padding:6px;">'+(r.c[3]?.v||'')+'</td>';
+                detailHtml += '<td style="padding:6px;">'+(r.c[2]?.v||'')+'</td>';
+                detailHtml += '<td style="padding:6px;text-align:right;">'+((r.c[4]?.v||'').toString().split(',').length)+'</td>';
+              } else if(s.key === 'dispatch') {
+                detailHtml += '<td style="padding:6px;">'+(r.c[6]?.v||'')+' / '+(r.c[7]?.v||'')+'</td>';
+                detailHtml += '<td style="padding:6px;">'+(r.c[1]?.v||'')+'</td>';
+                detailHtml += '<td style="padding:6px;text-align:right;">'+(parseFloat(r.c[12]?.v)||0)+'</td>';
+              } else if(s.key === 'shift') {
+                detailHtml += '<td style="padding:6px;">'+(r.c[2]?.v||'')+'</td>';
+                detailHtml += '<td style="padding:6px;">'+(r.c[4]?.v||'')+'</td>';
+                detailHtml += '<td style="padding:6px;text-align:right;">'+(parseFloat(r.c[6]?.v)||0)+'</td>';
+              }
+              
+              detailHtml += '</tr>';
+            });
+            
+            if(data.rows.length > 10) {
+              detailHtml += '<tr style="background:var(--gp);"><td colspan="4" style="padding:6px;text-align:center;color:#999;font-style:italic;">+ '+(data.rows.length-10)+' more entries...</td></tr>';
+            }
+            
+            detailHtml += '</tbody></table>';
             detailHtml += '</div>';
           }
         });
-        detailHtml += '</div>';
         
-        html += '<tr class="exp-row" id="'+rid+'" style="display:none;"><td colspan="'+(SHEETS.length+2)+'" class="exp-inner">'+detailHtml+'</td></tr>';
+        detailHtml += '</div>';
+        html += '<tr class="exp-row" id="'+rid+'" style="display:none;"><td colspan="'+(SHEETS.length+2)+'" style="padding:0;"><table style="width:100%;"><tr><td>'+detailHtml+'</td></tr></table></td></tr>';
       }
     });
 
