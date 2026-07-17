@@ -421,31 +421,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 
     <!-- Manager Menu -->
     <div id="mgrMenu" style="display:none;">
-      <div class="msec-title">👷 Attendance</div>
+      <div class="msec-title">🔄 Kaam Ki Entry</div>
       <div class="mgrid">
         <div class="mcard attend" onclick="openMod('attend')">
           <div class="ico">📝</div><div class="ttl">Daily Entry</div>
           <div class="dsc">Present / Half Day / Absent + OT</div>
         </div>
-        <div class="mcard report" onclick="openMod('attReport')">
-          <div class="ico">📊</div><div class="ttl">Attendance Report</div>
-          <div class="dsc">Date range + Labour match check</div>
-        </div>
-      </div>
-      <div class="msec-title">📊 Reports</div>
-      <div class="mgrid">
-        <div class="mcard seed" onclick="openMod('seedReport')">
-          <div class="ico">🌱</div><div class="ttl">Seed Sowing Report</div>
-          <div class="dsc">Date range, filter, totals</div>
-        </div>
-        <div class="mcard attend" onclick="openMod('labourReport')">
-          <div class="ico">👷</div><div class="ttl">Labour Report</div>
-          <div class="dsc">Labour-wise kaam summary</div>
-        </div>
-      </div>
-
-      <div class="msec-title">🔄 Operations</div>
-      <div class="mgrid">
         <div class="mcard entry" onclick="openShiftingForm()">
           <div class="ico">🔄</div><div class="ttl">Shifting</div>
           <div class="dsc">Labour shifting records</div>
@@ -455,23 +436,46 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div class="dsc">Vehicle dispatch records</div>
         </div>
       </div>
-
-      <div class="msec-title">📋 My Records</div>
+      <div class="msec-title">📊 Reports</div>
       <div class="mgrid">
+        <div class="mcard report" onclick="openMod('report')">
+          <div class="ico">📈</div><div class="ttl">Daily Report</div>
+          <div class="dsc">Aaj ka poora kaam</div>
+        </div>
+        <div class="mcard attend" onclick="openMod('attReport')">
+          <div class="ico">👥</div><div class="ttl">Attendance Report</div>
+          <div class="dsc">Date range + Labour match check</div>
+        </div>
+        <div class="mcard seed" onclick="openMod('seedReport')">
+          <div class="ico">🌱</div><div class="ttl">Seed Sowing Report</div>
+          <div class="dsc">Date range, filter, totals</div>
+        </div>
+        <div class="mcard attend" onclick="openMod('labourReport')">
+          <div class="ico">👷</div><div class="ttl">Labour Report</div>
+          <div class="dsc">Labour-wise kaam summary</div>
+        </div>
         <div class="mcard report" onclick="openShiftingReport()">
-          <div class="ico">📊</div><div class="ttl">Shifting Report</div>
-          <div class="dsc">Meri shifting records</div>
+          <div class="ico">🔄</div><div class="ttl">Shifting Report</div>
+          <div class="dsc">Shifting records + trays</div>
         </div>
         <div class="mcard report" onclick="openDispatchReport()">
-          <div class="ico">📊</div><div class="ttl">Dispatch Report</div>
-          <div class="dsc">Meri dispatch records</div>
+          <div class="ico">🚚</div><div class="ttl">Dispatch Report</div>
+          <div class="dsc">Gaadi, driver, plants</div>
+        </div>
+        <div class="mcard report" onclick="openBookingReport()">
+          <div class="ico">📋</div><div class="ttl">Booking Report</div>
+          <div class="dsc">Farmer booking + status</div>
+        </div>
+        <div class="mcard seed" onclick="openVarietyReport()">
+          <div class="ico">📊</div><div class="ttl">Variety Report</div>
+          <div class="dsc">Crop/Variety wise summary</div>
         </div>
         <div class="mcard admin-c" onclick="openSupActivity()">
           <div class="ico">🧑‍🌾</div><div class="ttl">Supervisor Activity</div>
           <div class="dsc">Kaun kya kar raha hai</div>
         </div>
         <div class="mcard entry" onclick="openPayDeliv()">
-          <div class="ico">💰</div><div class="ttl">Payment & Delivery</div>
+          <div class="ico">💰</div><div class="ttl">Payment &amp; Delivery</div>
           <div class="dsc">Payment add / delivered</div>
         </div>
       </div>
@@ -485,17 +489,49 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div class="ico">📈</div><div class="ttl">Daily Report</div>
           <div class="dsc">Aaj ka poora kaam</div>
         </div>
-        <div class="mcard attend" onclick="openMod('attend')">
-          <div class="ico">👷</div><div class="ttl">Attendance Entry</div>
-          <div class="dsc">Present/Absent/Half Day</div>
-        </div>
         <div class="mcard attend" onclick="openMod('attReport')">
           <div class="ico">👥</div><div class="ttl">Attendance Report</div>
-          <div class="dsc">Labour match check</div>
+          <div class="dsc">Date range + Labour match check</div>
+        </div>
+        <div class="mcard seed" onclick="openMod('seedReport')">
+          <div class="ico">🌱</div><div class="ttl">Seed Sowing Report</div>
+          <div class="dsc">Date range, filter, totals</div>
+        </div>
+        <div class="mcard attend" onclick="openMod('labourReport')">
+          <div class="ico">👷</div><div class="ttl">Labour Report</div>
+          <div class="dsc">Labour-wise kaam summary</div>
+        </div>
+        <div class="mcard report" onclick="openShiftingReport()">
+          <div class="ico">🔄</div><div class="ttl">Shifting Report</div>
+          <div class="dsc">Shifting records + trays</div>
+        </div>
+        <div class="mcard report" onclick="openDispatchReport()">
+          <div class="ico">🚚</div><div class="ttl">Dispatch Report</div>
+          <div class="dsc">Gaadi, driver, plants</div>
+        </div>
+        <div class="mcard report" onclick="openBookingReport()">
+          <div class="ico">📋</div><div class="ttl">Booking Report</div>
+          <div class="dsc">Farmer booking + status</div>
+        </div>
+        <div class="mcard seed" onclick="openVarietyReport()">
+          <div class="ico">📊</div><div class="ttl">Variety Report</div>
+          <div class="dsc">Crop/Variety wise summary</div>
+        </div>
+        <div class="mcard admin-c" onclick="openSupActivity()">
+          <div class="ico">🧑‍🌾</div><div class="ttl">Supervisor Activity</div>
+          <div class="dsc">Kaun kya kar raha hai</div>
+        </div>
+        <div class="mcard entry" onclick="openPayDeliv()">
+          <div class="ico">💰</div><div class="ttl">Payment &amp; Delivery</div>
+          <div class="dsc">Payment add / delivered</div>
         </div>
       </div>
       <div class="msec-title">⚙️ Admin Controls</div>
       <div class="mgrid">
+        <div class="mcard attend" onclick="openMod('attend')">
+          <div class="ico">👷</div><div class="ttl">Attendance Entry</div>
+          <div class="dsc">Present/Absent/Half Day</div>
+        </div>
         <div class="mcard admin-c" onclick="openMod('adminUsers')">
           <div class="ico">👑</div><div class="ttl">User Management</div>
           <div class="dsc">Supervisor add/remove</div>
@@ -503,14 +539,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
         <div class="mcard admin-c" onclick="openMod('adminLabour')">
           <div class="ico">👷</div><div class="ttl">Labour Master</div>
           <div class="dsc">Labour list manage karo</div>
-        </div>
-        <div class="mcard admin-c" onclick="openSupActivity()">
-          <div class="ico">🧑‍🌾</div><div class="ttl">Supervisor Activity</div>
-          <div class="dsc">Kaun kya kar raha hai</div>
-        </div>
-        <div class="mcard entry" onclick="openPayDeliv()">
-          <div class="ico">💰</div><div class="ttl">Payment & Delivery</div>
-          <div class="dsc">Payment add / delivered</div>
         </div>
       </div>
     </div>
