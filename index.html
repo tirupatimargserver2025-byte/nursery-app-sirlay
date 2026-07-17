@@ -297,9 +297,44 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .exp-row{display:none;background:#fafdfb;}
 .exp-row.show{display:table-row;}
 .exp-row.show + tr .exp-arrow, tr.exp-open .exp-arrow{transform:rotate(90deg);}
-.exp-inner{padding:8px;}
-.exp-inner table{width:100%;font-size:12px;}
-.exp-inner th{background:var(--gp)!important;color:var(--gm)!important;}
+
+/* Expand row detail tables */
+.exp-inner table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.exp-inner table thead {
+  background: var(--gd);
+  color: white;
+  font-weight: 700;
+}
+
+.exp-inner table th {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--gd);
+}
+
+.exp-inner table td {
+  padding: 10px;
+  border-bottom: 1px solid var(--g2);
+}
+
+.exp-inner table tbody tr:nth-child(even) {
+  background: var(--gp);
+}
+
+.exp-inner table tbody tr:hover {
+  background: #f0f0f0;
+}
+
+.exp-inner table tbody tr:nth-child(odd) {
+  background: white;
+}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -3297,7 +3332,7 @@ function loadShiftingReport(){
           
           ridCounter++;
           const rid = 'sr_exp_' + ridCounter;
-          const inner = '<table style="width:100%;"><tr><th style="text-align:center;">Field</th><th style="text-align:center;">Value</th></tr>' +
+          const inner = '<table><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody>' +
             '<tr><td>Supervisor</td><td>'+(r.c[1]?.v||'')+'</td></tr>' +
             '</table>';
           
@@ -4244,7 +4279,7 @@ function loadSupActivity(){
         });
         
         detailHtml += '</div>';
-        html += '<tr class="exp-row" id="'+rid+'" style="display:none;"><td colspan="'+(SHEETS.length+2)+'" style="padding:0;"><table style="width:100%;"><tr><td>'+detailHtml+'</td></tr></table></td></tr>';
+        html += '<tr class="exp-row" id="'+rid+'" style="display:none;"><td colspan="'+(SHEETS.length+2)+'" style="padding:0;"><table style="width:100%;"><tr><td>'+detailHtml+'</td></tr></tbody></table></td></tr>';
       }
     });
 
@@ -4941,7 +4976,7 @@ function loadDispatchReport(){
           const statusBadge = isVerified ? '✅' : '⚠️';
           const statusColor = isVerified ? 'var(--gl)' : '#ff6b6b';
           
-          const inner = '<table style="width:100%;"><tr><th style="text-align:center;">Field</th><th style="text-align:center;">Value</th></tr>' +
+          const inner = '<table><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody>' +
             '<tr><td>Sowing Date Range</td><td>'+sowingDate+'</td></tr>' +
             '<tr><td>Sowing Verified</td><td>'+statusBadge+' '+(isVerified ? 'YES' : 'NO')+'</td></tr>' +
             '<tr><td>Meter Reading</td><td>'+(r.c[5]?.v||0)+'</td></tr>' +
