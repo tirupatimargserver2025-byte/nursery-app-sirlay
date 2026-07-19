@@ -2980,14 +2980,19 @@ function showSuc(mod, msg){
   const btns={seed:'sSub',water:'wSub',attend:'attSub',assign:'asSub'};
   const btn=document.getElementById(btns[mod]);
   if(btn){btn.disabled=false;btn.innerHTML='✅ Entry Save Karo';}
+  // Save hote hi form clear kar do (taaki agli entry fresh ho)
+  resetCurrentForm();
 }
 
-function newEntry(){
-  document.getElementById('sucScreen').classList.remove('show');
+function resetCurrentForm(){
   if(curMod==='seed'){document.getElementById('vCon').innerHTML='';document.getElementById('sRem').value='';vCnt=0;Object.keys(lCnt).forEach(k=>delete lCnt[k]);addV();updSS();}
-  else if(curMod==='water'){document.getElementById('cCon').innerHTML='';document.getElementById('wlCon').innerHTML='';document.getElementById('wRem').value='';document.getElementById('wLitre').value='';cCnt=0;wlCnt=0;setWT('water');addWL();updWS();resetSprayTargets();}
+  else if(curMod==='water'){document.getElementById('cCon').innerHTML='';document.getElementById('wlCon').innerHTML='';document.getElementById('wRem').value='';document.getElementById('wLitre').value='';const _wp=document.getElementById('wPlants');if(_wp)_wp.value='';cCnt=0;wlCnt=0;setWT('water');addWL();updWS();resetSprayTargets();}
   else if(curMod==='attend'){document.getElementById('attList').innerHTML='';document.getElementById('attRem').value='';renderAttLabour();}
   else if(curMod==='assign'){document.getElementById('assignCon').innerHTML='';document.getElementById('asRem').value='';akCnt=0;akLabours={};addAssignKaam();}
+}
+function newEntry(){
+  document.getElementById('sucScreen').classList.remove('show');
+  resetCurrentForm();
 }
 function goMenuS(){document.getElementById('sucScreen').classList.remove('show');show('menuScreen');}
 
