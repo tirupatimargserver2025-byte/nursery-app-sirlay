@@ -335,6 +335,33 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   background: white;
 }
 
+/* ══ BOSS DASHBOARD ══ */
+.dash-card{background:white;border-radius:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);overflow:hidden;border:1px solid var(--g2);}
+.dash-head{display:flex;align-items:center;gap:12px;padding:16px;cursor:pointer;user-select:none;transition:background 0.15s;min-height:44px;}
+.dash-head:hover{background:var(--gp);}
+.dash-head .di{font-size:26px;flex-shrink:0;}
+.dash-head .dt{flex:1;font-weight:800;font-size:16px;color:var(--gd);}
+.dash-head .dtot{background:var(--gd);color:white;font-weight:800;font-size:13px;padding:5px 12px;border-radius:20px;white-space:nowrap;}
+.dash-head .darrow{font-size:16px;color:var(--gm);font-weight:800;transition:transform 0.2s;flex-shrink:0;}
+.dash-card.open .darrow{transform:rotate(90deg);}
+.dash-body{display:none;padding:0 12px 14px;border-top:1px solid var(--g2);}
+.dash-card.open .dash-body{display:block;}
+.dash-stat{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;}
+.dash-stat .dsi{flex:1;min-width:80px;background:var(--gp);border-radius:10px;padding:10px;text-align:center;}
+.dash-stat .dsi .dsv{font-size:20px;font-weight:800;color:var(--gd);display:block;}
+.dash-stat .dsi .dsl{font-size:11px;color:var(--g5);font-weight:600;margin-top:2px;}
+.dash-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.dash-tbl thead tr{background:var(--gd);color:white;}
+.dash-tbl th{padding:9px 8px;text-align:left;font-weight:700;font-size:12px;}
+.dash-tbl td{padding:9px 8px;border-bottom:1px solid var(--g2);}
+.dash-tbl tbody tr:nth-child(even){background:var(--gp);}
+.dash-tbl tbody tr.dtot-row{background:var(--gd)!important;color:white;font-weight:800;}
+.dash-tbl tbody tr.dtot-row td{border:none;}
+.dash-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.dash-sub{font-size:12px;color:var(--g5);margin:8px 0 4px;font-weight:600;}
+.dash-empty{text-align:center;color:var(--g5);padding:16px;font-size:13px;}
+.dash-hidden{display:none!important;}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -377,6 +404,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 
     <!-- Supervisor Menu -->
     <div id="supMenu">
+      <div class="msec-title">📊 Meri Dashboard</div>
+      <div class="mgrid">
+        <div class="mcard report" onclick="openDashboard()" style="grid-column:1/-1;background:linear-gradient(135deg,var(--gd),var(--gm));color:white;">
+          <div class="ico">📊</div><div class="ttl" style="color:white;">Meri Sari Report</div>
+          <div class="dsc" style="color:rgba(255,255,255,0.85);">Ek hi jagah — mera poora kaam</div>
+        </div>
+      </div>
       <div class="msec-title">🌅 Subah Ka Kaam</div>
       <div class="mgrid">
         <div class="mcard assign" onclick="openMod('assign')">
@@ -421,6 +455,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 
     <!-- Manager Menu -->
     <div id="mgrMenu" style="display:none;">
+      <div class="msec-title">📊 Boss Dashboard</div>
+      <div class="mgrid">
+        <div class="mcard report" onclick="openDashboard()" style="grid-column:1/-1;background:linear-gradient(135deg,var(--gd),var(--gm));color:white;">
+          <div class="ico">📊</div><div class="ttl" style="color:white;">Poora Dashboard Kholo</div>
+          <div class="dsc" style="color:rgba(255,255,255,0.85);">Sari report ek hi jagah — tabs me jaaye bina</div>
+        </div>
+      </div>
       <div class="msec-title">🔄 Kaam Ki Entry</div>
       <div class="mgrid">
         <div class="mcard attend" onclick="openMod('attend')">
@@ -475,6 +516,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 
     <!-- Admin Menu -->
     <div id="adminMenu" style="display:none;">
+      <div class="msec-title">📊 Boss Dashboard</div>
+      <div class="mgrid">
+        <div class="mcard report" onclick="openDashboard()" style="grid-column:1/-1;background:linear-gradient(135deg,var(--gd),var(--gm));color:white;">
+          <div class="ico">📊</div><div class="ttl" style="color:white;">Poora Dashboard Kholo</div>
+          <div class="dsc" style="color:rgba(255,255,255,0.85);">Sari report ek hi jagah — tabs me jaaye bina</div>
+        </div>
+      </div>
       <div class="msec-title">📊 Reports</div>
       <div class="mgrid">
         <div class="mcard report" onclick="openMod('report')">
@@ -537,6 +585,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 
     <!-- Marketing Menu -->
     <div id="marketingMenu" style="display:none;">
+      <div class="msec-title">📊 Boss Dashboard</div>
+      <div class="mgrid">
+        <div class="mcard report" onclick="openDashboard()" style="grid-column:1/-1;background:linear-gradient(135deg,var(--gd),var(--gm));color:white;">
+          <div class="ico">📊</div><div class="ttl" style="color:white;">Poora Dashboard Kholo</div>
+          <div class="dsc" style="color:rgba(255,255,255,0.85);">Sari report ek hi jagah — tabs me jaaye bina</div>
+        </div>
+      </div>
       <div class="msec-title">📝 Booking</div>
       <div class="mgrid">
         <div class="mcard entry" onclick="openBookingForm()">
@@ -815,6 +870,30 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
     <div class="card" style="margin-top:10px;"><div class="ctitle blue">📝 Remarks</div>
       <textarea id="wRem" rows="2" placeholder="Koi khaas baat..."></textarea></div>
     <button class="subbtn" id="wSub" onclick="submitWater()" style="background:linear-gradient(135deg,var(--bl),var(--bm));">✅ Entry Save Karo</button>
+  </div>
+</div>
+
+<!-- ════ BOSS DASHBOARD ════ -->
+<div class="screen" id="dashScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:var(--pu);">📊</div>
+      <h1>Dashboard <span>Sari Report Ek Jagah</span></h1></div>
+    <div class="sbar">
+      <button class="backbtn" onclick="goMenu()">← Menu</button>
+      <div class="dbadge" id="dashSupB"></div></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">📅 Date Filter</div>
+      <div class="g2">
+        <div><label>From Date</label><input type="date" id="dashFrom"></div>
+        <div><label>To Date</label><input type="date" id="dashTo"></div>
+      </div>
+      <div style="margin-top:8px;"><label>🔍 Search (kisi bhi report me)</label>
+        <input type="text" id="dashSearch" placeholder="Farmer, village, crop, labour..." oninput="dashFilterSearch()" style="width:100%;padding:10px;border:1px solid var(--g2);border-radius:8px;font-size:14px;"></div>
+      <button onclick="loadDashboard()" style="width:100%;padding:12px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;">🔄 Dashboard Load Karo</button>
+    </div>
+    <div id="dashContent"></div>
   </div>
 </div>
 
@@ -4041,6 +4120,296 @@ function generateBookingPDF(d){
 }
 
 // ─────── BOOKING REPORT ───────
+// ════════════════════════ BOSS DASHBOARD ════════════════════════
+function openDashboard(){
+  const from = new Date(); from.setDate(from.getDate()-30);
+  document.getElementById('dashFrom').valueAsDate = from;
+  document.getElementById('dashTo').valueAsDate = new Date();
+  document.getElementById('dashSearch').value = '';
+  const isSup = (curUser.role === 'Supervisor');
+  document.getElementById('dashSupB').textContent =
+    (isSup?'👷':curUser.role==='Manager'?'👔':curUser.role==='Marketing'?'📣':'👑')+' '+curUser.name;
+  document.getElementById('dashContent').innerHTML = '';
+  show('dashScreen');
+  loadDashboard();
+}
+
+// gviz parse helper
+function dashParse(txt){
+  try{
+    const j = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+    return j.table.rows.filter(r=>r.c && r.c[0] && r.c[0].v && r.c[0].v!=='Date');
+  }catch(e){ return []; }
+}
+function dashDate(r){
+  if(!r.c||!r.c[0]||!r.c[0].v) return '';
+  let d=r.c[0].v.toString();
+  if(d.startsWith('Date(')){
+    const p=d.replace('Date(','').replace(')','').split(',');
+    d=p[0]+'-'+String(parseInt(p[1])+1).padStart(2,'0')+'-'+String(p[2]).padStart(2,'0');
+  }
+  return d;
+}
+function nz(v){ return (v===undefined||v===null)?'':v; }
+function num(v){ const n=parseFloat(v); return isNaN(n)?0:n; }
+
+function loadDashboard(){
+  const from = document.getElementById('dashFrom').value;
+  const to = document.getElementById('dashTo').value;
+  const con = document.getElementById('dashContent');
+  const isSup = (curUser.role === 'Supervisor');
+  const me = curUser.name;
+  con.innerHTML = '<div class="card" style="text-align:center;padding:30px;"><div style="font-size:34px;">⏳</div><div style="font-weight:700;color:var(--gd);margin-top:6px;">Sari report load ho rahi hai...</div><div style="font-size:12px;color:var(--g5);margin-top:4px;">Thoda time lagega — 10 report ek saath</div></div>';
+
+  const ts = Date.now();
+  const S = name => fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+name+'&headers=1&t='+ts).then(r=>r.text()).catch(()=>'');
+
+  Promise.all([
+    S('Seed%20Sowing%20Data'),      // 0
+    S('Seed%20Labour%20Data'),      // 1
+    S('Watering%20Records'),        // 2
+    S('Spraying%20Records'),        // 3
+    S('Chemical%20Records'),        // 4
+    S('Attendance%20Records'),      // 5
+    S('Morning%20Assignment'),      // 6
+    S('Shifting%20Data'),           // 7
+    S('Dispatch%20Data'),           // 8
+    S('Booking%20Data'),            // 9
+    S('W-S%20Labour')               // 10
+  ]).then(function(T){
+    const seed=dashParse(T[0]), seedLab=dashParse(T[1]), wat=dashParse(T[2]),
+          spr=dashParse(T[3]), chem=dashParse(T[4]), att=dashParse(T[5]),
+          assign=dashParse(T[6]), shift=dashParse(T[7]), disp=dashParse(T[8]),
+          book=dashParse(T[9]), wsLab=dashParse(T[10]);
+    [seed,seedLab,wat,spr,chem,att,assign,shift,disp,book,wsLab].forEach(function(arr){
+      arr.forEach(function(r){ r._d=dashDate(r); });
+    });
+
+    // date + supervisor filter helper (supervisor col varies per sheet)
+    function flt(arr, supCol){
+      return arr.filter(function(r){
+        if(!r._d || r._d<from || r._d>to) return false;
+        if(isSup && supCol!==null && (nz(r.c[supCol]?.v).toString()!==me)) return false;
+        return true;
+      });
+    }
+
+    let html='';
+
+    // ═══ 1. SEED SOWING ═══ (Data: 0Date 1Sup 2Area 4Veg 5Var 6Lot 7Pkt 8Trays 11Plants)
+    (function(){
+      const rows=flt(seed,1);
+      let pkt=0,tray=0,pl=0;
+      rows.forEach(function(r){pkt+=num(r.c[7]?.v);tray+=num(r.c[8]?.v);pl+=num(r.c[11]?.v);});
+      let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+pkt.toLocaleString()+'</span><div class="dsl">Total PKT</div></div><div class="dsi"><span class="dsv">'+tray.toLocaleString()+'</span><div class="dsl">Trays</div></div><div class="dsi"><span class="dsv">'+pl.toLocaleString()+'</span><div class="dsl">Plants</div></div></div>';
+      if(rows.length){
+        body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th>'+(isSup?'':'<th>Sup</th>')+'<th>Area</th><th>Veg</th><th>Variety</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';
+        rows.forEach(function(r){
+          body+='<tr><td>'+formatDate(r._d)+'</td>'+(isSup?'':'<td>'+nz(r.c[1]?.v)+'</td>')+'<td>'+nz(r.c[2]?.v)+'</td><td>'+nz(r.c[4]?.v)+'</td><td>'+nz(r.c[5]?.v)+'</td><td>'+num(r.c[7]?.v)+'</td><td>'+num(r.c[8]?.v)+'</td><td>'+num(r.c[11]?.v).toLocaleString()+'</td></tr>';
+        });
+        body+='<tr class="dtot-row"><td colspan="'+(isSup?4:5)+'">TOTAL</td><td>'+pkt+'</td><td>'+tray+'</td><td>'+pl.toLocaleString()+'</td></tr>';
+        body+='</tbody></table></div>';
+      } else body+='<div class="dash-empty">Koi seed sowing record nahi.</div>';
+      html+=dashCard('🌱','Seed Sowing',rows.length,body);
+    })();
+
+    // ═══ 2. WATERING ═══ (0Date 1Sup 2Area 6Method 7Litre 9Plants)
+    (function(){
+      const rows=flt(wat,1);
+      let litre=0; rows.forEach(function(r){litre+=num(r.c[7]?.v);});
+      let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+rows.length+'</span><div class="dsl">Records</div></div><div class="dsi"><span class="dsv">'+litre.toLocaleString()+'L</span><div class="dsl">Total Pani</div></div></div>';
+      if(rows.length){
+        body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th>'+(isSup?'':'<th>Sup</th>')+'<th>Area</th><th>Method</th><th>Pani(L)</th><th>Plants</th></tr></thead><tbody>';
+        rows.forEach(function(r){
+          body+='<tr><td>'+formatDate(r._d)+'</td>'+(isSup?'':'<td>'+nz(r.c[1]?.v)+'</td>')+'<td>'+nz(r.c[2]?.v)+'</td><td>'+nz(r.c[6]?.v)+'</td><td>'+num(r.c[7]?.v)+'</td><td>'+nz(r.c[9]?.v)+'</td></tr>';
+        });
+        body+='<tr class="dtot-row"><td colspan="'+(isSup?3:4)+'">TOTAL</td><td>'+litre.toLocaleString()+'L</td><td></td></tr>';
+        body+='</tbody></table></div>';
+      } else body+='<div class="dash-empty">Koi watering record nahi.</div>';
+      html+=dashCard('💧','Watering',rows.length,body);
+    })();
+
+    // ═══ 3. SPRAY / DRENCHING ═══ (Spraying: 0Date 1Sup 2Area 3Crop(target) 8Sprayer 9Pump ; Chemical: 0Date 1Sup 2Area 3Crop 5Chem 6WorkType 7Dose 8Unit 9Purpose)
+    (function(){
+      const rows=flt(spr,1);
+      const chemRows=flt(chem,1);
+      let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+rows.length+'</span><div class="dsl">Spray Sessions</div></div><div class="dsi"><span class="dsv">'+chemRows.length+'</span><div class="dsl">Chemical Entries</div></div></div>';
+      if(rows.length){
+        body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th>'+(isSup?'':'<th>Sup</th>')+'<th>Area</th><th>Kahan</th><th>Sprayer</th><th>Pumps</th></tr></thead><tbody>';
+        rows.forEach(function(r){
+          body+='<tr><td>'+formatDate(r._d)+'</td>'+(isSup?'':'<td>'+nz(r.c[1]?.v)+'</td>')+'<td>'+nz(r.c[2]?.v)+'</td><td>'+sprayScopeLabel(nz(r.c[3]?.v),'')+'</td><td>'+nz(r.c[8]?.v)+'</td><td>'+nz(r.c[9]?.v)+'</td></tr>';
+        });
+        body+='</tbody></table></div>';
+      }
+      if(chemRows.length){
+        body+='<div class="dash-sub">🧪 Chemical Detail</div><div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th><th>Area</th><th>Chemical</th><th>Kya Kiya</th><th>Matra</th><th>Unit</th></tr></thead><tbody>';
+        chemRows.forEach(function(r){
+          const wt=nz(r.c[6]?.v)||'Spray'; const badge=wt==='Drench'?'💧 Drench':'🌿 Spray';
+          body+='<tr><td>'+formatDate(r._d)+'</td><td>'+nz(r.c[2]?.v)+'</td><td>'+nz(r.c[5]?.v)+'</td><td>'+badge+'</td><td>'+nz(r.c[7]?.v)+'</td><td>'+nz(r.c[8]?.v)+'</td></tr>';
+        });
+        body+='</tbody></table></div>';
+      }
+      if(!rows.length && !chemRows.length) body+='<div class="dash-empty">Koi spray/drench record nahi.</div>';
+      html+=dashCard('🌿','Spray / Drenching',rows.length,body);
+    })();
+
+    // ═══ 4. ATTENDANCE ═══ (asli: 0Date 1Sup 2Area 4Labour 5Status; status='Present'/'Half Day'/'Absent')
+    (function(){
+      const rows=flt(att,1);
+      let present=0,half=0,absent=0;
+      rows.forEach(function(r){const st=nz(r.c[5]?.v).toString();if(st==='Present')present++;else if(st==='Half Day')half++;else if(st==='Absent')absent++;});
+      let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+present+'</span><div class="dsl">Present</div></div><div class="dsi"><span class="dsv">'+half+'</span><div class="dsl">Half Day</div></div><div class="dsi"><span class="dsv">'+absent+'</span><div class="dsl">Absent</div></div></div>';
+      if(rows.length){
+        body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th>'+(isSup?'':'<th>Sup</th>')+'<th>Area</th><th>Labour</th><th>Status</th></tr></thead><tbody>';
+        rows.forEach(function(r){
+          body+='<tr><td>'+formatDate(r._d)+'</td>'+(isSup?'':'<td>'+nz(r.c[1]?.v)+'</td>')+'<td>'+nz(r.c[2]?.v)+'</td><td>'+nz(r.c[4]?.v)+'</td><td>'+nz(r.c[5]?.v)+'</td></tr>';
+        });
+        body+='<tr class="dtot-row"><td colspan="'+(isSup?4:5)+'">Total: '+rows.length+' entries</td></tr>';
+        body+='</tbody></table></div>';
+      } else body+='<div class="dash-empty">Koi attendance record nahi.</div>';
+      html+=dashCard('👷','Attendance',rows.length,body);
+    })();
+
+    // ═══ 5. MORNING ASSIGNMENT ═══ (0Date 1Sup 2Area 3Kaam 4Labour)
+    (function(){
+      const rows=flt(assign,1);
+      let totLab=0; rows.forEach(function(r){totLab+=nz(r.c[4]?.v).toString().split(',').filter(function(s){return s.trim();}).length;});
+      let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+rows.length+'</span><div class="dsl">Assignments</div></div><div class="dsi"><span class="dsv">'+totLab+'</span><div class="dsl">Total Labour</div></div></div>';
+      if(rows.length){
+        body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th>'+(isSup?'':'<th>Sup</th>')+'<th>Area</th><th>Kaam</th><th>Labour</th></tr></thead><tbody>';
+        rows.forEach(function(r){
+          body+='<tr><td>'+formatDate(r._d)+'</td>'+(isSup?'':'<td>'+nz(r.c[1]?.v)+'</td>')+'<td>'+nz(r.c[2]?.v)+'</td><td>'+nz(r.c[3]?.v)+'</td><td>'+nz(r.c[4]?.v)+'</td></tr>';
+        });
+        body+='</tbody></table></div>';
+      } else body+='<div class="dash-empty">Koi assignment record nahi.</div>';
+      html+=dashCard('📋','Morning Assignment',rows.length,body);
+    })();
+
+    // ═══ 6. SHIFTING ═══ (asli: 0Date 1Sup 2Area 3Crop 4Var 5Labour 6Trays)
+    (function(){
+      const rows=flt(shift,1);
+      let trays=0; rows.forEach(function(r){trays+=num(r.c[6]?.v);});
+      let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+rows.length+'</span><div class="dsl">Records</div></div><div class="dsi"><span class="dsv">'+trays.toLocaleString()+'</span><div class="dsl">Total Trays</div></div></div>';
+      if(rows.length){
+        body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th>'+(isSup?'':'<th>Sup</th>')+'<th>Area</th><th>Crop</th><th>Variety</th><th>Labour</th><th>Trays</th></tr></thead><tbody>';
+        rows.forEach(function(r){
+          body+='<tr><td>'+formatDate(r._d)+'</td>'+(isSup?'':'<td>'+nz(r.c[1]?.v)+'</td>')+'<td>'+nz(r.c[2]?.v)+'</td><td>'+nz(r.c[3]?.v)+'</td><td>'+nz(r.c[4]?.v)+'</td><td>'+nz(r.c[5]?.v)+'</td><td>'+num(r.c[6]?.v)+'</td></tr>';
+        });
+        body+='<tr class="dtot-row"><td colspan="'+(isSup?5:6)+'">TOTAL</td><td>'+trays.toLocaleString()+'</td></tr>';
+        body+='</tbody></table></div>';
+      } else body+='<div class="dash-empty">Koi shifting record nahi.</div>';
+      html+=dashCard('🔄','Shifting',rows.length,body);
+    })();
+
+    // ═══ 7. DISPATCH ═══ (0Date 1Area 2Sup 3Gaadi 4Driver 6Crop 7Var 12Total ...) supervisor col=2
+    (function(){
+      const rows=flt(disp,2);
+      let plants=0; rows.forEach(function(r){plants+=num(r.c[12]?.v);});
+      let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+rows.length+'</span><div class="dsl">Dispatches</div></div><div class="dsi"><span class="dsv">'+plants.toLocaleString()+'</span><div class="dsl">Total Plants</div></div></div>';
+      if(rows.length){
+        body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th><th>Area</th>'+(isSup?'':'<th>Sup</th>')+'<th>Gaadi</th><th>Crop</th><th>Variety</th><th>Plants</th></tr></thead><tbody>';
+        rows.forEach(function(r){
+          body+='<tr><td>'+formatDate(r._d)+'</td><td>'+nz(r.c[1]?.v)+'</td>'+(isSup?'':'<td>'+nz(r.c[2]?.v)+'</td>')+'<td>'+nz(r.c[3]?.v)+'</td><td>'+nz(r.c[6]?.v)+'</td><td>'+nz(r.c[7]?.v)+'</td><td>'+num(r.c[12]?.v).toLocaleString()+'</td></tr>';
+        });
+        body+='<tr class="dtot-row"><td colspan="'+(isSup?5:6)+'">TOTAL</td><td>'+plants.toLocaleString()+'</td></tr>';
+        body+='</tbody></table></div>';
+      } else body+='<div class="dash-empty">Koi dispatch record nahi.</div>';
+      html+=dashCard('🚚','Dispatch',rows.length,body);
+    })();
+
+    // ═══ 8. BOOKING ═══ (0Date 1Farmer 2Village 5Crop 6Var 7Plant 18TotalRecv 20Status)  marketing/all only, supervisor=skip
+    if(!isSup){
+      (function(){
+        const rows=flt(book,null);
+        let plants=0,recv=0;
+        rows.forEach(function(r){plants+=num(r.c[7]?.v);recv+=num(r.c[18]?.v);});
+        let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+rows.length+'</span><div class="dsl">Bookings</div></div><div class="dsi"><span class="dsv">'+plants.toLocaleString()+'</span><div class="dsl">Total Plants</div></div><div class="dsi"><span class="dsv">₹'+recv.toLocaleString()+'</span><div class="dsl">Received</div></div></div>';
+        if(rows.length){
+          body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th><th>Farmer</th><th>Village</th><th>Crop</th><th>Variety</th><th>Plants</th><th>Status</th></tr></thead><tbody>';
+          rows.forEach(function(r){
+            body+='<tr><td>'+formatDate(r._d)+'</td><td>'+nz(r.c[1]?.v)+'</td><td>'+nz(r.c[2]?.v)+'</td><td>'+nz(r.c[5]?.v)+'</td><td>'+nz(r.c[6]?.v)+'</td><td>'+num(r.c[7]?.v).toLocaleString()+'</td><td>'+nz(r.c[20]?.v)+'</td></tr>';
+          });
+          body+='<tr class="dtot-row"><td colspan="5">TOTAL</td><td>'+plants.toLocaleString()+'</td><td></td></tr>';
+          body+='</tbody></table></div>';
+        } else body+='<div class="dash-empty">Koi booking record nahi.</div>';
+        html+=dashCard('📝','Booking',rows.length,body);
+      })();
+
+      // ═══ 9. VARIETY SUMMARY (from booking) ═══
+      (function(){
+        const rows=flt(book,null);
+        const byCV={};
+        rows.forEach(function(r){
+          const c=nz(r.c[5]?.v)||'?', v=nz(r.c[6]?.v)||'?';
+          const key=c+' / '+v;
+          if(!byCV[key]) byCV[key]={plants:0,count:0};
+          byCV[key].plants+=num(r.c[7]?.v); byCV[key].count++;
+        });
+        const keys=Object.keys(byCV).sort(function(a,b){return byCV[b].plants-byCV[a].plants;});
+        let totPl=0; keys.forEach(function(k){totPl+=byCV[k].plants;});
+        let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+keys.length+'</span><div class="dsl">Crop/Variety</div></div><div class="dsi"><span class="dsv">'+totPl.toLocaleString()+'</span><div class="dsl">Total Plants</div></div></div>';
+        if(keys.length){
+          body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Crop / Variety</th><th>Bookings</th><th>Plants</th></tr></thead><tbody>';
+          keys.forEach(function(k){
+            body+='<tr><td>'+k+'</td><td>'+byCV[k].count+'</td><td>'+byCV[k].plants.toLocaleString()+'</td></tr>';
+          });
+          body+='<tr class="dtot-row"><td>TOTAL</td><td>'+rows.length+'</td><td>'+totPl.toLocaleString()+'</td></tr>';
+          body+='</tbody></table></div>';
+        } else body+='<div class="dash-empty">Koi data nahi.</div>';
+        html+=dashCard('🌾','Variety Summary',keys.length,body);
+      })();
+    }
+
+    con.innerHTML = html || '<div class="dash-empty">Koi data nahi mila.</div>';
+    // Search dobara apply karo agar search box me kuch hai
+    dashFilterSearch();
+  }).catch(function(e){
+    con.innerHTML = '<div class="card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Dashboard load nahi hua. Internet check karo aur dobara try karo.</div>';
+  });
+}
+
+// Ek collapsible card banao
+function dashCard(icon, title, count, bodyHtml){
+  return '<div class="dash-card" data-title="'+title.toLowerCase()+'">'+
+    '<div class="dash-head" onclick="this.parentElement.classList.toggle(\'open\')">'+
+      '<span class="di">'+icon+'</span>'+
+      '<span class="dt">'+title+'</span>'+
+      '<span class="dtot">Kul: '+count+'</span>'+
+      '<span class="darrow">▶</span>'+
+    '</div>'+
+    '<div class="dash-body">'+bodyHtml+'</div>'+
+  '</div>';
+}
+
+// Search — kisi bhi card me matching row dikhe, baaki hide
+function dashFilterSearch(){
+  const q = (document.getElementById('dashSearch')?.value||'').trim().toLowerCase();
+  const cards = document.querySelectorAll('#dashContent .dash-card');
+  cards.forEach(function(card){
+    const rows = card.querySelectorAll('.dash-tbl tbody tr:not(.dtot-row)');
+    if(!q){
+      card.classList.remove('dash-hidden');
+      rows.forEach(function(r){ r.classList.remove('dash-hidden'); });
+      return;
+    }
+    let anyMatch=false;
+    rows.forEach(function(r){
+      const txt=r.textContent.toLowerCase();
+      if(txt.includes(q)){ r.classList.remove('dash-hidden'); anyMatch=true; }
+      else r.classList.add('dash-hidden');
+    });
+    // Card title bhi match kare to poora card dikhao
+    const titleMatch = (card.getAttribute('data-title')||'').includes(q);
+    if(anyMatch || titleMatch){
+      card.classList.remove('dash-hidden');
+      card.classList.add('open'); // match hone par khol do
+      if(titleMatch && !anyMatch) rows.forEach(function(r){ r.classList.remove('dash-hidden'); });
+    } else {
+      card.classList.add('dash-hidden');
+    }
+  });
+}
+
 function openBookingReport(){
   const from = new Date(); from.setDate(from.getDate()-30);
   document.getElementById('brFrom').valueAsDate = from;
