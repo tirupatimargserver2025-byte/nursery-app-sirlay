@@ -3198,8 +3198,9 @@ function addSprayLine(){
     '<div class="cbb">'+
       '<div class="fr cvpart"><label>\u{1F96C} Paudha (Crop)</label>'+
         '<input type="text" id="slc-'+id+'" list="cropList" placeholder="\u{1F50D} TOMATO, MIRCHI..." onchange="loadLineVar('+id+')"></div>'+
-      '<div class="fr cvpart"><label>\u{1F331} Variety <span style="font-weight:400;color:var(--g5);font-size:11px;">(ek ya kai chunein \u2014 khali = poora crop)</span></label>'+
-        '<div id="slv-'+id+'" style="display:flex;flex-wrap:wrap;gap:6px;padding:8px;border:1px solid var(--g2);border-radius:6px;background:var(--g1);min-height:38px;align-items:center;">'+
+      '<div class="fr cvpart"><label>\u{1F331} Variety <span id="slvc-'+id+'" style="font-weight:700;color:var(--gd);font-size:11px;">(0 chuni)</span></label>'+
+        '<input type="text" id="slvs-'+id+'" placeholder="\u{1F50D} Variety dhundhein..." oninput="filterVariety('+id+')" style="width:100%;padding:9px;border:1px solid var(--g2);border-radius:6px;margin-bottom:6px;display:none;">'+
+        '<div id="slv-'+id+'" style="display:flex;flex-wrap:wrap;gap:6px;padding:8px;border:1px solid var(--g2);border-radius:6px;background:var(--g1);min-height:38px;max-height:190px;overflow-y:auto;align-items:flex-start;align-content:flex-start;">'+
           '<span style="color:var(--g5);font-size:12px;">Pehle crop chunein...</span></div></div>'+
       '<div class="fr"><label>\u{1F9EA} Dawai / Khaad</label>'+
         '<input type="text" id="sln-'+id+'" list="chemList" placeholder="\u{1F50D} Calcium, 00:00:50, Armimetar..."></div>'+
@@ -3224,24 +3225,69 @@ function remSprayLine(id){
 function loadLineVar(id){
   const crop = (document.getElementById('slc-'+id)?.value||'').trim();
   const box = document.getElementById('slv-'+id);
+  const srch = document.getElementById('slvs-'+id);
   if(!box) return;
+  if(srch){ srch.value=''; srch.style.display='none'; }
   const vars = VDATA[crop] || [];
   if(!vars.length){
     box.innerHTML = '<span style="color:var(--g5);font-size:12px;">Is crop ki variety nahi mili \u2014 poora crop maana jayega</span>';
+    updVarCount(id);
     return;
   }
+  // 6 se zyada variety hain to search box dikhao
+  if(srch && vars.length > 6) srch.style.display='block';
   let h = '';
-  vars.forEach(function(v, i){
-    h += '<label class="vchip" style="display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border:2px solid var(--g2);border-radius:16px;background:white;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.15s;">'+
-      '<input type="checkbox" class="slvchk-'+id+'" value="'+v.replace(/"/g,'&quot;')+'" style="width:16px;height:16px;" onchange="markChip(this)">'+v+'</label>';
+  vars.forEach(function(v){
+    const safe = v.replace(/"/g,'&quot;');
+    h += '<label class="vchip" data-v="'+safe.toLowerCase()+'" style="display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border:2px solid var(--g2);border-radius:16px;background:white;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.15s;">'+
+      '<input type="checkbox" class="slvchk-'+id+'" value="'+safe+'" style="width:16px;height:16px;" onchange="markChip(this)">'+v+'</label>';
   });
   box.innerHTML = h;
+  updVarCount(id);
+}
+
+// Search se variety filter — chuni hui hamesha dikhegi
+function filterVariety(id){
+  const q = (document.getElementById('slvs-'+id)?.value||'').trim().toLowerCase();
+  const box = document.getElementById('slv-'+id);
+  if(!box) return;
+  let shown = 0;
+  box.querySelectorAll('label.vchip').forEach(function(lab){
+    const cb = lab.querySelector('input');
+    const match = !q || (lab.getAttribute('data-v')||'').includes(q);
+    // chuni hui variety kabhi nahi chhupegi
+    if(match || (cb && cb.checked)){ lab.style.display='inline-flex'; shown++; }
+    else lab.style.display='none';
+  });
+  let msg = box.querySelector('.novar');
+  if(shown===0){
+    if(!msg){
+      msg = document.createElement('span');
+      msg.className='novar';
+      msg.style.cssText='color:var(--g5);font-size:12px;';
+      box.appendChild(msg);
+    }
+    msg.textContent='"'+q+'" naam ki koi variety nahi mili';
+    msg.style.display='inline';
+  } else if(msg){ msg.style.display='none'; }
+}
+
+// Kitni variety chuni hai — label me dikhao
+function updVarCount(id){
+  const el = document.getElementById('slvc-'+id);
+  if(!el) return;
+  const n = document.querySelectorAll('.slvchk-'+id+':checked').length;
+  el.textContent = n>0 ? '('+n+' chuni)' : '(0 chuni)';
+  el.style.color = n>0 ? 'var(--gd)' : 'var(--g5)';
 }
 
 // Variety chip select hone par hara highlight
 function markChip(cb){
   const lab = cb.closest('label');
   if(!lab) return;
+  // count update karo
+  const cls = (cb.className||'').match(/slvchk-(\d+)/);
+  if(cls) updVarCount(cls[1]);
   if(cb.checked){
     lab.style.background = 'var(--gd)';
     lab.style.color = 'white';
