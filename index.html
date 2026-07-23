@@ -2364,15 +2364,35 @@ function setWT(type){
   document.getElementById('watSec').className='watsec'+(type==='water'?'':' hide');
   document.getElementById('spraySec').className='wsec'+(type==='spray'?' show':'');
   if(type==='spray'&&!document.querySelector('[id^="spl-"]')) addSprayLine();
+  refreshLabourKaam();
   updWS();
 }
 
+// Kaam ke type ke hisaab se labour ka Kaam dropdown
+function kaamOptions(){
+  const t = document.getElementById('wKT')?.value || 'water';
+  if(t === 'spray'){
+    return '<option>Spray</option><option>Drenching</option><option>Pump chalana</option><option>Dono</option>';
+  }
+  return '<option>Watering</option><option>Pipe pakadna</option><option>Pump chalana</option><option>Dono</option>';
+}
+// Kaam type badalne par sabhi labour ke Kaam dropdown refresh karo
+function refreshLabourKaam(){
+  document.querySelectorAll('[id^="wlt-"]').forEach(function(sel){
+    const old = sel.value;
+    sel.innerHTML = kaamOptions();
+    // agar purana option abhi bhi maujood hai to wahi rehne do
+    for(let i=0;i<sel.options.length;i++){
+      if(sel.options[i].value === old){ sel.value = old; break; }
+    }
+  });
+}
 function addWL(){
   wlCnt++; const lid=wlCnt;
   const d=document.createElement('div'); d.className='wlblock'; d.id='wlb-'+lid;
   d.innerHTML='<div class="wlbh"><div class="wlbt"><div class="wln">'+lid+'</div> Labour '+lid+'</div>'+(lid>1?'<button class="rmbtn" onclick="remWL('+lid+')">✕</button>':'')+
   '</div><div class="wlbb"><div class="fr"><label>👤 Naam</label><input type="text" id="wln-'+lid+'" placeholder="Naam..." oninput="updWS()" list="labourNames"></div>'+
-  '<div class="g2"><div><label>🔧 Kaam</label><select id="wlt-'+lid+'"><option>Watering</option><option>Spraying</option><option>Drenching</option><option>Pump chalana</option><option>Pipe pakadna</option><option>Dono</option></select></div>'+
+  '<div class="g2"><div><label>🔧 Kaam</label><select id="wlt-'+lid+'">'+kaamOptions()+'</select></div>'+
   '<div><label>🪣 Pump Count</label><input type="number" id="wlp-'+lid+'" placeholder="0" min="0" oninput="updWS()"></div></div></div>';
   document.getElementById('wlCon').appendChild(d);
   updWS();
@@ -3212,12 +3232,26 @@ function loadLineVar(id){
   }
   let h = '';
   vars.forEach(function(v, i){
-    h += '<label style="display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid var(--g2);border-radius:16px;background:white;cursor:pointer;font-size:13px;font-weight:600;">'+
-      '<input type="checkbox" class="slvchk-'+id+'" value="'+v.replace(/"/g,'&quot;')+'" style="width:16px;height:16px;">'+v+'</label>';
+    h += '<label class="vchip" style="display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border:2px solid var(--g2);border-radius:16px;background:white;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.15s;">'+
+      '<input type="checkbox" class="slvchk-'+id+'" value="'+v.replace(/"/g,'&quot;')+'" style="width:16px;height:16px;" onchange="markChip(this)">'+v+'</label>';
   });
   box.innerHTML = h;
 }
 
+// Variety chip select hone par hara highlight
+function markChip(cb){
+  const lab = cb.closest('label');
+  if(!lab) return;
+  if(cb.checked){
+    lab.style.background = 'var(--gd)';
+    lab.style.color = 'white';
+    lab.style.borderColor = 'var(--gd)';
+  } else {
+    lab.style.background = 'white';
+    lab.style.color = '';
+    lab.style.borderColor = 'var(--g2)';
+  }
+}
 function toggleAllArea(){
   const on = document.getElementById('spAllArea').checked;
   // Poora Area = crop/variety mat pucho, par dawai/matra ki line rahegi
