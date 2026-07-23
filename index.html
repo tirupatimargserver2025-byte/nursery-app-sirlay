@@ -832,17 +832,16 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
       </div>
       <div class="wsec" id="spraySec">
         <span class="ipill">🌿 Spray / Drenching</span>
-        <label style="font-weight:700;color:var(--gd);display:block;margin-bottom:6px;">📍 Kahan Kiya?</label>
         <label style="display:flex;align-items:center;gap:8px;padding:10px;border:2px solid var(--g2);border-radius:8px;margin-bottom:10px;cursor:pointer;font-weight:600;background:var(--gp);">
           <input type="checkbox" id="spAllArea" onchange="toggleAllArea()" style="width:18px;height:18px;">
-          📍 Poora Area me kiya (sabhi crop/variety)
+          📍 Poora Area me kiya (crop/variety nahi chunni)
         </label>
-        <div id="spTargetWrap">
-          <div class="ctitle" style="margin-top:2px;">🌱 Kaunse Crop/Variety me</div>
-          <div id="tgtCon"></div>
-          <button type="button" class="abtn ac" onclick="addTgt()">➕ Aur Crop/Variety Add Karo</button>
+        <div id="spLineWrap">
+          <div class="ctitle" style="margin-top:2px;">📒 Register Entry — har line: paudha, variety, dawai, matra</div>
+          <div id="spLineCon"></div>
+          <button type="button" class="abtn ac" onclick="addSprayLine()">➕ Aur Line Add Karo</button>
         </div>
-        <div class="g2">
+        <div class="g2" style="margin-top:10px;">
           <div><label>🔫 Sprayer</label>
             <select id="spType"><option>Haath wala pump</option><option>Power sprayer</option><option>Dono</option></select></div>
           <div><label>🔢 Pump Count</label><input type="number" id="pCnt" placeholder="0" min="0" oninput="updWS()"></div>
@@ -851,9 +850,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div><label>💧 Pani/Pump (L)</label><input type="number" id="wPP" placeholder="16" min="0" oninput="updWS()"></div>
           <div><label>🌱 Area Covered</label><input type="text" id="aCov" placeholder="Zone A, GH-1"></div>
         </div>
-        <div class="ctitle" style="margin-top:4px;">🧪 Chemicals</div>
-        <div id="cCon"></div>
-        <button class="abtn ac" onclick="addC()">➕ Chemical Add Karo</button>
       </div>
     </div>
     <div class="card"><div class="ctitle blue">👷 Labour Details</div>
@@ -1644,7 +1640,7 @@ let LABOUR_LIST = []; // [{name, wage}]
 let VDATA = {};
 let curUser = null; // {name, role}
 let curMod = null;
-let vCnt=0, lCnt={}, cCnt=0, wlCnt=0, akCnt=0;
+let vCnt=0, lCnt={}, wlCnt=0, akCnt=0;
 let akLabours = {}; // {akid: [names]}
 
 // Timezone-safe date: returns YYYY-MM-DD in LOCAL time (fixes India IST shift bug from toISOString)
@@ -1890,6 +1886,7 @@ function openMod(mod) {
     document.getElementById('wSupB').textContent='👷 '+curUser.name;
     if(!document.querySelector('[id^="wlb-"]')){wlCnt=0;addWL();}
     resetSprayTargets();
+    loadChemList();
     show('waterScreen');
   } else if(mod==='attReport') {
     document.getElementById('repSupB').textContent=(curUser.role==='Manager'?'👔':'👑')+' '+curUser.name;
@@ -2387,21 +2384,10 @@ function setWT(type){
   document.getElementById('btnS').className='tbtn'+(type==='spray'?' as':'');
   document.getElementById('watSec').className='watsec'+(type==='water'?'':' hide');
   document.getElementById('spraySec').className='wsec'+(type==='spray'?' show':'');
-  if(type==='spray'&&!document.querySelector('[id^="cb-"]')) addC();
+  if(type==='spray'&&!document.querySelector('[id^="spl-"]')) addSprayLine();
   updWS();
 }
-function addC(){
-  cCnt++; const cid=cCnt;
-  const d=document.createElement('div'); d.className='cblock'; d.id='cb-'+cid;
-  d.innerHTML='<div class="cbh"><div class="cbt"><div class="cn">'+cid+'</div> Chemical '+cid+'</div>'+(cid>1?'<button class="rmbtn" onclick="remC('+cid+')">✕</button>':'')+
-  '</div><div class="cbb"><div class="fr"><label>🧪 Naam</label><input type="text" id="cn-'+cid+'" placeholder="e.g. Imidacloprid, DAP"></div>'+
-  '<div class="g3"><div><label>📏 Dose</label><input type="number" id="cd-'+cid+'" placeholder="0" step="0.1"></div>'+
-  '<div><label>📐 Unit</label><select id="cu-'+cid+'"><option>ml/pump</option><option>gm/pump</option><option>ml/litre</option><option>gm/litre</option><option>ml total</option><option>gm total</option></select></div>'+
-  '<div><label>🎯 Purpose</label><select id="cp-'+cid+'"><option>Pesticide</option><option>Fungicide</option><option>Fertilizer</option><option>Growth Promoter</option><option>Weedicide</option><option>Other</option></select></div></div>'+
-  '<div class="fr"><label>💉 Kya Kiya</label><select id="cwt-'+cid+'" style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;font-weight:600;"><option value="Spray">🌿 Spray (patton par)</option><option value="Drench">💧 Drenching (jad me)</option></select></div></div>';
-  document.getElementById('cCon').appendChild(d);
-}
-function remC(cid){document.getElementById('cb-'+cid).remove();}
+
 function addWL(){
   wlCnt++; const lid=wlCnt;
   const d=document.createElement('div'); d.className='wlblock'; d.id='wlb-'+lid;
@@ -2436,12 +2422,17 @@ function submitWater(){
   });
   let payload={module:'watering_spraying',date,supervisor,area,shift,kaamType,remarks:rem,labours:labs,startTime:document.getElementById('wST')?.value||'',endTime:document.getElementById('wET')?.value||''};
   if(kaamType==='spray'){
-    // Target (crop/variety ya poora area) build karo
-    const _target = buildTargetString();
-    if(!_target){toast('❗ Crop chunein ya "Poora Area" select karein','error');return;}
-    const chems=[];
-    document.querySelectorAll('[id^="cb-"]').forEach(el=>{const cid=el.id.split('-')[1];const nm=document.getElementById('cn-'+cid)?.value||'';if(nm) chems.push({name:nm,dose:document.getElementById('cd-'+cid)?.value||0,unit:document.getElementById('cu-'+cid)?.value||'',purpose:document.getElementById('cp-'+cid)?.value||'',workType:document.getElementById('cwt-'+cid)?.value||'Spray'});});
-    payload.crop=_target;payload.variety='';payload.pumpCount=document.getElementById('pCnt')?.value||0;payload.waterPerPump=document.getElementById('wPP')?.value||0;payload.areaCovered=document.getElementById('aCov')?.value||'';payload.sprayerType=document.getElementById('spType')?.value||'';payload.chemicals=chems;
+    // Register lines collect karo
+    const _lines = buildSprayLines();
+    if(!_lines.length){toast('❗ Kam se kam ek line bharein (dawai + matra)','error');return;}
+    const _allArea = !!document.getElementById('spAllArea')?.checked;
+    const bad = _lines.filter(function(l){ return _allArea ? !l.name : (!l.crop || !l.name); });
+    if(bad.length){toast(_allArea ? '❗ Har line me Dawai bharein' : '❗ Har line me Paudha aur Dawai dono bharein','error');return;}
+    let chems=[];
+    chems = _lines.map(function(l){
+      return {crop:l.crop, variety:l.variety, name:l.name, dose:l.dose, unit:l.unit, workType:l.workType, purpose:''};
+    });
+    payload.crop=spraySummaryString(_lines);payload.variety='';payload.pumpCount=document.getElementById('pCnt')?.value||0;payload.waterPerPump=document.getElementById('wPP')?.value||0;payload.areaCovered=document.getElementById('aCov')?.value||'';payload.sprayerType=document.getElementById('spType')?.value||'';payload.chemicals=chems;
   } else {payload.waterMethod=document.getElementById('wMeth')?.value||'';payload.waterLitre=document.getElementById('wLitre')?.value||0;payload.waterPlants=document.getElementById('wPlants')?.value||'';}
   const btn=document.getElementById('wSub');
   btn.disabled=true; btn.innerHTML='⏳ Save Ho Raha Hai...';
@@ -2793,7 +2784,7 @@ function loadMyReport(){
     
     if(!workType || workType==='seed'){let seedRows=parseRows(seedTxt);seedRows.forEach(r=>{r._date=fixDate(r);});const mySeed=seedRows.filter(r=>{if(!r._date||r._date<from||r._date>to) return false;if((r.c[1]?.v||'').toString()!==myName) return false;if(vegFilter && (r.c[4]?.v||'').toString()!==vegFilter) return false;if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;if(varFilter && !(r.c[5]?.v||'').toString().toLowerCase().includes(varFilter)) return false;return true;});let sPkt=0,sTrays=0,sPlants=0;const byVeg={};mySeed.forEach(r=>{const veg=(r.c[4]?.v||'').toString();const variety=(r.c[5]?.v||'').toString();const pkt=parseFloat(r.c[7]?.v)||0;const trays=parseFloat(r.c[8]?.v)||0;const plants=parseFloat(r.c[11]?.v)||0;sPkt+=pkt;sTrays+=trays;sPlants+=plants;if(!byVeg[veg]) byVeg[veg]={pkt:0,trays:0,plants:0,varieties:{}};byVeg[veg].pkt+=pkt;byVeg[veg].trays+=trays;byVeg[veg].plants+=plants;if(!byVeg[veg].varieties[variety]) byVeg[veg].varieties[variety]={pkt:0,trays:0,plants:0};byVeg[veg].varieties[variety].pkt+=pkt;byVeg[veg].varieties[variety].trays+=trays;byVeg[veg].varieties[variety].plants+=plants;});html+='<div class="rep-card"><div class="rep-title">🌱 Seed Sowing — '+mySeed.length+' Records</div><div class="rep-sub">'+from+' to '+to+'</div><div class="stat-grid"><div class="stat-item"><span class="sv">'+sPkt.toLocaleString()+'</span><div class="sl">Total PKT</div></div><div class="stat-item"><span class="sv">'+sTrays.toLocaleString()+'</span><div class="sl">Total Trays</div></div><div class="stat-item"><span class="sv">'+sPlants.toLocaleString()+'</span><div class="sl">Total Plants</div></div></div></div>';if(mySeed.length>0){html+='<div class="rep-card"><div class="rep-title">🥬 Vegetable-wise</div><div style="overflow-x:auto;"><table class="att-table"><thead><tr><th>Vegetable</th><th>Variety</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';Object.entries(byVeg).forEach(([veg,vdata])=>{html+='<tr style="background:var(--gp);font-weight:700;"><td>'+veg+'</td><td style="color:var(--g5);">'+Object.keys(vdata.varieties).length+' varieties</td><td>'+vdata.pkt+'</td><td>'+vdata.trays+'</td><td>'+vdata.plants.toLocaleString()+'</td></tr>';Object.entries(vdata.varieties).forEach(([vr,vrdata])=>{html+='<tr><td style="color:var(--g5);padding-left:16px;">↳</td><td>'+vr+'</td><td>'+vrdata.pkt+'</td><td>'+vrdata.trays+'</td><td>'+vrdata.plants.toLocaleString()+'</td></tr>';});});html+='<tr style="background:var(--gd);color:white;font-weight:800;"><td colspan="2">TOTAL</td><td>'+sPkt+'</td><td>'+sTrays+'</td><td>'+sPlants.toLocaleString()+'</td></tr>';html+='</tbody></table></div></div>';html+='<div class="rep-card"><div class="rep-title">📋 Seed Sowing Detail <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div><div style="overflow-x:auto;"><table class="att-table"><thead><tr><th></th><th>Date</th><th>Area</th><th>Vegetable</th><th>Variety</th><th>Lot</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';mySeed.forEach(r=>{const key=r._date+'|'+(r.c[2]?.v||'')+'|'+(r.c[4]?.v||'')+'|'+(r.c[5]?.v||'')+'|'+(r.c[6]?.v||'');const labs=seedLabMap[key]||[];let inner='';if(labs.length>0){inner+='<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">👤 Labour</th><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">PKT</th><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">Tray</th></tr></thead><tbody>';labs.forEach((l,idx)=>{const bg=idx%2===0?'white':'var(--gp)';inner+='<tr style="background:'+bg+';border-bottom:1px solid var(--g2);"><td style="padding:10px;">'+l.name+'</td><td style="padding:10px;">'+l.pkt+'</td><td style="padding:10px;">'+l.tray+'</td></tr>';});inner+='</tbody></table>';}else{inner='<div style="color:var(--g5);font-size:12px;">Labour breakdown nahi mila.</div>';}const ex=expRow(inner,9);html+='<tr class="exp-toggle" onclick="toggleRow(\''+ex.rid+'\')"><td><span class="exp-arrow">▶</span></td><td>'+formatDate(r._date)+'</td><td>'+(r.c[2]?.v||'')+'</td><td>'+(r.c[4]?.v||'')+'</td><td>'+(r.c[5]?.v||'')+'</td><td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+'</td><td>'+(r.c[8]?.v||0)+'</td><td>'+(parseFloat(r.c[11]?.v)||0).toLocaleString()+'</td></tr>';html+=ex.row;});html+='<tr style="background:var(--gd);color:white;font-weight:800;"><td colspan="6">TOTAL</td><td>'+sPkt+'</td><td>'+sTrays+'</td><td>'+sPlants.toLocaleString()+'</td></tr>';html+='</tbody></table></div></div>';}else{html+='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Seed Sowing — koi record nahi mila.</div>';}}
     
-    if(!workType || workType==='water' || workType==='spray'){let watRows=parseRows(watTxt);let sprRows=parseRows(sprTxt);watRows.forEach(r=>{r._date=fixDate(r);});sprRows.forEach(r=>{r._date=fixDate(r);});const myWat=watRows.filter(r=>{if(!r._date||r._date<from||r._date>to) return false;if((r.c[1]?.v||'').toString()!==myName) return false;if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;return true;});const mySpr=sprRows.filter(r=>{if(!r._date||r._date<from||r._date>to) return false;if((r.c[1]?.v||'').toString()!==myName) return false;if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;return true;});const totalWaterL=myWat.reduce((s,r)=>s+(parseFloat(r.c[7]?.v)||0),0);html+='<div class="rep-card"><div class="rep-title">💧 Watering & Spraying — '+(myWat.length+mySpr.length)+' Records</div><div class="rep-sub">'+from+' to '+to+'</div><div class="stat-grid"><div class="stat-item"><span class="sv">'+myWat.length+'</span><div class="sl">Watering</div></div><div class="stat-item"><span class="sv">'+mySpr.length+'</span><div class="sl">Spraying</div></div><div class="stat-item"><span class="sv">'+totalWaterL.toLocaleString()+'L</span><div class="sl">Total Pani</div></div></div></div>';if(myWat.length+mySpr.length>0){html+='<div class="rep-card"><div class="rep-title">📋 Watering & Spraying Detail <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div><div style="overflow-x:auto;"><table class="att-table"><thead><tr><th></th><th>Date</th><th>Area</th><th>Type</th><th>Method/Sprayer</th><th>Pani/Pumps</th><th>Labour</th></tr></thead><tbody>';myWat.forEach(r=>{const labs=wsLabRows.filter(w=>w._date===r._date && (w.c[2]?.v||'')===(r.c[2]?.v||'') && (w.c[3]?.v||'')==='water');let inner='';if(labs.length>0){inner+='<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">👤 Labour</th><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">Ghante</th></tr></thead><tbody>';labs.forEach((l,idx)=>{const bg=idx%2===0?'white':'var(--gp)';inner+='<tr style="background:'+bg+';border-bottom:1px solid var(--g2);"><td style="padding:10px;">'+(l.c[4]?.v||'')+'</td><td style="padding:10px;">'+(l.c[5]?.v||0)+'</td></tr>';});inner+='</tbody></table>';}else{inner='<div style="color:var(--g5);font-size:12px;">Labour detail nahi mila.</div>';}const ex=expRow(inner,7);html+='<tr class="exp-toggle" onclick="toggleRow(\''+ex.rid+'\')"><td><span class="exp-arrow">▶</span></td><td>'+formatDate(r._date)+'</td><td>'+(r.c[2]?.v||'')+'</td><td>💧 Watering</td><td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+'L</td><td>'+(r.c[9]?.v||0)+'</td></tr>';html+=ex.row;});mySpr.forEach(r=>{const labs=wsLabRows.filter(w=>w._date===r._date && (w.c[2]?.v||'')===(r.c[2]?.v||'') && (w.c[3]?.v||'')==='spray');const chems=chemRows.filter(c=>c._date===r._date && (c.c[2]?.v||'')===(r.c[2]?.v||''));let inner='';if(chems.length>0){inner+='<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">🧪 Chemical</th><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">Kya Kiya</th><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">Matra</th><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">Unit</th><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">Purpose</th></tr></thead><tbody>';chems.forEach((c,idx)=>{const bg=idx%2===0?'white':'var(--gp)';const wt=(c.c[6]?.v||'Spray');const wtBadge=wt==='Drench'?'💧 Drench':'🌿 Spray';inner+='<tr style="background:'+bg+';border-bottom:1px solid var(--g2);"><td style="padding:10px;">'+(c.c[5]?.v||'')+'</td><td style="padding:10px;font-weight:600;">'+wtBadge+'</td><td style="padding:10px;">'+(c.c[7]?.v||'')+'</td><td style="padding:10px;">'+(c.c[8]?.v||'')+'</td><td style="padding:10px;">'+(c.c[9]?.v||'')+'</td></tr>';});inner+='</tbody></table>';}if(labs.length>0){inner+='<table style="width:100%;border-collapse:collapse;margin-top:8px;"><thead><tr><th>👤 Labour</th><th>Pumps</th></tr></thead><tbody>';labs.forEach((l,idx)=>{const bg=idx%2===0?'white':'var(--gp)';inner+='<tr style="background:'+bg+';border-bottom:1px solid var(--g2);"><td style="padding:10px;">'+(l.c[4]?.v||'')+'</td><td style="padding:10px;">'+(l.c[6]?.v||0)+'</td></tr>';});inner+='</tbody></table>';}if(!inner) inner='<div style="color:var(--g5);font-size:12px;">Detail nahi mila.</div>';const ex=expRow(inner,7);html+='<tr class="exp-toggle" onclick="toggleRow(\''+ex.rid+'\')"><td><span class="exp-arrow">▶</span></td><td>'+formatDate(r._date)+'</td><td>'+(r.c[2]?.v||'')+'</td><td>'+sprayScopeLabel(r.c[3]?.v||'', r.c[4]?.v||'')+'</td><td>'+(r.c[8]?.v||'')+'</td><td>'+(r.c[9]?.v||0)+' pumps</td><td>'+(r.c[12]?.v||0)+'</td></tr>';html+=ex.row;});html+='</tbody></table></div></div>';}else{html+='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Watering/Spraying — koi record nahi mila.</div>';}}
+    if(!workType || workType==='water' || workType==='spray'){let watRows=parseRows(watTxt);let sprRows=parseRows(sprTxt);watRows.forEach(r=>{r._date=fixDate(r);});sprRows.forEach(r=>{r._date=fixDate(r);});const myWat=watRows.filter(r=>{if(!r._date||r._date<from||r._date>to) return false;if((r.c[1]?.v||'').toString()!==myName) return false;if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;return true;});const mySpr=sprRows.filter(r=>{if(!r._date||r._date<from||r._date>to) return false;if((r.c[1]?.v||'').toString()!==myName) return false;if(areaFilter && (r.c[2]?.v||'').toString()!==areaFilter) return false;return true;});const totalWaterL=myWat.reduce((s,r)=>s+(parseFloat(r.c[7]?.v)||0),0);html+='<div class="rep-card"><div class="rep-title">💧 Watering & Spraying — '+(myWat.length+mySpr.length)+' Records</div><div class="rep-sub">'+from+' to '+to+'</div><div class="stat-grid"><div class="stat-item"><span class="sv">'+myWat.length+'</span><div class="sl">Watering</div></div><div class="stat-item"><span class="sv">'+mySpr.length+'</span><div class="sl">Spraying</div></div><div class="stat-item"><span class="sv">'+totalWaterL.toLocaleString()+'L</span><div class="sl">Total Pani</div></div></div></div>';if(myWat.length+mySpr.length>0){html+='<div class="rep-card"><div class="rep-title">📋 Watering & Spraying Detail <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div><div style="overflow-x:auto;"><table class="att-table"><thead><tr><th></th><th>Date</th><th>Area</th><th>Type</th><th>Method/Sprayer</th><th>Pani/Pumps</th><th>Labour</th></tr></thead><tbody>';myWat.forEach(r=>{const labs=wsLabRows.filter(w=>w._date===r._date && (w.c[2]?.v||'')===(r.c[2]?.v||'') && (w.c[3]?.v||'')==='water');let inner='';if(labs.length>0){inner+='<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">👤 Labour</th><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">Ghante</th></tr></thead><tbody>';labs.forEach((l,idx)=>{const bg=idx%2===0?'white':'var(--gp)';inner+='<tr style="background:'+bg+';border-bottom:1px solid var(--g2);"><td style="padding:10px;">'+(l.c[4]?.v||'')+'</td><td style="padding:10px;">'+(l.c[5]?.v||0)+'</td></tr>';});inner+='</tbody></table>';}else{inner='<div style="color:var(--g5);font-size:12px;">Labour detail nahi mila.</div>';}const ex=expRow(inner,7);html+='<tr class="exp-toggle" onclick="toggleRow(\''+ex.rid+'\')"><td><span class="exp-arrow">▶</span></td><td>'+formatDate(r._date)+'</td><td>'+(r.c[2]?.v||'')+'</td><td>💧 Watering</td><td>'+(r.c[6]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+'L</td><td>'+(r.c[9]?.v||0)+'</td></tr>';html+=ex.row;});mySpr.forEach(r=>{const labs=wsLabRows.filter(w=>w._date===r._date && (w.c[2]?.v||'')===(r.c[2]?.v||'') && (w.c[3]?.v||'')==='spray');const chems=chemRows.filter(c=>c._date===r._date && (c.c[2]?.v||'')===(r.c[2]?.v||''));let inner='';if(chems.length>0){inner+='<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">🥬 Paudha</th><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">🌱 Variety</th><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">🧪 Dawai</th><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">Kya Kiya</th><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">Matra</th></tr></thead><tbody>';chems.forEach((c,idx)=>{const bg=idx%2===0?'white':'var(--gp)';const wt=(c.c[6]?.v||'Spray');const wtBadge=wt==='Drench'?'💧 Drench':'🌿 Spray';const mat=((c.c[7]?.v||'')+' '+(c.c[8]?.v||'')).trim();inner+='<tr style="background:'+bg+';border-bottom:1px solid var(--g2);"><td style="padding:10px;font-weight:600;">'+(c.c[3]?.v||'')+'</td><td style="padding:10px;">'+(c.c[4]?.v||'—')+'</td><td style="padding:10px;">'+(c.c[5]?.v||'')+'</td><td style="padding:10px;font-weight:600;">'+wtBadge+'</td><td style="padding:10px;font-weight:700;">'+mat+'</td></tr>';});inner+='</tbody></table>';}if(labs.length>0){inner+='<table style="width:100%;border-collapse:collapse;margin-top:8px;"><thead><tr><th>👤 Labour</th><th>Pumps</th></tr></thead><tbody>';labs.forEach((l,idx)=>{const bg=idx%2===0?'white':'var(--gp)';inner+='<tr style="background:'+bg+';border-bottom:1px solid var(--g2);"><td style="padding:10px;">'+(l.c[4]?.v||'')+'</td><td style="padding:10px;">'+(l.c[6]?.v||0)+'</td></tr>';});inner+='</tbody></table>';}if(!inner) inner='<div style="color:var(--g5);font-size:12px;">Detail nahi mila.</div>';const ex=expRow(inner,7);html+='<tr class="exp-toggle" onclick="toggleRow(\''+ex.rid+'\')"><td><span class="exp-arrow">▶</span></td><td>'+formatDate(r._date)+'</td><td>'+(r.c[2]?.v||'')+'</td><td>'+sprayScopeLabel(r.c[3]?.v||'', r.c[4]?.v||'')+'</td><td>'+(r.c[8]?.v||'')+'</td><td>'+(r.c[9]?.v||0)+' pumps</td><td>'+(r.c[12]?.v||0)+'</td></tr>';html+=ex.row;});html+='</tbody></table></div></div>';}else{html+='<div class="rep-card" style="text-align:center;color:var(--g5);padding:16px;">Watering/Spraying — koi record nahi mila.</div>';}}
     
     con.innerHTML=html;
   }).catch((err)=>{console.error('LoadSupActivity error:', err);con.innerHTML='<div class="rep-card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Data load nahi hua. Internet check karo.</div>';});
@@ -3065,7 +3056,7 @@ function showSuc(mod, msg){
 
 function resetCurrentForm(){
   if(curMod==='seed'){document.getElementById('vCon').innerHTML='';document.getElementById('sRem').value='';vCnt=0;Object.keys(lCnt).forEach(k=>delete lCnt[k]);addV();updSS();}
-  else if(curMod==='water'){document.getElementById('cCon').innerHTML='';document.getElementById('wlCon').innerHTML='';document.getElementById('wRem').value='';document.getElementById('wLitre').value='';const _wp=document.getElementById('wPlants');if(_wp)_wp.value='';cCnt=0;wlCnt=0;setWT('water');addWL();updWS();resetSprayTargets();}
+  else if(curMod==='water'){document.getElementById('wlCon').innerHTML='';document.getElementById('wRem').value='';document.getElementById('wLitre').value='';const _wp=document.getElementById('wPlants');if(_wp)_wp.value='';wlCnt=0;setWT('water');addWL();updWS();resetSprayTargets();}
   else if(curMod==='attend'){document.getElementById('attList').innerHTML='';document.getElementById('attRem').value='';renderAttLabour();}
   else if(curMod==='assign'){document.getElementById('assignCon').innerHTML='';document.getElementById('asRem').value='';akCnt=0;akLabours={};addAssignKaam();}
 }
@@ -3193,50 +3184,133 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-let tgtCnt = 0;
-function addTgt(){
-  tgtCnt++; const tid = tgtCnt;
+let spLineCnt = 0;
+let CHEM_LIST = [];
+
+// Register jaisi ek line: paudha + variety(multi) + dawai + matra + unit + type
+function addSprayLine(){
+  spLineCnt++; const id = spLineCnt;
   const d = document.createElement('div');
-  d.className = 'tgtrow'; d.id = 'tgt-'+tid;
-  d.style.cssText = 'display:grid;grid-template-columns:1fr 1fr auto;gap:6px;align-items:end;margin-bottom:8px;';
+  d.className = 'cblock'; d.id = 'spl-'+id;
   d.innerHTML =
-    '<div><label style="font-size:11px;">\u{1F96C} Crop</label>'+
-    '<input type="text" id="tc-'+tid+'" list="cropList" placeholder="\u{1F50D} Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;" onchange="loadTgtVar('+tid+')"></div>'+
-    '<div><label style="font-size:11px;">\u{1F331} Variety (optional)</label>'+
-    '<select id="tv-'+tid+'" style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;"><option value="">-- Poora Crop --</option></select></div>'+
-    (tid>1 ? '<button type="button" class="rmbtn" onclick="remTgt('+tid+')" style="padding:8px 10px;">\u2715</button>' : '<div></div>');
-  document.getElementById('tgtCon').appendChild(d);
+    '<div class="cbh"><div class="cbt"><div class="cn">'+id+'</div> Line '+id+'</div>'+
+      (id>1 ? '<button class="rmbtn" onclick="remSprayLine('+id+')">\u2715</button>' : '')+
+    '</div>'+
+    '<div class="cbb">'+
+      '<div class="fr cvpart"><label>\u{1F96C} Paudha (Crop)</label>'+
+        '<input type="text" id="slc-'+id+'" list="cropList" placeholder="\u{1F50D} TOMATO, MIRCHI..." onchange="loadLineVar('+id+')"></div>'+
+      '<div class="fr cvpart"><label>\u{1F331} Variety <span style="font-weight:400;color:var(--g5);font-size:11px;">(ek ya kai chunein \u2014 khali = poora crop)</span></label>'+
+        '<div id="slv-'+id+'" style="display:flex;flex-wrap:wrap;gap:6px;padding:8px;border:1px solid var(--g2);border-radius:6px;background:var(--g1);min-height:38px;align-items:center;">'+
+          '<span style="color:var(--g5);font-size:12px;">Pehle crop chunein...</span></div></div>'+
+      '<div class="fr"><label>\u{1F9EA} Dawai / Khaad</label>'+
+        '<input type="text" id="sln-'+id+'" list="chemList" placeholder="\u{1F50D} Calcium, 00:00:50, Armimetar..."></div>'+
+      '<div class="g3">'+
+        '<div><label>\u{1F4CF} Matra</label><input type="number" id="sld-'+id+'" placeholder="0" step="0.1"></div>'+
+        '<div><label>\u{1F4D0} Unit</label><select id="slu-'+id+'">'+
+          '<option>gm</option><option>ML</option><option>gm/pump</option><option>ml/pump</option>'+
+          '<option>gm/litre</option><option>ml/litre</option><option>kg</option><option>litre</option></select></div>'+
+        '<div><label>\u{1F489} Kya Kiya</label><select id="slt-'+id+'" style="font-weight:600;">'+
+          '<option value="Spray">\u{1F33F} Spray</option><option value="Drench">\u{1F4A7} Drench</option></select></div>'+
+      '</div>'+
+    '</div>';
+  document.getElementById('spLineCon').appendChild(d);
 }
-function remTgt(id){ const el=document.getElementById('tgt-'+id); if(el) el.remove(); }
-function loadTgtVar(id){
-  const crop = document.getElementById('tc-'+id).value;
-  const sel = document.getElementById('tv-'+id);
-  sel.innerHTML = '<option value="">-- Poora Crop --</option>';
-  if(crop && VDATA[crop]){
-    VDATA[crop].forEach(v => sel.innerHTML += '<option>'+v+'</option>');
+
+function remSprayLine(id){
+  const el = document.getElementById('spl-'+id);
+  if(el) el.remove();
+}
+
+// Crop chunte hi us crop ki saari variety checkbox banao
+function loadLineVar(id){
+  const crop = (document.getElementById('slc-'+id)?.value||'').trim();
+  const box = document.getElementById('slv-'+id);
+  if(!box) return;
+  const vars = VDATA[crop] || [];
+  if(!vars.length){
+    box.innerHTML = '<span style="color:var(--g5);font-size:12px;">Is crop ki variety nahi mili \u2014 poora crop maana jayega</span>';
+    return;
   }
+  let h = '';
+  vars.forEach(function(v, i){
+    h += '<label style="display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid var(--g2);border-radius:16px;background:white;cursor:pointer;font-size:13px;font-weight:600;">'+
+      '<input type="checkbox" class="slvchk-'+id+'" value="'+v.replace(/"/g,'&quot;')+'" style="width:16px;height:16px;">'+v+'</label>';
+  });
+  box.innerHTML = h;
 }
+
 function toggleAllArea(){
   const on = document.getElementById('spAllArea').checked;
-  document.getElementById('spTargetWrap').style.display = on ? 'none' : 'block';
+  // Poora Area = crop/variety mat pucho, par dawai/matra ki line rahegi
+  document.querySelectorAll('#spLineCon .cvpart').forEach(function(el){
+    el.style.display = on ? 'none' : 'block';
+  });
 }
-// Sabhi target rows ko ek readable string me badlo. Poora Area -> "Poora Area".
-function buildTargetString(){
-  if(document.getElementById('spAllArea')?.checked) return 'Poora Area';
+
+// Saari lines collect karo -> [{crop, variety, name, dose, unit, workType}]
+function buildSprayLines(){
+  const allArea = !!document.getElementById('spAllArea')?.checked;
+  const out = [];
+  document.querySelectorAll('[id^="spl-"]').forEach(function(el){
+    const id = el.id.split('-')[1];
+    const name = (document.getElementById('sln-'+id)?.value||'').trim();
+    let crop = (document.getElementById('slc-'+id)?.value||'').trim();
+    const vs = [];
+    document.querySelectorAll('.slvchk-'+id+':checked').forEach(function(cb){ vs.push(cb.value); });
+    if(allArea){ crop = 'Poora Area'; vs.length = 0; }
+    if(!name && !crop) return; // bilkul khali line skip
+    out.push({
+      crop: crop,
+      variety: vs.join(' + '),
+      name: name,
+      dose: document.getElementById('sld-'+id)?.value || 0,
+      unit: document.getElementById('slu-'+id)?.value || '',
+      workType: document.getElementById('slt-'+id)?.value || 'Spray',
+      _allArea: allArea
+    });
+  });
+  return out;
+}
+
+// Report/summary ke liye chhota target string
+function spraySummaryString(lines){
+  if(!lines.length) return '';
+  if(lines[0] && lines[0]._allArea) return 'Poora Area';
   const parts = [];
-  document.querySelectorAll('[id^="tgt-"]').forEach(el=>{
-    const tid = el.id.split('-')[1];
-    const crop = (document.getElementById('tc-'+tid)?.value||'').trim();
-    const vr = (document.getElementById('tv-'+tid)?.value||'').trim();
-    if(!crop) return;
-    parts.push(vr ? crop+'/'+vr : crop+' (sabhi)');
+  lines.forEach(function(l){
+    if(!l.crop) return;
+    const s = l.variety ? l.crop+'/'+l.variety : l.crop+' (sabhi)';
+    if(parts.indexOf(s) === -1) parts.push(s);
   });
   return parts.join(', ');
 }
+
+// Purani dawaiyan Chemical Records se load karo (search suggestions)
+function loadChemList(){
+  const dl = document.getElementById('chemList');
+  if(!dl) return;
+  fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Chemical%20Records&headers=1&t='+Date.now())
+    .then(function(r){ return r.text(); })
+    .then(function(txt){
+      const rows = dashParse(txt);
+      const seen = {};
+      rows.forEach(function(r){
+        const n = (r.c[5]?.v||'').toString().trim();
+        if(n && !seen[n]) seen[n] = true;
+      });
+      CHEM_LIST = Object.keys(seen).sort();
+      dl.innerHTML = '';
+      CHEM_LIST.forEach(function(n){
+        const o = document.createElement('option'); o.value = n; dl.appendChild(o);
+      });
+    })
+    .catch(function(){});
+}
+
 function resetSprayTargets(){
   const cb = document.getElementById('spAllArea'); if(cb) cb.checked = false;
-  const wrap = document.getElementById('spTargetWrap'); if(wrap) wrap.style.display = 'block';
-  const con = document.getElementById('tgtCon'); if(con){ con.innerHTML=''; tgtCnt=0; addTgt(); }
+  const wrap = document.getElementById('spLineWrap'); if(wrap) wrap.style.display = 'block';
+  const con = document.getElementById('spLineCon'); if(con){ con.innerHTML=''; spLineCnt=0; addSprayLine(); }
 }
 
 function loadShiftingVarieties(){
@@ -4242,10 +4316,11 @@ function loadDashboard(){
         body+='</tbody></table></div>';
       }
       if(chemRows.length){
-        body+='<div class="dash-sub">🧪 Chemical Detail</div><div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th><th>Area</th><th>Chemical</th><th>Kya Kiya</th><th>Matra</th><th>Unit</th></tr></thead><tbody>';
+        body+='<div class="dash-sub">📒 Register Detail</div><div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th><th>Area</th><th>Paudha</th><th>Variety</th><th>Dawai</th><th>Kya Kiya</th><th>Matra</th></tr></thead><tbody>';
         chemRows.forEach(function(r){
           const wt=nz(r.c[6]?.v)||'Spray'; const badge=wt==='Drench'?'💧 Drench':'🌿 Spray';
-          body+='<tr><td>'+formatDate(r._d)+'</td><td>'+nz(r.c[2]?.v)+'</td><td>'+nz(r.c[5]?.v)+'</td><td>'+badge+'</td><td>'+nz(r.c[7]?.v)+'</td><td>'+nz(r.c[8]?.v)+'</td></tr>';
+          const mat=(nz(r.c[7]?.v)+' '+nz(r.c[8]?.v)).trim();
+          body+='<tr><td>'+formatDate(r._d)+'</td><td>'+nz(r.c[2]?.v)+'</td><td><b>'+nz(r.c[3]?.v)+'</b></td><td>'+(nz(r.c[4]?.v)||'—')+'</td><td>'+nz(r.c[5]?.v)+'</td><td>'+badge+'</td><td><b>'+mat+'</b></td></tr>';
         });
         body+='</tbody></table></div>';
       }
@@ -5462,6 +5537,7 @@ function loadDispatchReport(){
 
     <!-- CROP AND VARIETY DATALISTS FOR SEARCH -->
     <datalist id="cropList"></datalist>
+    <datalist id="chemList"></datalist>
     <datalist id="varietyList"></datalist>
 </body>
 </html>
