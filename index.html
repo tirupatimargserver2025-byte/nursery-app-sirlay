@@ -3199,7 +3199,7 @@ function addSprayLine(){
       '<div class="fr cvpart"><label>\u{1F96C} Paudha (Crop)</label>'+
         '<input type="text" id="slc-'+id+'" list="cropList" placeholder="\u{1F50D} TOMATO, MIRCHI..." onchange="loadLineVar('+id+')"></div>'+
       '<div class="fr cvpart"><label>\u{1F331} Variety <span id="slvc-'+id+'" style="font-weight:700;color:var(--gd);font-size:11px;">(0 chuni)</span></label>'+
-        '<input type="text" id="slvs-'+id+'" placeholder="\u{1F50D} Variety dhundhein..." oninput="filterVariety('+id+')" style="width:100%;padding:9px;border:1px solid var(--g2);border-radius:6px;margin-bottom:6px;display:none;">'+
+        '<input type="text" id="slvs-'+id+'" placeholder="\u{1F50D} Variety dhundhein..." oninput="filterVariety('+id+')" autocomplete="off" style="width:100%;padding:10px;border:1px solid var(--g2);border-radius:6px;margin-bottom:6px;font-size:15px;">'+
         '<div id="slv-'+id+'" style="display:flex;flex-wrap:wrap;gap:6px;padding:8px;border:1px solid var(--g2);border-radius:6px;background:var(--g1);min-height:38px;max-height:190px;overflow-y:auto;align-items:flex-start;align-content:flex-start;">'+
           '<span style="color:var(--g5);font-size:12px;">Pehle crop chunein...</span></div></div>'+
       '<div class="fr"><label>\u{1F9EA} Dawai / Khaad</label>'+
@@ -3227,15 +3227,13 @@ function loadLineVar(id){
   const box = document.getElementById('slv-'+id);
   const srch = document.getElementById('slvs-'+id);
   if(!box) return;
-  if(srch){ srch.value=''; srch.style.display='none'; }
+  if(srch){ srch.value=''; }
   const vars = VDATA[crop] || [];
   if(!vars.length){
     box.innerHTML = '<span style="color:var(--g5);font-size:12px;">Is crop ki variety nahi mili \u2014 poora crop maana jayega</span>';
     updVarCount(id);
     return;
   }
-  // 6 se zyada variety hain to search box dikhao
-  if(srch && vars.length > 6) srch.style.display='block';
   let h = '';
   vars.forEach(function(v){
     const safe = v.replace(/"/g,'&quot;');
