@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>🌱 Nursery Management App</title>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -1610,6 +1613,26 @@ function formatDate(dateStr) {
   
   return day + ' ' + month + ' ' + year;
 }
+// ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
+// Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
+const APP_VERSION = '20260723-1149';
+(function autoUpdateCheck(){
+  // Loop guard: abhi abhi update hua hai to dobara check mat karo
+  if(location.search.indexOf('v=') !== -1) return;
+  fetch(location.pathname + '?nocache=' + Date.now(), { cache: 'no-store' })
+    .then(function(r){ return r.text(); })
+    .then(function(t){
+      // Regex string se banaya — warna ye line khud apne hi pattern se match kar leti
+      const re = new RegExp('APP_' + "VERSION = '([^']+)'");
+      const m = t.match(re);
+      if(m && m[1] !== APP_VERSION){
+        // Naya version mila -> fresh URL se load karo (cache bypass)
+        location.replace(location.pathname + '?v=' + m[1]);
+      }
+    })
+    .catch(function(){ /* offline ho to chup rehna */ });
+})();
+
 const API = 'https://script.google.com/macros/s/AKfycbzfdI-8l1ba0nL_5ssyq4YgPcQnAUXvmqu9Oeb6ukfA9tZzN8NaiS8ZsNN3qhNjc4xY5A/exec';
 const SHEET_ID = '1nItPv5Jk4baU4Rg6fgQMYchRK7exQk-KDsRkHLl34Ew';
 
