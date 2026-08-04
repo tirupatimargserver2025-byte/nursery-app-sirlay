@@ -1227,15 +1227,15 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
       <div class="ctitle">👨 Farmer Details</div>
       <div class="g2">
         <div><label>📅 Booking Date</label><input type="date" id="bkDate"></div>
-        <div><label>👨 Farmer Naam</label><input type="text" id="bkFarmer" placeholder="Kisan ka naam"></div>
+        <div><label>👨 Farmer Naam <span style="color:var(--rd);">*</span></label><input type="text" id="bkFarmer" placeholder="Kisan ka naam"></div>
       </div>
       <div class="g2">
-        <div><label>🏘️ Village</label><input type="text" id="bkVillage" placeholder="Gaon"></div>
-        <div><label>🏛️ Tehsil</label><input type="text" id="bkTehsil" placeholder="Tehsil"></div>
+        <div><label>🏘️ Village <span style="color:var(--rd);">*</span></label><input type="text" id="bkVillage" placeholder="Gaon"></div>
+        <div><label>🏛️ Tehsil <span style="color:var(--rd);">*</span></label><input type="text" id="bkTehsil" placeholder="Tehsil"></div>
       </div>
-      <div class="fr">
-        <label>📱 Mobile No.</label>
-        <input type="tel" id="bkMobile" placeholder="10 digit mobile" maxlength="10" style="width:100%;">
+      <div class="g2">
+        <div><label>🗺️ District <span style="color:var(--rd);">*</span></label><input type="text" id="bkDistrict" placeholder="Zila"></div>
+        <div><label>📱 Mobile No. <span style="color:var(--rd);">*</span></label><input type="tel" id="bkMobile" placeholder="10 digit mobile" maxlength="10" style="width:100%;"></div>
       </div>
     </div>
 
@@ -1615,7 +1615,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20260723-1149';
+const APP_VERSION = '20260804-1034';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -3578,6 +3578,7 @@ function openShiftingReport(){
   
   document.getElementById('shrVariety').innerHTML = '<option value="">-- Sab Varieties --</option>';
   
+  populateCropVarietyLists();
   show('shiftingReportScreen');
 }
 
@@ -3970,12 +3971,13 @@ function submitBooking(){
   const farmer = document.getElementById('bkFarmer').value.trim();
   const village = document.getElementById('bkVillage').value.trim();
   const tehsil = document.getElementById('bkTehsil').value.trim();
+  const district = document.getElementById('bkDistrict').value.trim();
   const mobile = document.getElementById('bkMobile').value.trim();
   const payMode = document.getElementById('bkPayMode').value;
   const payDate = document.getElementById('bkPayDate').value;
 
-  if(!bkDate || !farmer || !village || !mobile){
-    toast('❗ Booking date, farmer, village, mobile zaroori hain!', 'error');
+  if(!bkDate || !farmer || !village || !tehsil || !district || !mobile){
+    toast('❗ Farmer, Village, Tehsil, District aur Mobile — sab zaroori hai!', 'error');
     return;
   }
   if(mobile.length !== 10){
@@ -4082,7 +4084,7 @@ function submitBooking(){
         const rows = json.table.rows || [];
         rows.forEach(r => {
           // Booking ID col index 22
-          const bid = String(r.c && r.c[22] && r.c[22].v || '');
+          const bid = String(r.c && r.c[23] && r.c[23].v || '');
           if(bid.indexOf(prefix) === 0){
             const n = parseInt(bid.substring(prefix.length)) || 0;
             if(n > maxNum) maxNum = n;
@@ -4103,7 +4105,7 @@ function submitBooking(){
 
     const payload = {
       module: 'booking',
-      bookingDate: bkDate, farmer, village, tehsil, mobile,
+      bookingDate: bkDate, farmer, village, tehsil, district, mobile,
       totalAmount: totalAmt,
       paymentMode: payMode, modeStr: modeStr, cashAmount: cashAmt, bankAmount: bankAmt, bankName: bankName,
       paymentDate: payDate, bookingId, marketing, remarks: remarks,
@@ -4111,7 +4113,7 @@ function submitBooking(){
     };
 
     // PDF banao
-    generateBookingPDF({bkDate, farmer, village, tehsil, mobile, payMode, modeStr, cashAmt, bankAmt, bankName, payDate, bookingId, marketing, remarks, lines: collected, totalAmt});
+    generateBookingPDF({bkDate, farmer, village, tehsil, district, mobile, payMode, modeStr, cashAmt, bankAmt, bankName, payDate, bookingId, marketing, remarks, lines: collected, totalAmt});
 
     // Server ko bhejo
     fetch(API, {
@@ -4212,10 +4214,13 @@ function generateBookingPDF(d){
         // Niyam & Shartein (Hindi - conditions, updated list)
         '<div style="font-size:11px;color:#333;border:1px solid #c8e6c9;background:#f6fbf6;border-radius:6px;padding:10px 12px;margin-bottom:16px;line-height:1.6;">' +
           '<div style="font-weight:700;color:#1a472a;margin-bottom:5px;font-size:12px;">नियम व शर्तें</div>' +
-          '<div>• मैं/हम ' + clean(d.farmer) + ' ने अग्रिम रूप से बुक कराई गई फसल की किस्म का चयन अपने स्वविवेक से किया है,और उससे संबंधित जोखिम से भलीभांति अवगत हूँ</div>' +
-          '<div>• डिलीवरी से पूर्व किसान नर्सरी का निरीक्षण कर सकते हैं।</div>' +
-          '<div>• पूर्ण भुगतान के बाद ही पौधों की डिलीवरी की जाएगी।</div>' +
-          '<div>• पौधों की प्राप्ति के समय यदि पौधों की क्वालिटी से किसान संतुष्ट नहीं है तो उसी वाहन में पौधों को वापस कर देवे।</div>' +
+          '<div>• मैं/हम ' + clean(d.farmer) + ' ने अग्रिम रूप से बुक कराई गई फसल की किस्म का चयन अपने स्वविवेक से किया है।</div>' +
+          '<div>• बुक कराई गई नर्सरी की फसल की खेती में संबंधित जोखिम से भलीभांति अवगत हूँ।</div>' +
+          '<div>• फसल के उत्पादन की गुणवत्ता व मात्रा फसल की देखरेख, बीमारी/खाद/कीट-नियंत्रण एवं मौसम पर निर्भर है।</div>' +
+          '<div>• यदि किसान द्वारा नर्सरी से पौधों को निर्धारित समय में नहीं ले जाया जाता है तो होने वाले नुकसान की जवाबदारी नर्सरी की नहीं होगी।</div>' +
+          '<div>• बुक की गई नर्सरी को देखने के लिए किसान डिलेवरी से पहले नर्सरी पर आ सकते हैं।</div>' +
+          '<div>• पौधों की डिलेवरी आर्डर की राशि का पूर्ण अग्रिम भुगतान होने के पश्चात परिवहन की व्यवस्था के अनुसार की जावेगी।</div>' +
+          '<div>• पौधों की प्राप्ति के समय यदि पौधों की क्वालिटी से किसान संतुष्ट नहीं है तो उसी वाहन में पौधों को वापस कर देवे, अन्यथा बाद में नर्सरी की कोई भी जवाबदारी नहीं होगी।</div>' +
           '<div style="margin-top:5px;">उपरोक्त नियम व शर्तों को मैं/हम ' + clean(d.farmer) + ' अच्छी तरह पढ़ व समझ लिया है, जिसे स्वीकार करता/करते हैं।</div>' +
         '</div>' +
         // Prepared by + signature
@@ -4482,12 +4487,12 @@ function loadDashboard(){
       (function(){
         const rows=flt(book,null);
         let plants=0,recv=0;
-        rows.forEach(function(r){plants+=num(r.c[7]?.v);recv+=num(r.c[18]?.v);});
+        rows.forEach(function(r){plants+=num(r.c[8]?.v);recv+=num(r.c[19]?.v);});
         let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+rows.length+'</span><div class="dsl">Bookings</div></div><div class="dsi"><span class="dsv">'+plants.toLocaleString()+'</span><div class="dsl">Total Plants</div></div><div class="dsi"><span class="dsv">₹'+recv.toLocaleString()+'</span><div class="dsl">Received</div></div></div>';
         if(rows.length){
           body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th><th>Farmer</th><th>Village</th><th>Crop</th><th>Variety</th><th>Plants</th><th>Status</th></tr></thead><tbody>';
           rows.forEach(function(r){
-            body+='<tr><td>'+formatDate(r._d)+'</td><td>'+nz(r.c[1]?.v)+'</td><td>'+nz(r.c[2]?.v)+'</td><td>'+nz(r.c[5]?.v)+'</td><td>'+nz(r.c[6]?.v)+'</td><td>'+num(r.c[7]?.v).toLocaleString()+'</td><td>'+nz(r.c[20]?.v)+'</td></tr>';
+            body+='<tr><td>'+formatDate(r._d)+'</td><td>'+nz(r.c[1]?.v)+'</td><td>'+nz(r.c[2]?.v)+'</td><td>'+nz(r.c[6]?.v)+'</td><td>'+nz(r.c[7]?.v)+'</td><td>'+num(r.c[8]?.v).toLocaleString()+'</td><td>'+nz(r.c[21]?.v)+'</td></tr>';
           });
           body+='<tr class="dtot-row"><td colspan="5">TOTAL</td><td>'+plants.toLocaleString()+'</td><td></td></tr>';
           body+='</tbody></table></div>';
@@ -4500,10 +4505,10 @@ function loadDashboard(){
         const rows=flt(book,null);
         const byCV={};
         rows.forEach(function(r){
-          const c=nz(r.c[5]?.v)||'?', v=nz(r.c[6]?.v)||'?';
+          const c=nz(r.c[6]?.v)||'?', v=nz(r.c[7]?.v)||'?';
           const key=c+' / '+v;
           if(!byCV[key]) byCV[key]={plants:0,count:0};
-          byCV[key].plants+=num(r.c[7]?.v); byCV[key].count++;
+          byCV[key].plants+=num(r.c[8]?.v); byCV[key].count++;
         });
         const keys=Object.keys(byCV).sort(function(a,b){return byCV[b].plants-byCV[a].plants;});
         let totPl=0; keys.forEach(function(k){totPl+=byCV[k].plants;});
@@ -4580,6 +4585,7 @@ function openBookingReport(){
   document.getElementById('brVariety').innerHTML = '<option value="">-- Sab Varieties --</option>';
   document.getElementById('brFarmer').value = '';
   document.getElementById('brVillage').value = '';
+  populateCropVarietyLists();
   show('bookingReportScreen');
 }
 
@@ -4614,11 +4620,11 @@ function loadBookingReport(){
         });
         rows = rows.filter(r => {
           if(r._date < from || r._date > to) return false;
-          if(cropF && (r.c[5]?.v||'').toString() !== cropF) return false;
-          if(varF && (r.c[6]?.v||'').toString() !== varF) return false;
+          if(cropF && (r.c[6]?.v||'').toString() !== cropF) return false;
+          if(varF && (r.c[7]?.v||'').toString() !== varF) return false;
           if(farmerF && !(r.c[1]?.v||'').toString().toLowerCase().includes(farmerF)) return false;
           if(villF && !(r.c[2]?.v||'').toString().toLowerCase().includes(villF)) return false;
-          if(statusF && (r.c[20]?.v||'Pending').toString() !== statusF) return false;
+          if(statusF && (r.c[21]?.v||'Pending').toString() !== statusF) return false;
           return true;
         });
 
@@ -4628,7 +4634,7 @@ function loadBookingReport(){
         }
 
         let totalPlant = 0;
-        rows.forEach(r => { totalPlant += parseInt(r.c[7]?.v)||0; });
+        rows.forEach(r => { totalPlant += parseInt(r.c[8]?.v)||0; });
 
         const fixD = (val) => {
           let s=(val||'').toString();
@@ -4657,10 +4663,10 @@ function loadBookingReport(){
 
         rows.forEach(r => {
           const farmer=(r.c[1]?.v||''), village=(r.c[2]?.v||'');
-          const crop=(r.c[5]?.v||''), variety=(r.c[6]?.v||''), plant=(r.c[7]?.v||0);
-          const rate=(r.c[8]?.v||0);
-          const deliv = fixD(r.c[9]?.v);
-          const status = (r.c[20]?.v||'Pending').toString();
+          const crop=(r.c[6]?.v||''), variety=(r.c[7]?.v||''), plant=(r.c[8]?.v||0);
+          const rate=(r.c[9]?.v||0);
+          const deliv = fixD(r.c[10]?.v);
+          const status = (r.c[21]?.v||'Pending').toString();
           const stColor = status==='Delivered' ? 'var(--gd)' : (status==='Partial' ? '#ef6c00' : '#e65100');
           html += '<tr style="border-bottom:1px solid var(--g2);">'+
             '<td style="padding:7px;text-align:center;">'+fmtDate(r._date)+'</td>'+
@@ -4669,7 +4675,7 @@ function loadBookingReport(){
             '<td style="padding:7px;text-align:center;">'+crop+'</td>'+
             '<td style="padding:7px;text-align:center;font-weight:600;">'+variety+'</td>'+
             '<td style="padding:7px;text-align:center;">'+plant+'</td>'+
-            '<td style="padding:7px;text-align:center;color:var(--gd);font-weight:600;">'+(parseFloat(r.c[24]?.v)||0)+'</td>'+
+            '<td style="padding:7px;text-align:center;color:var(--gd);font-weight:600;">'+(parseFloat(r.c[25]?.v)||0)+'</td>'+
             '<td style="padding:7px;text-align:center;">'+rate+'</td>'+
             '<td style="padding:7px;text-align:center;">'+fmtDate(deliv)+'</td>'+
             '<td style="padding:7px;text-align:center;color:'+stColor+';font-weight:700;">'+status+'</td>'+
@@ -4937,7 +4943,7 @@ function loadPayDeliv(){
         // Group by Booking ID (col 21)
         const groups = {};
         rows.forEach(r => {
-          const bid = (r.c[22]?.v||'').toString();
+          const bid = (r.c[23]?.v||'').toString();
           if(!bid) return;
           if(!groups[bid]) groups[bid] = [];
           groups[bid].push(r);
@@ -4957,7 +4963,7 @@ function loadPayDeliv(){
           // Overall status saari variety rows se (Pending / Partial / Delivered)
           let allDone = true, anyDone = false;
           g.forEach(r => {
-            const st = (r.c[20]?.v||'Pending').toString();
+            const st = (r.c[21]?.v||'Pending').toString();
             if(st !== 'Delivered') allDone = false;
             if(st !== 'Pending') anyDone = true;
           });
@@ -4982,25 +4988,25 @@ function loadPayDeliv(){
         let html = '<div class="rep-card"><div class="rep-title">💰 '+matched.length+' Bookings</div></div>';
         matched.forEach(m => {
           const first = m.g[0];
-          const mobile = (first.c[4]?.v||'').toString();
-          const firstPay = parseFloat(first.c[10]?.v)||0;
-          const secondPay = parseFloat(first.c[14]?.v)||0;
-          const totalRec = parseFloat(first.c[18]?.v)||firstPay;
-          const delivDate = fixDate(first.c[21]?.v);
+          const mobile = (first.c[5]?.v||'').toString();
+          const firstPay = parseFloat(first.c[11]?.v)||0;
+          const secondPay = parseFloat(first.c[15]?.v)||0;
+          const totalRec = parseFloat(first.c[19]?.v)||firstPay;
+          const delivDate = fixDate(first.c[22]?.v);
 
           // Varieties list
           let varList = '';
           m.g.forEach(r => {
-            varList += (r.c[5]?.v||'')+'/'+(r.c[6]?.v||'')+' ('+(r.c[7]?.v||0)+'), ';
+            varList += (r.c[6]?.v||'')+'/'+(r.c[7]?.v||'')+' ('+(r.c[8]?.v||0)+'), ';
           });
           varList = varList.replace(/, $/, '');
 
           // Overall status: saari variety rows se nikalo
           let totBooked = 0, totDeliv = 0, allDone = true, anyDone = false;
           m.g.forEach(r => {
-            const bk = parseFloat(r.c[7]?.v)||0;
-            const dv = parseFloat(r.c[24]?.v)||0;
-            const st = (r.c[20]?.v||'Pending').toString();
+            const bk = parseFloat(r.c[8]?.v)||0;
+            const dv = parseFloat(r.c[25]?.v)||0;
+            const st = (r.c[21]?.v||'Pending').toString();
             totBooked += bk; totDeliv += dv;
             if(st !== 'Delivered') allDone = false;
             if(st !== 'Pending') anyDone = true;
@@ -5108,8 +5114,8 @@ function openAddPay(bid){
     if(!g){ console.error('pdBookings['+bid+'] not found'); toast('❗ Booking data nahi mila!', 'error'); return; }
     const first = g[0];
     if(!first){ console.error('First row not found'); toast('❗ Booking details nahi mila!', 'error'); return; }
-  const firstPay = parseFloat(first.c[10]?.v)||0;
-  const secondPay = parseFloat(first.c[14]?.v)||0;
+  const firstPay = parseFloat(first.c[11]?.v)||0;
+  const secondPay = parseFloat(first.c[15]?.v)||0;
   
   // Check: क्या first payment खाली है?
   const isFirstPayment = (firstPay === 0);
@@ -5251,12 +5257,12 @@ function openVarDeliv(bid){
 
   let html = '';
   g.forEach((r, i) => {
-    const lineId = (r.c[26]?.v||'').toString();
-    const crop = (r.c[5]?.v||''), variety = (r.c[6]?.v||'');
-    const booked = parseFloat(r.c[7]?.v)||0;
-    const delivered = parseFloat(r.c[24]?.v)||0;
+    const lineId = (r.c[27]?.v||'').toString();
+    const crop = (r.c[6]?.v||''), variety = (r.c[7]?.v||'');
+    const booked = parseFloat(r.c[8]?.v)||0;
+    const delivered = parseFloat(r.c[25]?.v)||0;
     const pending = booked - delivered;
-    const status = (r.c[20]?.v||'Pending').toString();
+    const status = (r.c[21]?.v||'Pending').toString();
     const stColor = status==='Delivered' ? 'var(--gd)' : (status==='Partial' ? '#e65100' : '#999');
     const done = status === 'Delivered';
 
@@ -5322,15 +5328,15 @@ function redownloadSlip(bid){
   };
 
   const lines = g.map(r => ({
-    crop: (r.c[5]?.v||''), variety: (r.c[6]?.v||''),
-    plant: (r.c[7]?.v||0), rate: (r.c[8]?.v||0),
-    deliveryDate: fixDate(r.c[9]?.v)
+    crop: (r.c[6]?.v||''), variety: (r.c[7]?.v||''),
+    plant: (r.c[8]?.v||0), rate: (r.c[9]?.v||0),
+    deliveryDate: fixDate(r.c[10]?.v)
   }));
 
   const firstMode = (first.c[11]?.v||'').toString();
   const firstBank = (first.c[12]?.v||'').toString();
   const firstDate = fixDate(first.c[13]?.v);
-  const secondAmt = parseFloat(first.c[14]?.v)||0;
+  const secondAmt = parseFloat(first.c[15]?.v)||0;
   const secondMode = (first.c[15]?.v||'').toString();
   const secondBank = (first.c[16]?.v||'').toString();
   const secondDate = fixDate(first.c[17]?.v);
@@ -5338,11 +5344,11 @@ function redownloadSlip(bid){
   generateBookingPDF({
     bkDate: fixDate(first.c[0]?.v),
     farmer: (first.c[1]?.v||''), village: (first.c[2]?.v||''),
-    tehsil: (first.c[3]?.v||''), mobile: (first.c[4]?.v||''),
+    tehsil: (first.c[3]?.v||''), mobile: (first.c[5]?.v||''),
     payMode: firstMode, modeStr: firstMode, cashAmt: 0, bankAmt: 0, bankName: firstBank,
     payDate: firstDate, bookingId: bid,
     marketing: (first.c[23]?.v||''), remarks: (first.c[19]?.v||''),
-    lines: lines, totalAmt: parseFloat(first.c[10]?.v)||0,
+    lines: lines, totalAmt: parseFloat(first.c[11]?.v)||0,
     secondAmt: secondAmt, secondMode: secondMode, secondBank: secondBank, secondDate: secondDate
   });
 }
@@ -5356,6 +5362,7 @@ function openVarietyReport(){
   Object.keys(VDATA).forEach(c => cropSel.innerHTML += '<option value="'+c+'">'+c+'</option>');
   document.getElementById('vrVariety').innerHTML = '<option value="">-- Sab Varieties --</option>';
   document.getElementById('varietyReportContent').innerHTML = '';
+  populateCropVarietyLists();
   show('varietyReportScreen');
 }
 
@@ -5407,15 +5414,15 @@ function loadVarietyReport(){
         ensure(crop, variety).sowing += parseInt(r.c[11]?.v)||0;
       });
 
-      // Booking: Date=c[0], Crop=c[5], Variety=c[6], Plant=c[7] (DATE FILTER)
+      // Booking: Date=c[0], Crop=c[6], Variety=c[7], Plant=c[8] (District ke baad shift; DATE FILTER)
       bookRows.forEach(r => {
-        if(!r.c || !r.c[6] || !r.c[6].v || r.c[6].v==='Variety') return;
-        const crop=(r.c[5]?.v||'').toString(), variety=(r.c[6]?.v||'').toString();
+        if(!r.c || !r.c[7] || !r.c[7].v || r.c[7].v==='Variety') return;
+        const crop=(r.c[6]?.v||'').toString(), variety=(r.c[7]?.v||'').toString();
         if(!passFilter(crop, variety)) return;
         const bd = fixDate(r.c[0]?.v);
         if(fromD && bd < fromD) return;
         if(toD && bd > toD) return;
-        ensure(crop, variety).booking += parseInt(r.c[7]?.v)||0;
+        ensure(crop, variety).booking += parseInt(r.c[8]?.v)||0;
       });
 
       // Dispatch: Crop=c[6], Variety=c[7], Total Plants=c[12] (no farmer now)
@@ -5489,6 +5496,7 @@ function openDispatchReport(){
   document.getElementById('drGaadi').value = '';
   document.getElementById('drDriver').value = '';
   
+  populateCropVarietyLists();
   show('dispatchReportScreen');
 }
 
