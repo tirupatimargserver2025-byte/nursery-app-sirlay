@@ -1615,7 +1615,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20260804-1034';
+const APP_VERSION = '20260804-1055';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -5333,13 +5333,13 @@ function redownloadSlip(bid){
     deliveryDate: fixDate(r.c[10]?.v)
   }));
 
-  const firstMode = (first.c[11]?.v||'').toString();
-  const firstBank = (first.c[12]?.v||'').toString();
-  const firstDate = fixDate(first.c[13]?.v);
+  const firstMode = (first.c[12]?.v||'').toString();
+  const firstBank = (first.c[13]?.v||'').toString();
+  const firstDate = fixDate(first.c[14]?.v);
   const secondAmt = parseFloat(first.c[15]?.v)||0;
-  const secondMode = (first.c[15]?.v||'').toString();
-  const secondBank = (first.c[16]?.v||'').toString();
-  const secondDate = fixDate(first.c[17]?.v);
+  const secondMode = (first.c[16]?.v||'').toString();
+  const secondBank = (first.c[17]?.v||'').toString();
+  const secondDate = fixDate(first.c[18]?.v);
 
   generateBookingPDF({
     bkDate: fixDate(first.c[0]?.v),
@@ -5347,8 +5347,8 @@ function redownloadSlip(bid){
     tehsil: (first.c[3]?.v||''), mobile: (first.c[5]?.v||''),
     payMode: firstMode, modeStr: firstMode, cashAmt: 0, bankAmt: 0, bankName: firstBank,
     payDate: firstDate, bookingId: bid,
-    marketing: (first.c[23]?.v||''), remarks: (first.c[19]?.v||''),
-    lines: lines, totalAmt: parseFloat(first.c[11]?.v)||0,
+    marketing: (first.c[24]?.v||''), remarks: (first.c[20]?.v||''),
+    lines: lines, totalAmt: parseFloat(first.c[19]?.v)||0,
     secondAmt: secondAmt, secondMode: secondMode, secondBank: secondBank, secondDate: secondDate
   });
 }
