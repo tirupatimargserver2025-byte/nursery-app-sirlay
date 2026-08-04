@@ -1615,7 +1615,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20260804-1055';
+const APP_VERSION = '20260804-1110';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -5348,7 +5348,7 @@ function redownloadSlip(bid){
     payMode: firstMode, modeStr: firstMode, cashAmt: 0, bankAmt: 0, bankName: firstBank,
     payDate: firstDate, bookingId: bid,
     marketing: (first.c[24]?.v||''), remarks: (first.c[20]?.v||''),
-    lines: lines, totalAmt: parseFloat(first.c[19]?.v)||0,
+    lines: lines, totalAmt: parseFloat(first.c[11]?.v)||0,
     secondAmt: secondAmt, secondMode: secondMode, secondBank: secondBank, secondDate: secondDate
   });
 }
