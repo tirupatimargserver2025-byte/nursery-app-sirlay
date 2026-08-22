@@ -7,6 +7,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>🌱 Nursery Management App</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/dist/tabler-icons.min.css">
+
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -391,6 +393,23 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .rep-tbl td{padding:10px 8px;border-bottom:1px solid #eef3f0;}
 .rep-tbl tbody tr:nth-child(even){background:#f9fcfa;}
 .rep-tbl tbody tr:hover{background:#f0f8f3;}
+
+/* ══ EXPANDABLE MENU SECTIONS (accordion) ══ */
+.msec-acc{background:var(--surface-2,white);border:1px solid #eef3f0;border-radius:14px;
+  margin-bottom:12px;overflow:hidden;box-shadow:0 1px 3px rgba(16,40,28,0.05);}
+.msec-head{display:flex;align-items:center;justify-content:space-between;
+  padding:15px 16px;cursor:pointer;user-select:none;}
+.msec-head .mh-left{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:800;
+  color:#3d7a5a;text-transform:uppercase;letter-spacing:1px;}
+.msec-head .mh-left i{font-size:18px;color:#2d7a4f;}
+.msec-head .mh-right{display:flex;align-items:center;gap:9px;}
+.msec-count{background:#e3f5ea;color:#1a7a45;font-size:11.5px;font-weight:800;
+  padding:2px 10px;border-radius:20px;}
+.msec-chev{font-size:19px;color:#2d7a4f;transition:transform 0.25s ease;}
+.msec-acc[data-open="1"] .msec-chev{transform:rotate(180deg);}
+.msec-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease;}
+.msec-acc[data-open="1"] .msec-body{max-height:1400px;}
+.msec-body .mgrid{margin:0;padding:2px 12px 14px;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -433,111 +452,104 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 
     <!-- Supervisor Menu -->
     <div id="supMenu">
-      <div class="msec-title">📊 Meri Dashboard</div>
-      <div class="mgrid">
+      <div style="font-size:11.5px;font-weight:800;color:#3d7a5a;text-transform:uppercase;letter-spacing:1px;margin:18px 0 10px;padding-left:6px;display:flex;align-items:center;gap:7px;"><i class="ti ti-chart-bar" style="font-size:16px;color:#2d7a4f;"></i>Meri Dashboard</div><div class="mgrid">
         <div class="mcard report" onclick="openDashboard()" style="grid-column:1/-1;background:linear-gradient(135deg,var(--gd),var(--gm));color:white;">
-          <div class="ico">📊</div><div class="ttl" style="color:white;">Meri Sari Report</div>
+          <div class="ico"><i class="ti ti-chart-bar"></i></div><div class="ttl" style="color:white;">Meri Sari Report</div>
           <div class="dsc" style="color:rgba(255,255,255,0.85);">Ek hi jagah — mera poora kaam</div>
         </div>
       </div>
-      <div class="msec-title">🌅 Subah Ka Kaam</div>
-      <div class="mgrid">
+      <div class="msec-acc" data-open="1"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-sunrise"></i>Subah Ka Kaam</div><div class="mh-right"><span class="msec-count">1</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard assign" onclick="openMod('assign')">
-          <div class="ico">📋</div><div class="ttl">Morning Assignment</div>
+          <div class="ico"><i class="ti ti-clipboard-list"></i></div><div class="ttl">Morning Assignment</div>
           <div class="dsc">Labour kahan kaam karega</div>
-        </div>
+        </div></div></div>
         <div class="mcard soon">
-          <div class="ico">👷</div><div class="ttl">Attendance</div>
+          <div class="ico"><i class="ti ti-user-hard-hat"></i></div><div class="ttl">Attendance</div>
           <div class="dsc">Manager ke paas hai</div>
           <span class="cbadge">Manager Only</span>
         </div>
       </div>
-      <div class="msec-title">📊 Meri Report</div>
-      <div class="mgrid">
+      <div class="msec-acc" data-open="0"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-chart-bar"></i>Meri Report</div><div class="mh-right"><span class="msec-count">1</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard report" onclick="openMod('myReport')">
-          <div class="ico">📊</div><div class="ttl">Meri Report</div>
+          <div class="ico"><i class="ti ti-chart-bar"></i></div><div class="ttl">Meri Report</div>
           <div class="dsc">Meri saari entries — date filter</div>
-        </div>
+        </div></div></div>
         <div class="mcard report" onclick="openShiftingReport()">
-          <div class="ico">🔄</div><div class="ttl">Shifting Report</div>
+          <div class="ico"><i class="ti ti-refresh"></i></div><div class="ttl">Shifting Report</div>
           <div class="dsc">Meri shifting records</div>
         </div>
         <div class="mcard report" onclick="openDispatchReport()">
-          <div class="ico">🚚</div><div class="ttl">Dispatch Report</div>
+          <div class="ico"><i class="ti ti-truck"></i></div><div class="ttl">Dispatch Report</div>
           <div class="dsc">Meri dispatch records</div>
         </div>
       </div>
-      <div class="msec-title">📊 Kaam Ki Entry</div>
-      <div class="mgrid">
+      <div class="msec-acc" data-open="0"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-chart-bar"></i>Kaam Ki Entry</div><div class="mh-right"><span class="msec-count">1</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard seed" onclick="openMod('seed')">
-          <div class="ico">🌱</div><div class="ttl">Seed Sowing</div>
+          <div class="ico"><i class="ti ti-seeding"></i></div><div class="ttl">Seed Sowing</div>
           <div class="dsc">Variety, PKT, Tray, Labour</div>
-        </div>
+        </div></div></div>
         <div class="mcard water" onclick="openMod('water')">
-          <div class="ico">💧</div><div class="ttl">Watering & Spraying</div>
+          <div class="ico"><i class="ti ti-droplet"></i></div><div class="ttl">Watering & Spraying</div>
           <div class="dsc">Chemical, dose, pump</div>
         </div>
-        <div class="mcard entry" onclick="openShiftingForm()"><div class="ico">🔄</div><div class="ttl">Shifting</div><div class="dsc">Labour shifting records</div></div>
-        <div class="mcard entry" onclick="openDispatchForm()"><div class="ico">🚚</div><div class="ttl">Dispatch</div><div class="dsc">Vehicle dispatch</div></div>
+        <div class="mcard entry" onclick="openShiftingForm()"><div class="ico"><i class="ti ti-refresh"></i></div><div class="ttl">Shifting</div><div class="dsc">Labour shifting records</div></div>
+        <div class="mcard entry" onclick="openDispatchForm()"><div class="ico"><i class="ti ti-truck"></i></div><div class="ttl">Dispatch</div><div class="dsc">Vehicle dispatch</div></div>
       </div>
     </div>
 
     <!-- Manager Menu -->
     <div id="mgrMenu" style="display:none;">
-      <div class="msec-title">📊 Boss Dashboard</div>
-      <div class="mgrid">
+      <div style="font-size:11.5px;font-weight:800;color:#3d7a5a;text-transform:uppercase;letter-spacing:1px;margin:18px 0 10px;padding-left:6px;display:flex;align-items:center;gap:7px;"><i class="ti ti-chart-bar" style="font-size:16px;color:#2d7a4f;"></i>Boss Dashboard</div><div class="mgrid">
         <div class="mcard report" onclick="openDashboard()" style="grid-column:1/-1;background:linear-gradient(135deg,var(--gd),var(--gm));color:white;">
-          <div class="ico">📊</div><div class="ttl" style="color:white;">Poora Dashboard Kholo</div>
+          <div class="ico"><i class="ti ti-chart-bar"></i></div><div class="ttl" style="color:white;">Poora Dashboard Kholo</div>
           <div class="dsc" style="color:rgba(255,255,255,0.85);">Sari report ek hi jagah — tabs me jaaye bina</div>
         </div>
       </div>
-      <div class="msec-title">🔄 Kaam Ki Entry</div>
-      <div class="mgrid">
+      <div class="msec-acc" data-open="1"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-refresh"></i>Kaam Ki Entry</div><div class="mh-right"><span class="msec-count">1</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard attend" onclick="openMod('attend')">
-          <div class="ico">📝</div><div class="ttl">Daily Entry</div>
+          <div class="ico"><i class="ti ti-edit"></i></div><div class="ttl">Daily Entry</div>
           <div class="dsc">Present / Half Day / Absent + OT</div>
-        </div>
+        </div></div></div>
       </div>
-      <div class="msec-title">📊 Reports</div>
-      <div class="mgrid">
+      <div class="msec-acc" data-open="0"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-chart-bar"></i>Reports</div><div class="mh-right"><span class="msec-count">1</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard report" onclick="openMod('report')">
-          <div class="ico">📈</div><div class="ttl">Daily Report</div>
+          <div class="ico"><i class="ti ti-chart-line"></i></div><div class="ttl">Daily Report</div>
           <div class="dsc">Aaj ka poora kaam</div>
-        </div>
+        </div></div></div>
         <div class="mcard attend" onclick="openMod('attReport')">
-          <div class="ico">👥</div><div class="ttl">Attendance Report</div>
+          <div class="ico"><i class="ti ti-users"></i></div><div class="ttl">Attendance Report</div>
           <div class="dsc">Date range + Labour match check</div>
         </div>
         <div class="mcard seed" onclick="openMod('seedReport')">
-          <div class="ico">🌱</div><div class="ttl">Seed Sowing Report</div>
+          <div class="ico"><i class="ti ti-seeding"></i></div><div class="ttl">Seed Sowing Report</div>
           <div class="dsc">Date range, filter, totals</div>
         </div>
         <div class="mcard attend" onclick="openMod('labourReport')">
-          <div class="ico">👷</div><div class="ttl">Labour Report</div>
+          <div class="ico"><i class="ti ti-user-hard-hat"></i></div><div class="ttl">Labour Report</div>
           <div class="dsc">Labour-wise kaam summary</div>
         </div>
         <div class="mcard report" onclick="openShiftingReport()">
-          <div class="ico">🔄</div><div class="ttl">Shifting Report</div>
+          <div class="ico"><i class="ti ti-refresh"></i></div><div class="ttl">Shifting Report</div>
           <div class="dsc">Shifting records + trays</div>
         </div>
         <div class="mcard report" onclick="openDispatchReport()">
-          <div class="ico">🚚</div><div class="ttl">Dispatch Report</div>
+          <div class="ico"><i class="ti ti-truck"></i></div><div class="ttl">Dispatch Report</div>
           <div class="dsc">Gaadi, driver, plants</div>
         </div>
         <div class="mcard report" onclick="openBookingReport()">
-          <div class="ico">📋</div><div class="ttl">Booking Report</div>
+          <div class="ico"><i class="ti ti-clipboard-list"></i></div><div class="ttl">Booking Report</div>
           <div class="dsc">Farmer booking + status</div>
         </div>
         <div class="mcard seed" onclick="openVarietyReport()">
-          <div class="ico">📊</div><div class="ttl">Variety Report</div>
+          <div class="ico"><i class="ti ti-chart-bar"></i></div><div class="ttl">Variety Report</div>
           <div class="dsc">Crop/Variety wise summary</div>
         </div>
         <div class="mcard admin-c" onclick="openSupActivity()">
-          <div class="ico">🧑‍🌾</div><div class="ttl">Supervisor Activity</div>
+          <div class="ico"><i class="ti ti-plant-2"></i></div><div class="ttl">Supervisor Activity</div>
           <div class="dsc">Kaun kya kar raha hai</div>
         </div>
         <div class="mcard entry" onclick="openPayDeliv()">
-          <div class="ico">💰</div><div class="ttl">Payment &amp; Delivery</div>
+          <div class="ico"><i class="ti ti-coin"></i></div><div class="ttl">Payment &amp; Delivery</div>
           <div class="dsc">Payment add / delivered</div>
         </div>
       </div>
@@ -545,68 +557,65 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 
     <!-- Admin Menu -->
     <div id="adminMenu" style="display:none;">
-      <div class="msec-title">📊 Boss Dashboard</div>
-      <div class="mgrid">
+      <div style="font-size:11.5px;font-weight:800;color:#3d7a5a;text-transform:uppercase;letter-spacing:1px;margin:18px 0 10px;padding-left:6px;display:flex;align-items:center;gap:7px;"><i class="ti ti-chart-bar" style="font-size:16px;color:#2d7a4f;"></i>Boss Dashboard</div><div class="mgrid">
         <div class="mcard report" onclick="openDashboard()" style="grid-column:1/-1;background:linear-gradient(135deg,var(--gd),var(--gm));color:white;">
-          <div class="ico">📊</div><div class="ttl" style="color:white;">Poora Dashboard Kholo</div>
+          <div class="ico"><i class="ti ti-chart-bar"></i></div><div class="ttl" style="color:white;">Poora Dashboard Kholo</div>
           <div class="dsc" style="color:rgba(255,255,255,0.85);">Sari report ek hi jagah — tabs me jaaye bina</div>
         </div>
       </div>
-      <div class="msec-title">📊 Reports</div>
-      <div class="mgrid">
+      <div class="msec-acc" data-open="1"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-chart-bar"></i>Reports</div><div class="mh-right"><span class="msec-count">1</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard report" onclick="openMod('report')">
-          <div class="ico">📈</div><div class="ttl">Daily Report</div>
+          <div class="ico"><i class="ti ti-chart-line"></i></div><div class="ttl">Daily Report</div>
           <div class="dsc">Aaj ka poora kaam</div>
-        </div>
+        </div></div></div>
         <div class="mcard attend" onclick="openMod('attReport')">
-          <div class="ico">👥</div><div class="ttl">Attendance Report</div>
+          <div class="ico"><i class="ti ti-users"></i></div><div class="ttl">Attendance Report</div>
           <div class="dsc">Date range + Labour match check</div>
         </div>
         <div class="mcard seed" onclick="openMod('seedReport')">
-          <div class="ico">🌱</div><div class="ttl">Seed Sowing Report</div>
+          <div class="ico"><i class="ti ti-seeding"></i></div><div class="ttl">Seed Sowing Report</div>
           <div class="dsc">Date range, filter, totals</div>
         </div>
         <div class="mcard attend" onclick="openMod('labourReport')">
-          <div class="ico">👷</div><div class="ttl">Labour Report</div>
+          <div class="ico"><i class="ti ti-user-hard-hat"></i></div><div class="ttl">Labour Report</div>
           <div class="dsc">Labour-wise kaam summary</div>
         </div>
         <div class="mcard report" onclick="openShiftingReport()">
-          <div class="ico">🔄</div><div class="ttl">Shifting Report</div>
+          <div class="ico"><i class="ti ti-refresh"></i></div><div class="ttl">Shifting Report</div>
           <div class="dsc">Shifting records + trays</div>
         </div>
         <div class="mcard report" onclick="openDispatchReport()">
-          <div class="ico">🚚</div><div class="ttl">Dispatch Report</div>
+          <div class="ico"><i class="ti ti-truck"></i></div><div class="ttl">Dispatch Report</div>
           <div class="dsc">Gaadi, driver, plants</div>
         </div>
         <div class="mcard report" onclick="openBookingReport()">
-          <div class="ico">📋</div><div class="ttl">Booking Report</div>
+          <div class="ico"><i class="ti ti-clipboard-list"></i></div><div class="ttl">Booking Report</div>
           <div class="dsc">Farmer booking + status</div>
         </div>
         <div class="mcard seed" onclick="openVarietyReport()">
-          <div class="ico">📊</div><div class="ttl">Variety Report</div>
+          <div class="ico"><i class="ti ti-chart-bar"></i></div><div class="ttl">Variety Report</div>
           <div class="dsc">Crop/Variety wise summary</div>
         </div>
         <div class="mcard admin-c" onclick="openSupActivity()">
-          <div class="ico">🧑‍🌾</div><div class="ttl">Supervisor Activity</div>
+          <div class="ico"><i class="ti ti-plant-2"></i></div><div class="ttl">Supervisor Activity</div>
           <div class="dsc">Kaun kya kar raha hai</div>
         </div>
         <div class="mcard entry" onclick="openPayDeliv()">
-          <div class="ico">💰</div><div class="ttl">Payment &amp; Delivery</div>
+          <div class="ico"><i class="ti ti-coin"></i></div><div class="ttl">Payment &amp; Delivery</div>
           <div class="dsc">Payment add / delivered</div>
         </div>
       </div>
-      <div class="msec-title">⚙️ Admin Controls</div>
-      <div class="mgrid">
+      <div class="msec-acc" data-open="0"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-settings"></i>Admin Controls</div><div class="mh-right"><span class="msec-count">1</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard attend" onclick="openMod('attend')">
-          <div class="ico">👷</div><div class="ttl">Attendance Entry</div>
+          <div class="ico"><i class="ti ti-user-hard-hat"></i></div><div class="ttl">Attendance Entry</div>
           <div class="dsc">Present/Absent/Half Day</div>
-        </div>
+        </div></div></div>
         <div class="mcard admin-c" onclick="openMod('adminUsers')">
-          <div class="ico">👑</div><div class="ttl">User Management</div>
+          <div class="ico"><i class="ti ti-crown"></i></div><div class="ttl">User Management</div>
           <div class="dsc">Supervisor add/remove</div>
         </div>
         <div class="mcard admin-c" onclick="openMod('adminLabour')">
-          <div class="ico">👷</div><div class="ttl">Labour Master</div>
+          <div class="ico"><i class="ti ti-user-hard-hat"></i></div><div class="ttl">Labour Master</div>
           <div class="dsc">Labour list manage karo</div>
         </div>
       </div>
@@ -614,60 +623,57 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 
     <!-- Marketing Menu -->
     <div id="marketingMenu" style="display:none;">
-      <div class="msec-title">📊 Boss Dashboard</div>
-      <div class="mgrid">
+      <div style="font-size:11.5px;font-weight:800;color:#3d7a5a;text-transform:uppercase;letter-spacing:1px;margin:18px 0 10px;padding-left:6px;display:flex;align-items:center;gap:7px;"><i class="ti ti-chart-bar" style="font-size:16px;color:#2d7a4f;"></i>Boss Dashboard</div><div class="mgrid">
         <div class="mcard report" onclick="openDashboard()" style="grid-column:1/-1;background:linear-gradient(135deg,var(--gd),var(--gm));color:white;">
-          <div class="ico">📊</div><div class="ttl" style="color:white;">Poora Dashboard Kholo</div>
+          <div class="ico"><i class="ti ti-chart-bar"></i></div><div class="ttl" style="color:white;">Poora Dashboard Kholo</div>
           <div class="dsc" style="color:rgba(255,255,255,0.85);">Sari report ek hi jagah — tabs me jaaye bina</div>
         </div>
       </div>
-      <div class="msec-title">📝 Booking</div>
-      <div class="mgrid">
+      <div class="msec-acc" data-open="1"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-edit"></i>Booking</div><div class="mh-right"><span class="msec-count">1</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard entry" onclick="openBookingForm()">
-          <div class="ico">📝</div><div class="ttl">Nayi Booking</div>
+          <div class="ico"><i class="ti ti-edit"></i></div><div class="ttl">Nayi Booking</div>
           <div class="dsc">Farmer booking + PDF</div>
-        </div>
+        </div></div></div>
       </div>
-      <div class="msec-title">📊 Reports</div>
-      <div class="mgrid">
+      <div class="msec-acc" data-open="0"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-chart-bar"></i>Reports</div><div class="mh-right"><span class="msec-count">1</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard report" onclick="openBookingReport()">
-          <div class="ico">📋</div><div class="ttl">Booking Report</div>
+          <div class="ico"><i class="ti ti-clipboard-list"></i></div><div class="ttl">Booking Report</div>
           <div class="dsc">Saari bookings — filter</div>
-        </div>
+        </div></div></div>
         <div class="mcard report" onclick="openVarietyReport()">
-          <div class="ico">📊</div><div class="ttl">Variety Report</div>
+          <div class="ico"><i class="ti ti-chart-bar"></i></div><div class="ttl">Variety Report</div>
           <div class="dsc">Sowing / Booking / Dispatch</div>
         </div>
         <div class="mcard report" onclick="openMod('seedReport')">
-          <div class="ico">🌱</div><div class="ttl">Seed Sowing Report</div>
+          <div class="ico"><i class="ti ti-seeding"></i></div><div class="ttl">Seed Sowing Report</div>
           <div class="dsc">Kitna sowing hua</div>
         </div>
         <div class="mcard report" onclick="openDispatchReport()">
-          <div class="ico">🚚</div><div class="ttl">Dispatch Report</div>
+          <div class="ico"><i class="ti ti-truck"></i></div><div class="ttl">Dispatch Report</div>
           <div class="dsc">Kitna dispatch hua</div>
         </div>
         <div class="mcard report" onclick="openMod('attReport')">
-          <div class="ico">👷</div><div class="ttl">Attendance Report</div>
+          <div class="ico"><i class="ti ti-user-hard-hat"></i></div><div class="ttl">Attendance Report</div>
           <div class="dsc">Kaun aaya kaun nahi</div>
         </div>
         <div class="mcard report" onclick="openMod('labourReport')">
-          <div class="ico">💰</div><div class="ttl">Labour Report</div>
+          <div class="ico"><i class="ti ti-coin"></i></div><div class="ttl">Labour Report</div>
           <div class="dsc">Labour ka hisaab</div>
         </div>
         <div class="mcard report" onclick="openMod('report')">
-          <div class="ico">💧</div><div class="ttl">Watering Report</div>
+          <div class="ico"><i class="ti ti-droplet"></i></div><div class="ttl">Watering Report</div>
           <div class="dsc">Pani / dawai</div>
         </div>
         <div class="mcard report" onclick="openShiftingReport()">
-          <div class="ico">🔄</div><div class="ttl">Shifting Report</div>
+          <div class="ico"><i class="ti ti-refresh"></i></div><div class="ttl">Shifting Report</div>
           <div class="dsc">Shifting records</div>
         </div>
         <div class="mcard admin-c" onclick="openSupActivity()">
-          <div class="ico">🧑‍🌾</div><div class="ttl">Supervisor Activity</div>
+          <div class="ico"><i class="ti ti-plant-2"></i></div><div class="ttl">Supervisor Activity</div>
           <div class="dsc">Kaun kya kar raha hai</div>
         </div>
         <div class="mcard entry" onclick="openPayDeliv()">
-          <div class="ico">💰</div><div class="ttl">Payment & Delivery</div>
+          <div class="ico"><i class="ti ti-coin"></i></div><div class="ttl">Payment & Delivery</div>
           <div class="dsc">Payment add / delivered</div>
         </div>
       </div>
@@ -1641,7 +1647,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20260822-0928';
+const APP_VERSION = '20260822-1229';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -1697,6 +1703,8 @@ window.onload = () => {
 };
 
 // ════ SHOW SCREEN ════
+function togSec(h){var a=h.closest('.msec-acc');a.setAttribute('data-open',a.getAttribute('data-open')==='1'?'0':'1');}
+
 function show(id) {
   document.querySelectorAll('.screen').forEach(s=>{s.style.display='none';});
   const el = document.getElementById(id);
