@@ -447,6 +447,20 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .bk-pay{background:linear-gradient(135deg,#2e7d32,#43a047);}
 .bk-var{background:linear-gradient(135deg,#1565c0,#1e88e5);}
 .bk-del{background:linear-gradient(135deg,#e65100,#f57c00);}
+
+/* ══ CROP-VARIETY SUMMARY TABLE ══ */
+.cvsum-card{background:white;border:1px solid #eef3f0;border-radius:14px;margin-bottom:12px;
+  overflow:hidden;box-shadow:0 1px 3px rgba(16,40,28,0.06),0 4px 14px rgba(16,40,28,0.05);}
+.cvsum-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;user-select:none;}
+.cvsum-chev{transition:transform 0.25s ease;}
+.cvsum-card[data-open="1"] .cvsum-chev{transform:rotate(180deg);}
+.cvsum-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease;}
+.cvsum-card[data-open="1"] .cvsum-body{max-height:2000px;}
+.cvsum-tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+.cvsum-tbl th{padding:9px 14px;background:#f0f8f3;color:#3d5449;font-weight:700;font-size:11.5px;
+  text-transform:uppercase;letter-spacing:0.3px;border-bottom:2px solid #e0ebe5;}
+.cvsum-tbl td{padding:9px 14px;border-bottom:1px solid #eef3f0;color:#2a3a33;}
+.cvsum-tbl tbody tr:nth-child(even){background:#f9fcfa;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -1684,7 +1698,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20260823-0715';
+const APP_VERSION = '20260823-0720';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -1741,6 +1755,7 @@ window.onload = () => {
 };
 
 // ════ SHOW SCREEN ════
+function togCvsum(h){var a=h.closest('.cvsum-card');a.setAttribute('data-open',a.getAttribute('data-open')==='1'?'0':'1');}
 function togBk(h){var a=h.closest('.bk-card');a.setAttribute('data-open',a.getAttribute('data-open')==='1'?'0':'1');}
 function togSec(h){var a=h.closest('.msec-acc');a.setAttribute('data-open',a.getAttribute('data-open')==='1'?'0':'1');}
 
@@ -4743,6 +4758,38 @@ function loadBookingReport(){
 
         // Summary
         let html = '<div class="rep-card"><div class="rep-title"><i class="ti ti-clipboard-list" style="color:var(--gm);"></i> '+glist.length+' Booking \u2022 '+totalPlant.toLocaleString('en-IN')+' Plants \u2022 \u20B9'+totalRec.toLocaleString('en-IN')+' Received</div></div>';
+
+        // ══ Crop-Variety wise summary table ══
+        const cvSum = {};
+        glist.forEach(g => {
+          g.lines.forEach(l => {
+            const key = (l.crop||'?')+'|'+(l.variety||'?');
+            if(!cvSum[key]) cvSum[key] = { crop:l.crop||'?', variety:l.variety||'?', plants:0, count:0 };
+            cvSum[key].plants += l.plant;
+            cvSum[key].count++;
+          });
+        });
+        const cvList = Object.values(cvSum).sort((a,b)=> b.plants - a.plants);
+        let sumHtml = '<div class="cvsum-card" data-open="1">'+
+          '<div class="cvsum-head" onclick="togCvsum(this)">'+
+            '<div style="display:flex;align-items:center;gap:8px;"><i class="ti ti-chart-bar" style="color:var(--gm);font-size:18px;"></i>'+
+            '<span style="font-weight:800;font-size:14px;color:#1a2e26;">Crop / Variety Summary</span></div>'+
+            '<i class="ti ti-chevron-down cvsum-chev" style="color:#2d7a4f;font-size:18px;"></i>'+
+          '</div>'+
+          '<div class="cvsum-body"><table class="cvsum-tbl"><thead><tr>'+
+            '<th style="text-align:left;">Crop</th><th style="text-align:left;">Variety</th>'+
+            '<th style="text-align:right;">Booking</th><th style="text-align:right;">Plants</th></tr></thead><tbody>';
+        cvList.forEach(cv => {
+          sumHtml += '<tr><td style="text-align:left;font-weight:600;">'+cv.crop+'</td>'+
+            '<td style="text-align:left;">'+cv.variety+'</td>'+
+            '<td style="text-align:right;">'+cv.count+'</td>'+
+            '<td style="text-align:right;font-weight:700;color:var(--gd);">'+cv.plants.toLocaleString('en-IN')+'</td></tr>';
+        });
+        sumHtml += '<tr style="background:var(--gd);color:white;font-weight:800;"><td style="text-align:left;" colspan="2">TOTAL</td>'+
+          '<td style="text-align:right;">'+glist.length+'</td>'+
+          '<td style="text-align:right;">'+totalPlant.toLocaleString('en-IN')+'</td></tr>';
+        sumHtml += '</tbody></table></div></div>';
+        html += sumHtml;
 
         // Har booking = expandable card
         glist.forEach((g, gi) => {
