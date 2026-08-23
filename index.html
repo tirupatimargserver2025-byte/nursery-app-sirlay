@@ -425,6 +425,16 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .msec-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease;}
 .msec-acc[data-open="1"] .msec-body{max-height:1400px;}
 .msec-body .mgrid{margin:0;padding:2px 12px 14px;}
+
+/* ══ EXPANDABLE BOOKING CARDS ══ */
+.bk-card{background:white;border:1px solid #eef3f0;border-radius:14px;margin-bottom:10px;
+  overflow:hidden;box-shadow:0 1px 3px rgba(16,40,28,0.06),0 4px 14px rgba(16,40,28,0.05);}
+.bk-head{display:flex;align-items:center;padding:14px 16px;cursor:pointer;user-select:none;}
+.bk-chev{transition:transform 0.25s ease;display:block;margin-top:2px;}
+.bk-card[data-open="1"] .bk-chev{transform:rotate(180deg);}
+.bk-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease;padding:0 16px;}
+.bk-card[data-open="1"] .bk-body{max-height:800px;padding:0 16px 14px;}
+.bk-card[data-open="1"]{box-shadow:0 4px 12px rgba(16,40,28,0.10),0 10px 28px rgba(16,40,28,0.10);}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -1662,7 +1672,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20260822-1304';
+const APP_VERSION = '20260823-0630';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -1718,6 +1728,7 @@ window.onload = () => {
 };
 
 // ════ SHOW SCREEN ════
+function togBk(h){var a=h.closest('.bk-card');a.setAttribute('data-open',a.getAttribute('data-open')==='1'?'0':'1');}
 function togSec(h){var a=h.closest('.msec-acc');a.setAttribute('data-open',a.getAttribute('data-open')==='1'?'0':'1');}
 
 function show(id) {
@@ -4660,22 +4671,20 @@ function loadBookingReport(){
   const villF = document.getElementById('brVillage').value.trim().toLowerCase();
   const statusF = document.getElementById('brStatus').value;
   const con = document.getElementById('bookingReportContent');
-  con.innerHTML = '<div class="card" style="text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;color:var(--gd);">Loading...</div></div>';
+  con.innerHTML = '<div class="card" style="text-align:center;padding:20px;"><div style="font-size:30px;">\u23F3</div><div style="font-weight:700;color:var(--gd);">Loading...</div></div>';
 
   fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Booking%20Data&headers=1&t='+Date.now())
     .then(r=>r.text())
     .then(txt=>{
       try{
         const json = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+        const fixD = (val) => {
+          let s=(val||'').toString();
+          if(s.startsWith('Date(')){ const p=s.replace('Date(','').replace(')','').split(','); s=p[0]+'-'+String(parseInt(p[1])+1).padStart(2,'0')+'-'+String(p[2]).padStart(2,'0'); }
+          return s;
+        };
         let rows = json.table.rows.filter(r => r.c && r.c[0] && r.c[0].v && r.c[0].v !== 'Booking Date');
-        rows = rows.map(r => {
-          let d = (r.c[0]?.v||'').toString();
-          if(d.startsWith('Date(')){
-            const p = d.replace('Date(','').replace(')','').split(',');
-            d = p[0]+'-'+String(parseInt(p[1])+1).padStart(2,'0')+'-'+String(p[2]).padStart(2,'0');
-          }
-          r._date = d; return r;
-        });
+        rows = rows.map(r => { r._date = fixD(r.c[0]?.v); return r; });
         rows = rows.filter(r => {
           if(r._date < from || r._date > to) return false;
           if(cropF && (r.c[6]?.v||'').toString() !== cropF) return false;
@@ -4691,55 +4700,73 @@ function loadBookingReport(){
           return;
         }
 
-        let totalPlant = 0;
-        rows.forEach(r => { totalPlant += parseInt(r.c[8]?.v)||0; });
+        // Booking ID se group karo
+        const groups = {};
+        rows.forEach(r => {
+          const bid = (r.c[23]?.v||'').toString() || ('row'+Math.random());
+          if(!groups[bid]) groups[bid] = { bid:bid, date:r._date, farmer:(r.c[1]?.v||''), village:(r.c[2]?.v||''),
+            mobile:(r.c[5]?.v||''), firstPay:parseFloat(r.c[11]?.v)||0, secondPay:parseFloat(r.c[15]?.v)||0,
+            totalRec:parseFloat(r.c[19]?.v)||0, lines:[] };
+          groups[bid].lines.push({
+            crop:(r.c[6]?.v||''), variety:(r.c[7]?.v||''), plant:parseInt(r.c[8]?.v)||0,
+            rate:parseFloat(r.c[9]?.v)||0, deliv:fixD(r.c[10]?.v), delivered:parseFloat(r.c[25]?.v)||0,
+            status:(r.c[21]?.v||'Pending').toString()
+          });
+        });
 
-        const fixD = (val) => {
-          let s=(val||'').toString();
-          if(s.startsWith('Date(')){ const p=s.replace('Date(','').replace(')','').split(','); s=p[0]+'-'+String(parseInt(p[1])+1).padStart(2,'0')+'-'+String(p[2]).padStart(2,'0'); }
-          return s;
-        };
+        const glist = Object.values(groups);
+        let totalPlant=0, totalRec=0;
+        glist.forEach(g => { g.lines.forEach(l=>totalPlant+=l.plant); totalRec+=g.totalRec; });
 
         // Summary
-        let html = '<div class="rep-card"><div class="rep-title">📋 '+rows.length+' Rows • '+totalPlant.toLocaleString('en-IN')+' Plants</div></div>';
+        let html = '<div class="rep-card"><div class="rep-title"><i class="ti ti-clipboard-list" style="color:var(--gm);"></i> '+glist.length+' Booking \u2022 '+totalPlant.toLocaleString('en-IN')+' Plants \u2022 \u20B9'+totalRec.toLocaleString('en-IN')+' Received</div></div>';
 
-        // TABLE (card ki jagah)
-        html += '<div class="card" style="padding:0;overflow-x:auto;">'+
-          '<table style="width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;">'+
-          '<thead><tr style="background:var(--gm);color:white;">'+
-          '<th style="padding:7px;text-align:center;">Date</th>'+
-          '<th style="padding:7px;text-align:center;">Farmer</th>'+
-          '<th style="padding:7px;text-align:center;">Village</th>'+
-          '<th style="padding:7px;text-align:center;">Crop</th>'+
-          '<th style="padding:7px;text-align:center;">Variety</th>'+
-          '<th style="padding:7px;">Plant</th>'+
-          '<th style="padding:7px;">Diya</th>'+
-          '<th style="padding:7px;">Rate</th>'+
-          '<th style="padding:7px;">Delivery</th>'+
-          '<th style="padding:7px;">Status</th>'+
-          '</tr></thead><tbody>';
+        // Har booking = expandable card
+        glist.forEach((g, gi) => {
+          // Overall status
+          let allDel=true, anyDel=false;
+          g.lines.forEach(l => { if(l.status!=='Delivered') allDel=false; if(l.status!=='Pending') anyDel=true; });
+          const ov = allDel ? 'Delivered' : (anyDel ? 'Partial' : 'Pending');
+          const ovCls = ov==='Delivered' ? 'badge-green' : (ov==='Partial' ? 'badge-orange' : 'badge-gray');
+          let gPlant=0; g.lines.forEach(l=>gPlant+=l.plant);
 
-        rows.forEach(r => {
-          const farmer=(r.c[1]?.v||''), village=(r.c[2]?.v||'');
-          const crop=(r.c[6]?.v||''), variety=(r.c[7]?.v||''), plant=(r.c[8]?.v||0);
-          const rate=(r.c[9]?.v||0);
-          const deliv = fixD(r.c[10]?.v);
-          const status = (r.c[21]?.v||'Pending').toString();
-          const stCls = status==='Delivered' ? 'badge-green' : (status==='Partial' ? 'badge-orange' : 'badge-gray');
-          html += '<tr style="border-bottom:1px solid var(--g2);">'+
-            '<td style="padding:7px;text-align:center;">'+fmtDate(r._date)+'</td>'+
-            '<td style="padding:7px;text-align:center;">'+farmer+'</td>'+
-            '<td style="padding:7px;text-align:center;">'+village+'</td>'+
-            '<td style="padding:7px;text-align:center;">'+crop+'</td>'+
-            '<td style="padding:7px;text-align:center;font-weight:600;">'+variety+'</td>'+
-            '<td style="padding:7px;text-align:center;">'+plant+'</td>'+
-            '<td style="padding:7px;text-align:center;color:var(--gd);font-weight:600;">'+(parseFloat(r.c[25]?.v)||0)+'</td>'+
-            '<td style="padding:7px;text-align:center;">'+rate+'</td>'+
-            '<td style="padding:7px;text-align:center;">'+fmtDate(deliv)+'</td>'+
-            '<td style="padding:7px;text-align:center;"><span class="badge '+stCls+'">'+status+'</span></td>'+
-            '</tr>';
+          // Lines HTML (andar)
+          let linesHtml = '';
+          g.lines.forEach(l => {
+            const sCls = l.status==='Delivered' ? 'badge-green' : (l.status==='Partial' ? 'badge-orange' : 'badge-gray');
+            linesHtml += '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:1px solid #eef3f0;">'+
+              '<div style="flex:1;"><div style="font-weight:700;font-size:13px;color:#1a2e26;">'+l.crop+' \u2013 '+l.variety+'</div>'+
+              '<div style="font-size:11.5px;color:#7a8a83;margin-top:2px;">'+l.plant.toLocaleString('en-IN')+' plants \u00D7 \u20B9'+l.rate+' \u2022 Delivery: '+fmtDate(l.deliv)+'</div></div>'+
+              '<div style="text-align:right;"><span class="badge '+sCls+'">'+l.status+'</span>'+
+              (l.delivered>0?'<div style="font-size:11px;color:var(--gd);font-weight:600;margin-top:3px;">Diya: '+l.delivered.toLocaleString('en-IN')+'</div>':'')+'</div>'+
+              '</div>';
+          });
+
+          html += '<div class="bk-card" data-open="0">'+
+            '<div class="bk-head" onclick="togBk(this)">'+
+              '<div style="flex:1;min-width:0;">'+
+                '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
+                  '<span style="font-weight:800;font-size:14.5px;color:#1a2e26;">'+g.farmer+'</span>'+
+                  '<span class="badge '+ovCls+'">'+ov+'</span></div>'+
+                '<div style="font-size:12px;color:#7a8a83;margin-top:3px;">'+g.village+' \u2022 '+g.lines.length+' variety \u2022 '+gPlant.toLocaleString('en-IN')+' plants</div>'+
+              '</div>'+
+              '<div style="text-align:right;margin-left:10px;">'+
+                '<div style="font-weight:800;font-size:15px;color:var(--gd);">\u20B9'+g.totalRec.toLocaleString('en-IN')+'</div>'+
+                '<i class="ti ti-chevron-down bk-chev" style="color:#2d7a4f;font-size:18px;"></i></div>'+
+            '</div>'+
+            '<div class="bk-body">'+
+              '<div style="padding:2px 0 6px;">'+
+                '<div style="font-size:11px;color:#7a8a83;margin-bottom:4px;">Booking: '+fmtDate(g.date)+' \u2022 ID: '+g.bid+' \u2022 \uD83D\uDCF1 '+g.mobile+'</div>'+
+                linesHtml+
+                '<div style="display:flex;gap:14px;margin-top:10px;padding-top:9px;border-top:2px solid #eef3f0;font-size:12px;">'+
+                  '<span>1st: <b style="color:var(--gd);">\u20B9'+g.firstPay.toLocaleString('en-IN')+'</b></span>'+
+                  (g.secondPay>0?'<span>2nd: <b style="color:var(--gd);">\u20B9'+g.secondPay.toLocaleString('en-IN')+'</b></span>':'')+
+                  '<span>Total: <b style="color:var(--gd);">\u20B9'+g.totalRec.toLocaleString('en-IN')+'</b></span></div>'+
+              '</div>'+
+            '</div>'+
+          '</div>';
         });
-        html += '</tbody></table></div>';
+
         con.innerHTML = html;
       }catch(e){
         con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--rd);">Report load nahi hui. Sheet check karo.</div>';
@@ -4748,9 +4775,6 @@ function loadBookingReport(){
       con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--rd);">Internet error!</div>';
     });
 }
-
-// ─────── VARIETY REPORT (Sowing / Booking / Dispatch / Bacha) ───────
-// ═══════════════════ SUPERVISOR ACTIVITY REPORT ═══════════════════
 function openSupActivity(){
   const from = new Date(); from.setDate(from.getDate()-30);
   document.getElementById('saFrom').valueAsDate = from;
