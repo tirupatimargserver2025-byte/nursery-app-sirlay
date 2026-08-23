@@ -435,6 +435,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .bk-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease;padding:0 16px;}
 .bk-card[data-open="1"] .bk-body{max-height:800px;padding:0 16px 14px;}
 .bk-card[data-open="1"]{box-shadow:0 4px 12px rgba(16,40,28,0.10),0 10px 28px rgba(16,40,28,0.10);}
+
+/* ══ BOOKING CARD ACTION BUTTONS ══ */
+.bk-actions{display:flex;gap:8px;margin-top:12px;}
+.bk-abtn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;
+  padding:10px 6px;border:none;border-radius:10px;font-size:12px;font-weight:700;
+  cursor:pointer;transition:transform 0.15s,filter 0.15s;color:white;}
+.bk-abtn i{font-size:15px;}
+.bk-abtn:hover{transform:translateY(-2px);filter:brightness(1.08);}
+.bk-abtn:active{transform:translateY(0);}
+.bk-pay{background:linear-gradient(135deg,#2e7d32,#43a047);}
+.bk-var{background:linear-gradient(135deg,#1565c0,#1e88e5);}
+.bk-del{background:linear-gradient(135deg,#e65100,#f57c00);}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -1672,7 +1684,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20260823-0630';
+const APP_VERSION = '20260823-0643';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -1696,6 +1708,7 @@ const SHEET_ID = '1nItPv5Jk4baU4Rg6fgQMYchRK7exQk-KDsRkHLl34Ew';
 let SUP_DATA = {}; // {name: {pin, role}}
 let LABOUR_LIST = []; // [{name, wage}]
 let VDATA = {};
+let bkModalSource = 'paydeliv';
 let curUser = null; // {name, role}
 let curMod = null;
 let vCnt=0, lCnt={}, wlCnt=0, akCnt=0;
@@ -4700,7 +4713,17 @@ function loadBookingReport(){
           return;
         }
 
-        // Booking ID se group karo
+        // pdBookings global bhi bhar do (taaki card ke buttons se modals chalein)
+        const rawGroups = {};
+        rows.forEach(r => {
+          const rbid = (r.c[23]?.v||'').toString();
+          if(!rbid) return;
+          if(!rawGroups[rbid]) rawGroups[rbid] = [];
+          rawGroups[rbid].push(r);
+        });
+        pdBookings = rawGroups;
+
+        // Booking ID se group karo (display ke liye)
         const groups = {};
         rows.forEach(r => {
           const bid = (r.c[23]?.v||'').toString() || ('row'+Math.random());
@@ -4762,6 +4785,11 @@ function loadBookingReport(){
                   '<span>1st: <b style="color:var(--gd);">\u20B9'+g.firstPay.toLocaleString('en-IN')+'</b></span>'+
                   (g.secondPay>0?'<span>2nd: <b style="color:var(--gd);">\u20B9'+g.secondPay.toLocaleString('en-IN')+'</b></span>':'')+
                   '<span>Total: <b style="color:var(--gd);">\u20B9'+g.totalRec.toLocaleString('en-IN')+'</b></span></div>'+
+                '<div class="bk-actions">'+
+                  '<button class="bk-abtn bk-pay" onclick="event.stopPropagation();bkModalSource=\'booking\';openAddPay(\''+g.bid+'\')"><i class="ti ti-coin"></i> Payment</button>'+
+                  '<button class="bk-abtn bk-var" onclick="event.stopPropagation();bkModalSource=\'booking\';openAddVar(\''+g.bid+'\')"><i class="ti ti-seeding"></i> Variety</button>'+
+                  '<button class="bk-abtn bk-del" onclick="event.stopPropagation();bkModalSource=\'booking\';openVarDeliv(\''+g.bid+'\')"><i class="ti ti-truck"></i> Delivery</button>'+
+                '</div>'+
               '</div>'+
             '</div>'+
           '</div>';
@@ -5182,7 +5210,7 @@ function submitAddVariety(){
     .then(()=>{
       toast('✅ Variety add ho gayi!');
       closeAddVar();
-      setTimeout(()=>{ isSaving = false; loadPayDeliv(); }, 1200);
+      setTimeout(()=>{ isSaving = false; bkRefreshAfterSave(); }, 1200);
     }).catch(()=>{ isSaving = false; toast('⚠️ Error! Internet check karo.', 'error'); });
 }
 
@@ -5243,6 +5271,10 @@ function apToggleBank(){
   // Bank/Both mein alag amounts hain, to upar wala single Amount chupa do
   document.getElementById('apAmount').parentElement.style.display = ((mode === 'Both' || mode === 'Bank') ? 'none' : 'block');
 }
+function bkRefreshAfterSave(){
+  if(bkModalSource === 'booking'){ bkModalSource='paydeliv'; loadBookingReport(); }
+  else { loadPayDeliv(); }
+}
 function submitPayment(){
   if(isSaving){ return; }
   const isFirst = window.apIsFirstPayment === true;
@@ -5296,7 +5328,7 @@ function submitPayment(){
     .then(()=>{
       toast('✅ ' + (isFirst ? 'First' : 'Second') + ' payment add ho gaya!');
       closeAddPay();
-      setTimeout(()=>{ isSaving = false; loadPayDeliv(); }, 1200);
+      setTimeout(()=>{ isSaving = false; bkRefreshAfterSave(); }, 1200);
     }).catch(()=>{ isSaving = false; toast('⚠️ Error! Internet check karo.', 'error'); });
 }
 
@@ -5324,7 +5356,7 @@ function submitDelivered(){
     .then(()=>{
       toast('✅ Pura delivered ho gaya!');
       closeDeliv();
-      setTimeout(()=>{ isSaving = false; loadPayDeliv(); }, 1200);
+      setTimeout(()=>{ isSaving = false; bkRefreshAfterSave(); }, 1200);
     }).catch(()=>{ isSaving = false; toast('⚠️ Error! Internet check karo.', 'error'); });
 }
 
@@ -5394,7 +5426,7 @@ function submitVarietyDeliv(){
     .then(()=>{
       toast('✅ '+lines.length+' variety update ho gayi!');
       closeVarDeliv();
-      setTimeout(()=>{ isSaving = false; loadPayDeliv(); }, 1200);
+      setTimeout(()=>{ isSaving = false; bkRefreshAfterSave(); }, 1200);
     }).catch(()=>{ isSaving = false; toast('⚠️ Error! Internet check karo.', 'error'); });
 }
 
