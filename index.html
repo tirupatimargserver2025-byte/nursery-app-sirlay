@@ -1708,7 +1708,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20260823-0727';
+const APP_VERSION = '20260916-0818';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -2453,13 +2453,26 @@ function submitSeed(){
       const lt=parseInt(document.getElementById('lt-'+v+'-'+lid)?.value)||0;
       if(nm){labs.push({name:nm,pkt:lp,tray:lt});labourPkt+=lp;}
     });
-    // PKT validation
-    if(totalPkt>0 && labs.length>0 && Math.abs(labourPkt-totalPkt)>0.001){
-      toast('❌ Variety '+vid+' ('+vr+'): Total PKT '+totalPkt+' hai lekin Labour PKT sum '+labourPkt+' hai! Match karo.','error');
-      return;
+    // Total PKT khaali par labour PKT bhara -> Total PKT apne aap labour sum se bhar do
+    var finalPkt = totalPkt;
+    if(totalPkt===0 && labourPkt>0){
+      finalPkt = labourPkt;
+      var vpEl = document.getElementById('vp-'+vid);
+      if(vpEl) vpEl.value = labourPkt;   // form me bhi dikha do
+    }
+    // PKT validation (SAKHT) - Total PKT hai to Labour PKT barabar hona hi chahiye
+    if(finalPkt>0){
+      if(labs.length===0){
+        toast('❌ Variety '+vid+' ('+vr+'): Total PKT '+finalPkt+' hai par koi labour nahi! Labour PKT add karo.','error');
+        return;
+      }
+      if(Math.abs(labourPkt-finalPkt)>0.001){
+        toast('❌ Variety '+vid+' ('+vr+'): Total PKT '+finalPkt+' hai lekin Labour PKT sum '+labourPkt+' hai! Barabar karo.','error');
+        return;
+      }
     }
     entries.push({vegetable:veg,variety:vr,lot:document.getElementById('vl-'+vid)?.value||'',
-      pkt:totalPkt,tray:t,cup:c,seeds:s,totalPlants:t*c*s,labours:labs});
+      pkt:finalPkt,tray:t,cup:c,seeds:s,totalPlants:t*c*s,labours:labs});
   }
   if(!entries.length){toast('❗ Kam se kam ek variety add karo!','error');return;}
   const btn=document.getElementById('sSub');
@@ -3309,6 +3322,41 @@ let spLineCnt = 0;
 let CHEM_LIST = [];
 
 // Register jaisi ek line: paudha + variety(multi) + dawai + matra + unit + type
+let dwCnt = {};  // har spray-line ke andar dawai rows ka counter
+
+// Ek Line ke andar nayi dawai row jodo (crop/variety same rahega)
+function addDawaiRow(lineId){
+  dwCnt[lineId] = (dwCnt[lineId]||0) + 1;
+  const did = dwCnt[lineId];
+  const box = document.getElementById('dwCon-'+lineId);
+  if(!box) return;
+  const row = document.createElement('div');
+  row.className = 'dwrow';
+  row.id = 'dwrow-'+lineId+'-'+did;
+  row.dataset.line = lineId;
+  row.dataset.did = did;
+  row.style.cssText = 'border-top:1px dashed var(--g2);margin-top:8px;padding-top:8px;position:relative;';
+  var closeBtn = '';
+  if(did>1){
+    closeBtn = '<button type="button" class="dwRemBtn" style="position:absolute;top:4px;right:0;background:none;border:none;color:var(--rd);font-size:15px;cursor:pointer;font-weight:800;">\u2715</button>';
+  }
+  row.innerHTML =
+    '<div class="fr"><label>\u{1F9EA} Dawai / Khaad</label>'+
+      '<input type="text" id="sln-'+lineId+'-'+did+'" list="chemList" placeholder="\u{1F50D} Calcium, 00:00:50, Armimetar..."></div>'+
+    '<div class="g3">'+
+      '<div><label>\u{1F4CF} Matra</label><input type="number" id="sld-'+lineId+'-'+did+'" placeholder="0" step="0.1"></div>'+
+      '<div><label>\u{1F4D0} Unit</label><select id="slu-'+lineId+'-'+did+'">'+
+        '<option>gm</option><option>ML</option><option>gm/pump</option><option>ml/pump</option>'+
+        '<option>gm/litre</option><option>ml/litre</option><option>kg</option><option>litre</option></select></div>'+
+      '<div><label>\u{1F489} Kya Kiya</label><select id="slt-'+lineId+'-'+did+'" style="font-weight:600;">'+
+        '<option value="Spray">\u{1F33F} Spray</option><option value="Drench">\u{1F4A7} Drench</option></select></div>'+
+    '</div>'+
+    closeBtn;
+  box.appendChild(row);
+  var rb = row.querySelector('.dwRemBtn');
+  if(rb) rb.addEventListener('click', function(){ row.remove(); });
+}
+
 function addSprayLine(){
   spLineCnt++; const id = spLineCnt;
   const d = document.createElement('div');
@@ -3324,18 +3372,12 @@ function addSprayLine(){
         '<input type="text" id="slvs-'+id+'" placeholder="\u{1F50D} Variety dhundhein..." oninput="filterVariety('+id+')" autocomplete="off" style="width:100%;padding:10px;border:1px solid var(--g2);border-radius:6px;margin-bottom:6px;font-size:15px;">'+
         '<div id="slv-'+id+'" style="display:flex;flex-wrap:wrap;gap:6px;padding:8px;border:1px solid var(--g2);border-radius:6px;background:var(--g1);min-height:38px;max-height:190px;overflow-y:auto;align-items:flex-start;align-content:flex-start;">'+
           '<span style="color:var(--g5);font-size:12px;">Pehle crop chunein...</span></div></div>'+
-      '<div class="fr"><label>\u{1F9EA} Dawai / Khaad</label>'+
-        '<input type="text" id="sln-'+id+'" list="chemList" placeholder="\u{1F50D} Calcium, 00:00:50, Armimetar..."></div>'+
-      '<div class="g3">'+
-        '<div><label>\u{1F4CF} Matra</label><input type="number" id="sld-'+id+'" placeholder="0" step="0.1"></div>'+
-        '<div><label>\u{1F4D0} Unit</label><select id="slu-'+id+'">'+
-          '<option>gm</option><option>ML</option><option>gm/pump</option><option>ml/pump</option>'+
-          '<option>gm/litre</option><option>ml/litre</option><option>kg</option><option>litre</option></select></div>'+
-        '<div><label>\u{1F489} Kya Kiya</label><select id="slt-'+id+'" style="font-weight:600;">'+
-          '<option value="Spray">\u{1F33F} Spray</option><option value="Drench">\u{1F4A7} Drench</option></select></div>'+
-      '</div>'+
+      '<div id="dwCon-'+id+'"></div>'+
+      '<button type="button" class="addDwBtn" onclick="addDawaiRow('+id+')" style="width:100%;padding:9px;margin-top:2px;background:var(--gp);color:var(--gd);border:1.5px dashed var(--gl);border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">\u2795 Ek Aur Dawai Jodo</button>'+
     '</div>';
   document.getElementById('spLineCon').appendChild(d);
+  dwCnt[id] = 0;
+  addDawaiRow(id);   // pehli dawai row apne aap
 }
 
 function remSprayLine(id){
@@ -3426,27 +3468,43 @@ function toggleAllArea(){
   });
 }
 
-// Saari lines collect karo -> [{crop, variety, name, dose, unit, workType}]
+// Saari lines collect karo -> har Line ke andar kayi dawai ho sakti hain
+// (crop/variety ek hi rahega, har dawai ka apna alag entry banega)
 function buildSprayLines(){
   const allArea = !!document.getElementById('spAllArea')?.checked;
   const out = [];
   document.querySelectorAll('[id^="spl-"]').forEach(function(el){
     const id = el.id.split('-')[1];
-    const name = (document.getElementById('sln-'+id)?.value||'').trim();
     let crop = (document.getElementById('slc-'+id)?.value||'').trim();
     const vs = [];
     document.querySelectorAll('.slvchk-'+id+':checked').forEach(function(cb){ vs.push(cb.value); });
     if(allArea){ crop = 'Poora Area'; vs.length = 0; }
-    if(!name && !crop) return; // bilkul khali line skip
-    out.push({
-      crop: crop,
-      variety: vs.join(' + '),
-      name: name,
-      dose: document.getElementById('sld-'+id)?.value || 0,
-      unit: document.getElementById('slu-'+id)?.value || '',
-      workType: document.getElementById('slt-'+id)?.value || 'Spray',
-      _allArea: allArea
-    });
+
+    // Is Line ki saari dawai rows dhoondo
+    const dwBox = document.getElementById('dwCon-'+id);
+    let anyDawai = false;
+    if(dwBox){
+      dwBox.querySelectorAll('.dwrow').forEach(function(row){
+        const did = row.dataset.did;
+        const name = (document.getElementById('sln-'+id+'-'+did)?.value||'').trim();
+        if(!name && !crop) return;   // bilkul khali row skip
+        if(!name) return;             // sirf naam ho tabhi entry (crop akela bekar)
+        anyDawai = true;
+        out.push({
+          crop: crop,
+          variety: vs.join(' + '),
+          name: name,
+          dose: document.getElementById('sld-'+id+'-'+did)?.value || 0,
+          unit: document.getElementById('slu-'+id+'-'+did)?.value || '',
+          workType: document.getElementById('slt-'+id+'-'+did)?.value || 'Spray',
+          _allArea: allArea
+        });
+      });
+    }
+    // Agar crop chuna hai par koi dawai nahi bhari, phir bhi crop/variety ka record chhod do (jaisa pehle tha)
+    if(!anyDawai && crop){
+      out.push({ crop: crop, variety: vs.join(' + '), name: '', dose: 0, unit: '', workType: 'Spray', _allArea: allArea });
+    }
   });
   return out;
 }
