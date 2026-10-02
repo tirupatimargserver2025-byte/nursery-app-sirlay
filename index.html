@@ -471,6 +471,30 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .crop-card[data-open="1"]{box-shadow:0 3px 10px rgba(16,40,28,0.09);}
 .crop-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease;}
 .crop-card[data-open="1"] .crop-body{max-height:1200px;}
+
+/* ══ DAILY REPORT JPG ══ */
+.dj-card{width:720px;background:#ffffff;font-family:'Segoe UI',Roboto,'Noto Sans Devanagari',Arial,sans-serif;color:#1d2b25;padding-bottom:14px;}
+.dj-top{background:linear-gradient(135deg,#1a4731,#2d7a4f);color:white;padding:22px 26px 20px;}
+.dj-n{font-size:15px;font-weight:700;opacity:0.9;}
+.dj-tt{font-size:30px;font-weight:900;margin:4px 0 8px;letter-spacing:-0.3px;}
+.dj-sub{font-size:17px;}
+.dj-tiles{display:flex;gap:10px;padding:16px 20px 4px;}
+.dj-tile{flex:1;background:#f0f8f3;border:1px solid #d5ebde;border-radius:12px;padding:10px 6px;text-align:center;}
+.dj-ti{font-size:20px;}
+.dj-tv{font-size:24px;font-weight:900;color:#1a4731;}
+.dj-tl{font-size:12.5px;color:#4a5a53;font-weight:700;}
+.dj-sec{margin:14px 20px 0;border:1px solid #e3ebe6;border-radius:12px;overflow:hidden;}
+.dj-h{color:white;font-size:17px;font-weight:800;padding:9px 14px;}
+.dj-t{width:100%;border-collapse:collapse;font-size:15px;}
+.dj-t th{background:#f5f8f6;color:#4a5a53;font-size:12.5px;font-weight:800;text-transform:uppercase;text-align:left;padding:7px 10px;border-bottom:2px solid #e3ebe6;}
+.dj-t td{padding:8px 10px;border-bottom:1px solid #eef3f0;vertical-align:top;}
+.dj-t tbody tr:nth-child(even) td{background:#fafcfb;}
+.dj-t .r{text-align:right;white-space:nowrap;}
+.dj-t tr.dj-tot td{background:#e3f5ea;color:#1a5c34;font-weight:900;}
+.dj-m{font-size:13px;color:#5f6f68;}
+.dj-l{font-size:13.5px;color:#3d5449;margin-top:3px;}
+.dj-sm{font-size:13.5px;color:#3d5449;}
+.dj-foot{text-align:center;font-size:12px;color:#8a9a93;margin-top:14px;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -530,10 +554,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <span class="cbadge">Manager Only</span>
         </div>
       </div></div></div>
-      <div class="msec-acc" data-open="0"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-clipboard-list"></i>Meri Report</div><div class="mh-right"><span class="msec-count">3</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
+      <div class="msec-acc" data-open="0"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-clipboard-list"></i>Meri Report</div><div class="mh-right"><span class="msec-count">4</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard report" onclick="openMod('myReport')">
           <div class="ico"><i class="ti ti-chart-bar"></i></div><div class="ttl">Meri Report</div>
           <div class="dsc">Meri saari entries — date filter</div>
+        </div>
+        <div class="mcard report" onclick="openDailyJpg()">
+          <div class="ico"><i class="ti ti-brand-whatsapp"></i></div><div class="ttl">Daily Report JPG</div>
+          <div class="dsc">Aaj ka kaam — WhatsApp par</div>
         </div>
         <div class="mcard report" onclick="openShiftingReport()">
           <div class="ico"><i class="ti ti-refresh"></i></div><div class="ttl">Shifting Report</div>
@@ -572,10 +600,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div class="dsc">Present / Half Day / Absent + OT</div>
         </div>
       </div></div></div>
-      <div class="msec-acc" data-open="0"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-clipboard-list"></i>Reports</div><div class="mh-right"><span class="msec-count">10</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
+      <div class="msec-acc" data-open="0"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-clipboard-list"></i>Reports</div><div class="mh-right"><span class="msec-count">11</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard report" onclick="openMod('report')">
           <div class="ico"><i class="ti ti-chart-line"></i></div><div class="ttl">Daily Report</div>
           <div class="dsc">Aaj ka poora kaam</div>
+        </div>
+        <div class="mcard report" onclick="openDailyJpg()">
+          <div class="ico"><i class="ti ti-brand-whatsapp"></i></div><div class="ttl">Daily Report JPG</div>
+          <div class="dsc">Aaj ka kaam — WhatsApp par</div>
         </div>
         <div class="mcard attend" onclick="openMod('attReport')">
           <div class="ico"><i class="ti ti-users"></i></div><div class="ttl">Attendance Report</div>
@@ -624,10 +656,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div class="dsc" style="color:rgba(255,255,255,0.85);">Sari report ek hi jagah — tabs me jaaye bina</div>
         </div>
       </div>
-      <div class="msec-acc" data-open="1"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-clipboard-list"></i>Reports</div><div class="mh-right"><span class="msec-count">10</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
+      <div class="msec-acc" data-open="1"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-clipboard-list"></i>Reports</div><div class="mh-right"><span class="msec-count">11</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard report" onclick="openMod('report')">
           <div class="ico"><i class="ti ti-chart-line"></i></div><div class="ttl">Daily Report</div>
           <div class="dsc">Aaj ka poora kaam</div>
+        </div>
+        <div class="mcard report" onclick="openDailyJpg()">
+          <div class="ico"><i class="ti ti-brand-whatsapp"></i></div><div class="ttl">Daily Report JPG</div>
+          <div class="dsc">Aaj ka kaam — WhatsApp par</div>
         </div>
         <div class="mcard attend" onclick="openMod('attReport')">
           <div class="ico"><i class="ti ti-users"></i></div><div class="ttl">Attendance Report</div>
@@ -1127,6 +1163,34 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   </div>
 </div>
 
+
+<!-- ════ DAILY REPORT JPG ════ -->
+<div class="screen" id="dailyJpgScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:#25d366;">📸</div>
+      <h1>Daily Report JPG <span>WhatsApp par bhejo</span></h1></div>
+    <div class="sbar"><span class="sbadge supervisor" id="djSupShow"></span>
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">📅 Kis din ki report</div>
+      <div class="fr"><label>📅 Date</label><input type="date" id="djDate"></div>
+      <div class="fr" id="djSupRow"><label>👷 Supervisor</label><select id="djSup"></select></div>
+      <button onclick="djMake()" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--gl),var(--gm));color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;margin-top:4px;">🖼️ Report Banao</button>
+    </div>
+    <div id="djStatus"></div>
+    <div id="djPreview" style="display:none;">
+      <div style="display:flex;gap:8px;margin:0 0 10px;">
+        <button onclick="djShare()" style="flex:1;padding:13px;background:#25d366;color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;">📤 WhatsApp par Share</button>
+        <button onclick="djDownload()" style="flex:0 0 auto;padding:13px 16px;background:var(--gd);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;">⬇️ JPG</button>
+      </div>
+      <img id="djImg" alt="Daily report" style="width:100%;border-radius:12px;box-shadow:0 4px 18px rgba(0,0,0,0.25);background:white;">
+    </div>
+  </div>
+</div>
+<div id="djStage" style="position:absolute;left:-10000px;top:0;width:720px;"></div>
+
 <!-- SUCCESS -->
 <div class="sucscreen" id="sucScreen">
   <div class="sucico" id="sucIco">✅</div>
@@ -1167,7 +1231,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
       
       <div class="fr">
         <label>🌱 Variety</label>
-        <input type="text" id="shVariety" list="varietyList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;">
+        <input type="text" id="shVariety" list="varietyList" placeholder="🔍 Pehle crop chuno..." onchange="cvVarCheck('shCrop','shVariety')" style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;">
       </div>
 
       <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--g2);">
@@ -1708,7 +1772,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261002-1540';
+const APP_VERSION = '20261002-1705';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -3550,7 +3614,7 @@ function resetSprayTargets(){
   const con = document.getElementById('spLineCon'); if(con){ con.innerHTML=''; spLineCnt=0; addSprayLine(); }
 }
 
-function loadShiftingVarieties(){ cvFilter('shCrop', 'shVariety'); }
+function loadShiftingVarieties(){ cvCropCheck('shCrop', 'shVariety'); }
 
 function loadShiftingLabour(){
   const date = document.getElementById('shDate').value;
@@ -3662,13 +3726,16 @@ function submitShifting(){
   const date = document.getElementById('shDate').value;
   const sup = document.getElementById('shSup').value;
   const area = document.getElementById('shArea').value;
-  const crop = document.getElementById('shCrop').value;
-  const variety = document.getElementById('shVariety').value;
+  let crop = document.getElementById('shCrop').value;
+  let variety = document.getElementById('shVariety').value;
   
   if(!date || !sup || !area || !crop || !variety){
     toast('❗ Sab fields zaroori hain!', 'error');
     return;
   }
+  const lockErr = cvLock('shCrop', 'shVariety');
+  if(lockErr){ toast('❗ '+lockErr, 'error'); return; }
+  crop = document.getElementById('shCrop').value; variety = document.getElementById('shVariety').value;
   
   const labours = Object.keys(shiftingLabours);
   if(labours.length === 0){
@@ -3871,7 +3938,7 @@ function addDpLine(){
       '<div><label>🥬 Crop</label><input type="text" id="dp-crop-'+id+'" list="cropList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;" onchange="dpLoadVar('+id+')"></div>' +
     '</div>' +
     '<div class="g2">' +
-      '<div><label>🌱 Variety</label><input type="text" id="dp-var-'+id+'" list="varietyList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;"></div>' +
+      '<div><label>🌱 Variety</label><input type="text" id="dp-var-'+id+'" list="varietyList" placeholder="🔍 Pehle crop chuno..." onchange="dpVarCheck('+id+')" style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;"></div>' +
       '<div><label>📦 Carret</label><input type="number" id="dp-car-'+id+'" placeholder="0" min="0" step="1" oninput="dpCalc('+id+')"></div>' +
     '</div>' +
     '<div class="g2">' +
@@ -3900,9 +3967,10 @@ function removeDpLine(id){
 }
 
 function dpLoadVar(id){
-  cvFilter('dp-crop-'+id, 'dp-var-'+id);
+  cvCropCheck('dp-crop-'+id, 'dp-var-'+id);
   dpValidate(id);
 }
+function dpVarCheck(id){ cvVarCheck('dp-crop-'+id, 'dp-var-'+id); dpValidate(id); }
 
 function dpCalc(id){
   const car = parseInt(document.getElementById('dp-car-'+id).value)||0;
@@ -3981,6 +4049,8 @@ function submitDispatch(){
 
     if(!area){ errorMsg = 'Area select karo!'; return; }
     if(!crop || !variety){ errorMsg = 'Crop aur Variety select karo!'; return; }
+    const lockErr = cvLock('dp-crop-'+id, 'dp-var-'+id);
+    if(lockErr){ errorMsg = lockErr; return; }
     if(!sowFrom || !sowTo){ errorMsg = variety+': Sowing date range daalo!'; return; }
     if(car===0 && dir===0){ errorMsg = variety+': Carret ya Direct Plants daalo!'; return; }
 
@@ -3988,7 +4058,7 @@ function submitDispatch(){
     const sowRange = sowFrom + ' se ' + sowTo;
 
     entries.push({
-      area: area, crop: crop, variety: variety,
+      area: area, crop: document.getElementById('dp-crop-'+id).value, variety: document.getElementById('dp-var-'+id).value,
       sowingDate: sowRange, carret: car, ppc: ppc, direct: dir,
       totalPlants: tot, remarks: '', isValidated: validated
     });
@@ -5914,6 +5984,307 @@ function loadDispatchReport(){
     }).catch(err => {
       con.innerHTML = '<div class="rep-card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Data load nahi hua. Internet check karo.</div>';
     });
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// DAILY REPORT JPG — supervisor ka ek din ka poora kaam, WhatsApp par share
+// ════════════════════════════════════════════════════════════════
+let DJ_BLOB = null, DJ_NAME = '';
+function djEsc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function djN(v){ var n = parseFloat(v); return isNaN(n) ? 0 : n; }
+function djFmt(n){ return Number(n||0).toLocaleString('en-IN'); }
+function djKey(s){ return String(s==null?'':s).trim().toLowerCase(); }
+function djISO(v){
+  if(v==null || v==='') return '';
+  var s = String(v).trim(), m;
+  if((m = s.match(/^Date\((\d+),(\d+),(\d+)/))) return m[1]+'-'+String(+m[2]+1).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0');
+  if((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return m[1]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0');
+  if((m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/))) return m[3]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[1]).padStart(2,'0');
+  return s;
+}
+function djV(r, i){ var c = r.c && r.c[i]; return (c && c.v!=null) ? c.v : ''; }
+// dikhane ke liye (time/number ka formatted roop)
+function djF(r, i){ var c = r.c && r.c[i]; if(!c) return ''; if(c.f!=null && c.f!=='') return c.f; return c.v==null ? '' : c.v; }
+function djTime(r, i){ var s = String(djF(r,i)); var m = s.match(/(\d{1,2}):(\d{2})/); return m ? (m[1].padStart(2,'0')+':'+m[2]) : ''; }
+
+function openDailyJpg(){
+  const isSup = curUser && curUser.role === 'Supervisor';
+  document.getElementById('djDate').value = localISO(new Date());
+  const sel = document.getElementById('djSup');
+  sel.innerHTML = '<option value="">-- Supervisor chuno --</option>';
+  Object.keys(SUP_DATA).filter(function(n){ return SUP_DATA[n] && SUP_DATA[n].role==='Supervisor'; })
+    .forEach(function(n){ sel.innerHTML += '<option value="'+djEsc(n)+'">'+djEsc(n)+'</option>'; });
+  document.getElementById('djSupRow').style.display = isSup ? 'none' : 'block';
+  document.getElementById('djSupShow').textContent = isSup ? ('👷 '+curUser.name) : '';
+  document.getElementById('djStatus').innerHTML = '';
+  document.getElementById('djPreview').style.display = 'none';
+  DJ_BLOB = null;
+  show('dailyJpgScreen');
+}
+
+function djFetch(sheet){
+  return fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&headers=1&sheet='+encodeURIComponent(sheet)+'&t='+Date.now())
+    .then(function(r){ return r.text(); })
+    .then(function(t){ return dashParse(t); })
+    .catch(function(){ return []; });
+}
+
+const DJ_SHEETS = [
+  ['ma','Morning Assignment',1], ['seed','Seed Sowing Data',1], ['seedLab','Seed Labour Data',1],
+  ['wat','Watering Records',1], ['spr','Spraying Records',1], ['chem','Chemical Records',1],
+  ['wsl','W-S Labour',1], ['shf','Shifting Data',1], ['dsp','Dispatch Data',2]
+];
+const DJ_FZ_SHEETS = [['fbs','F-Bag Shifting',1], ['fws','F-Watering Spraying',1], ['fld','F-Loading',1]];
+
+function djMake(){
+  const date = document.getElementById('djDate').value;
+  const isSup = curUser && curUser.role === 'Supervisor';
+  const sup = isSup ? curUser.name : document.getElementById('djSup').value;
+  if(!date){ toast('❗ Date chuno','error'); return; }
+  if(!sup){ toast('❗ Supervisor chuno','error'); return; }
+  const st = document.getElementById('djStatus');
+  st.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--g5);">⏳ Entries jod rahe hain...</div>';
+  document.getElementById('djPreview').style.display = 'none';
+  const list = DJ_SHEETS.concat(typeof FZ_SHEETS !== 'undefined' ? DJ_FZ_SHEETS : []);
+  Promise.all(list.map(function(s){ return djFetch(s[1]); })).then(function(arr){
+    const D = {};
+    list.forEach(function(s, i){
+      D[s[0]] = arr[i].filter(function(r){
+        return djISO(djV(r,0)) === date && djKey(djV(r, s[2])) === djKey(sup);
+      });
+    });
+    const res = djBuild(date, sup, D);
+    if(!res.count){
+      st.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--g5);">📭 '+djEsc(sup)+' ki '+djEsc(formatDate(date))+' ko koi entry nahi mili</div>';
+      return;
+    }
+    const stage = document.getElementById('djStage');
+    stage.innerHTML = res.html;
+    st.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--g5);">🖼️ Image ban rahi hai...</div>';
+    djRender(stage, date, sup);
+  });
+}
+
+function djRender(stage, date, sup){
+  const st = document.getElementById('djStatus');
+  if(typeof html2canvas !== 'function'){ st.innerHTML = '<div class="card" style="color:var(--rd);text-align:center;padding:16px;">⚠️ Image tool load nahi hua — internet check karke app refresh karo</div>'; return; }
+  html2canvas(stage.firstElementChild, {scale:2, backgroundColor:'#ffffff', useCORS:true, logging:false}).then(function(canvas){
+    canvas.toBlob(function(blob){
+      DJ_BLOB = blob;
+      DJ_NAME = 'Daily-Report-'+String(sup).replace(/[^\wऀ-ॿ]+/g,'-')+'-'+date+'.jpg';
+      const img = document.getElementById('djImg');
+      if(img.dataset.url) URL.revokeObjectURL(img.dataset.url);
+      img.dataset.url = URL.createObjectURL(blob);
+      img.src = img.dataset.url;
+      st.innerHTML = '';
+      document.getElementById('djPreview').style.display = 'block';
+      stage.innerHTML = '';
+    }, 'image/jpeg', 0.9);
+  }).catch(function(){
+    st.innerHTML = '<div class="card" style="color:var(--rd);text-align:center;padding:16px;">⚠️ Image nahi bani — dobara try karo</div>';
+  });
+}
+
+function djShare(){
+  if(!DJ_BLOB){ toast('❗ Pehle report banao','error'); return; }
+  let file = null;
+  try{ file = new File([DJ_BLOB], DJ_NAME, {type:'image/jpeg'}); }catch(e){}
+  if(file && navigator.canShare && navigator.canShare({files:[file]})){
+    navigator.share({files:[file], title:DJ_NAME}).catch(function(){});
+  } else {
+    djDownload();
+    toast('📥 JPG download ho gaya — WhatsApp me attach karke bhejo');
+  }
+}
+function djDownload(){
+  if(!DJ_BLOB){ toast('❗ Pehle report banao','error'); return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(DJ_BLOB); a.download = DJ_NAME;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+
+// ── Image ka HTML ──
+function djBuild(date, sup, D){
+  const labs = {};          // labour -> [kaam]
+  const addLab = function(n, s){ n = String(n||'').trim(); if(!n) return; (labs[n] = labs[n] || []).push(s); };
+  const splitNames = function(s){ return String(s||'').split(',').map(function(x){ return x.trim(); }).filter(Boolean); };
+  let count = 0, secs = '';
+  let totSow = 0, totShift = 0, totDisp = 0, totFzBag = 0, totFzLoad = 0;
+  const tbl = function(head, rows, foot){
+    return '<table class="dj-t"><thead><tr>'+head.map(function(h){ return '<th'+(h.r?' class="r"':'')+'>'+(h.t||h)+'</th>'; }).join('')+'</tr></thead><tbody>'+
+      rows.join('')+(foot||'')+'</tbody></table>';
+  };
+  const sec = function(icon, title, color, body){ return '<div class="dj-sec"><div class="dj-h" style="background:'+color+';">'+icon+' '+title+'</div>'+body+'</div>'; };
+  const R = {t:'',r:1};
+
+  // 1. Morning Assignment
+  if(D.ma.length){
+    count += D.ma.length;
+    const rows = D.ma.map(function(r){
+      const names = splitNames(djV(r,4));
+      names.forEach(function(n){ addLab(n, '📋 '+djV(r,3)); });
+      return '<tr><td>'+djEsc(djV(r,2))+'</td><td><b>'+djEsc(djV(r,3))+'</b></td><td>'+djEsc(names.join(', '))+' <span class="dj-m">('+names.length+')</span></td></tr>';
+    });
+    secs += sec('📋','Morning Assignment','#e65100', tbl(['Area','Kaam','Labour'], rows));
+  }
+  // 2. Seed Sowing
+  if(D.seed.length){
+    count += D.seed.length;
+    let tp = 0, tt = 0, tk = 0;
+    const rows = D.seed.map(function(r){
+      const k = [djV(r,2),djV(r,4),djV(r,5),djV(r,6)].map(djKey).join('|');
+      const ls = D.seedLab.filter(function(l){ return [djV(l,2),djV(l,3),djV(l,4),djV(l,5)].map(djKey).join('|') === k; });
+      const lt = ls.map(function(l){
+        addLab(djV(l,6), '🌱 '+djV(r,5)+' '+djN(djV(l,7))+' pkt/'+djN(djV(l,8))+' tray');
+        return djEsc(djV(l,6))+' '+djN(djV(l,7))+'p/'+djN(djV(l,8))+'t';
+      }).join(', ');
+      tp += djN(djV(r,11)); tt += djN(djV(r,8)); tk += djN(djV(r,7));
+      return '<tr><td>'+djEsc(djV(r,2))+'</td><td><b>'+djEsc(djV(r,4))+'</b> – '+djEsc(djV(r,5))+(djV(r,6)?' <span class="dj-m">Lot '+djEsc(djV(r,6))+'</span>':'')+
+        (lt?'<div class="dj-l">👷 '+lt+'</div>':'')+'</td><td class="r">'+djN(djV(r,7))+'</td><td class="r">'+djFmt(djN(djV(r,8)))+'</td><td class="r"><b>'+djFmt(djN(djV(r,11)))+'</b></td></tr>';
+    });
+    totSow = tp;
+    secs += sec('🌱','Seed Sowing','#2e7d32', tbl(['Area','Crop – Variety',{t:'PKT',r:1},{t:'Tray',r:1},{t:'Plants',r:1}], rows,
+      '<tr class="dj-tot"><td colspan="2">TOTAL</td><td class="r">'+tk+'</td><td class="r">'+djFmt(tt)+'</td><td class="r">'+djFmt(tp)+'</td></tr>'));
+  }
+  // labour rows of W-S Labour by area+type
+  const wsLab = function(area, type){
+    return D.wsl.filter(function(l){ return djKey(djV(l,2))===djKey(area) && djKey(djV(l,3))===type; });
+  };
+  // 3. Watering
+  if(D.wat.length){
+    count += D.wat.length;
+    const done = {};
+    const rows = D.wat.map(function(r){
+      const area = djV(r,2), t1 = djTime(r,4), t2 = djTime(r,5);
+      let lt = '';
+      if(!done[djKey(area)]){
+        done[djKey(area)] = 1;
+        lt = wsLab(area,'water').map(function(l){ addLab(djV(l,4), '💧 Pani '+area); return djEsc(djV(l,4))+(djN(djV(l,5))?' '+djN(djV(l,5))+'h':''); }).join(', ');
+      }
+      return '<tr><td>'+djEsc(area)+'</td><td>'+djEsc(djV(r,6)||'—')+(djN(djV(r,7))?' · '+djFmt(djN(djV(r,7)))+' L':'')+(t1||t2?'<div class="dj-m">⏰ '+t1+(t2?' – '+t2:'')+'</div>':'')+
+        (lt?'<div class="dj-l">👷 '+lt+'</div>':'')+'</td></tr>';
+    });
+    secs += sec('💧','Watering','#1565c0', tbl(['Area','Kaam / Labour'], rows));
+  }
+  // 4. Spraying
+  if(D.spr.length || D.chem.length){
+    count += Math.max(D.spr.length, 1);
+    const areas = [];
+    D.spr.concat(D.chem).forEach(function(r){ const a = djV(r,2); if(areas.map(djKey).indexOf(djKey(a))===-1) areas.push(a); });
+    const rows = areas.map(function(a){
+      const ch = D.chem.filter(function(c){ return djKey(djV(c,2))===djKey(a); }).map(function(c){
+        const tgt = [djV(c,3), djV(c,4)].filter(Boolean).join(' – ');
+        return '<div>• <b>'+djEsc(djV(c,5))+'</b> '+(djN(djV(c,7))?djN(djV(c,7))+' '+djEsc(djV(c,8)):'')+' <span class="dj-m">('+djEsc(djV(c,6)||'Spray')+(tgt?' · '+djEsc(tgt):'')+')</span></div>';
+      }).join('');
+      const pumps = D.spr.filter(function(s){ return djKey(djV(s,2))===djKey(a); }).reduce(function(x,s){ return x + djN(djV(s,9)); }, 0);
+      const lt = wsLab(a,'spray').map(function(l){ addLab(djV(l,4), '🌿 Spray '+a); return djEsc(djV(l,4))+(djN(djV(l,6))?' '+djN(djV(l,6))+' pump':''); }).join(', ');
+      return '<tr><td>'+djEsc(a)+(pumps?'<div class="dj-m">'+pumps+' pump</div>':'')+'</td><td>'+(ch||'<span class="dj-m">—</span>')+(lt?'<div class="dj-l">👷 '+lt+'</div>':'')+'</td></tr>';
+    });
+    secs += sec('🌿','Spray / Drenching','#6a1b9a', tbl(['Area','Dawai / Labour'], rows));
+  }
+  // 5. Shifting
+  if(D.shf.length){
+    const g = {}, order = [];
+    D.shf.forEach(function(r){
+      const k = [djV(r,2),djV(r,3),djV(r,4)].map(djKey).join('|');
+      if(!g[k]){ g[k] = {r:r, l:[], t:0}; order.push(k); }
+      const tr = djN(djV(r,6));
+      g[k].l.push(djEsc(djV(r,5))+' '+tr); g[k].t += tr;
+      addLab(djV(r,5), '🔄 Shifting '+djV(r,4)+' '+tr+' tray');
+    });
+    count += order.length;
+    let tt = 0;
+    const rows = order.map(function(k){ const x = g[k], r = x.r; tt += x.t;
+      return '<tr><td>'+djEsc(djV(r,2))+'</td><td><b>'+djEsc(djV(r,3))+'</b> – '+djEsc(djV(r,4))+'<div class="dj-l">👷 '+x.l.join(', ')+'</div></td><td class="r"><b>'+djFmt(x.t)+'</b></td></tr>'; });
+    totShift = tt;
+    secs += sec('🔄','Shifting','#ef6c00', tbl(['Area','Crop – Variety / Labour',{t:'Tray',r:1}], rows,
+      '<tr class="dj-tot"><td colspan="2">TOTAL</td><td class="r">'+djFmt(tt)+'</td></tr>'));
+  }
+  // 6. Dispatch
+  if(D.dsp.length){
+    count += D.dsp.length;
+    let tp = 0;
+    const rows = D.dsp.map(function(r){
+      const t = djN(djV(r,12)); tp += t;
+      const car = djN(djV(r,9)), ppc = djN(djV(r,10)), dir = djN(djV(r,11));
+      return '<tr><td>'+djEsc(djV(r,3))+(djV(r,4)?'<div class="dj-m">'+djEsc(djV(r,4))+'</div>':'')+'</td><td><b>'+djEsc(djV(r,6))+'</b> – '+djEsc(djV(r,7))+
+        '<div class="dj-m">'+(car?car+' carret × '+ppc:'')+(dir?(car?' + ':'')+dir+' direct':'')+' · '+djEsc(djV(r,1))+'</div></td><td class="r"><b>'+djFmt(t)+'</b></td></tr>';
+    });
+    totDisp = tp;
+    secs += sec('🚚','Dispatch','#37474f', tbl(['Gaadi','Crop – Variety',{t:'Plants',r:1}], rows,
+      '<tr class="dj-tot"><td colspan="2">TOTAL</td><td class="r">'+djFmt(tp)+'</td></tr>'));
+  }
+  // 7-9. Faldar (sirf Bafalgaon)
+  if(D.fbs && D.fbs.length){
+    const g = {}, order = [];
+    D.fbs.forEach(function(r){
+      const k = [djV(r,2),djV(r,4),djV(r,5),djV(r,6)].map(djKey).join('|');
+      if(!g[k]){ g[k] = {r:r, l:[], t:0}; order.push(k); }
+      const q = djN(djV(r,8)); g[k].l.push(djEsc(djV(r,7))+' '+q); g[k].t += q;
+      addLab(djV(r,7), '🌳 Bag shifting '+djV(r,4)+' '+q);
+    });
+    count += order.length;
+    let tt = 0;
+    const rows = order.map(function(k){ const x = g[k], r = x.r; tt += x.t;
+      return '<tr><td>'+djEsc(djV(r,2))+'</td><td><b>'+djEsc(djV(r,4))+'</b> <span class="dj-m">'+djEsc(djV(r,3))+' · '+djEsc(djV(r,5))+' → '+djEsc(djV(r,6))+'</span><div class="dj-l">👷 '+x.l.join(', ')+'</div></td><td class="r"><b>'+djFmt(x.t)+'</b></td></tr>'; });
+    totFzBag = tt;
+    secs += sec('🌳','Faldar Bag Shifting','#9a5316', tbl(['Zone','Paudha / Labour',{t:'Bag',r:1}], rows,
+      '<tr class="dj-tot"><td colspan="2">TOTAL</td><td class="r">'+djFmt(tt)+'</td></tr>'));
+  }
+  if(D.fws && D.fws.length){
+    count += D.fws.length;
+    const rows = D.fws.map(function(r){
+      const names = splitNames(djV(r,7)); names.forEach(function(n){ addLab(n, '🌳 '+djV(r,3)); });
+      return '<tr><td>'+djEsc(djV(r,2))+'</td><td><b>'+djEsc(djV(r,3))+'</b> – '+djEsc(djV(r,5))+(djV(r,6)?'<div>🧪 '+djEsc(djV(r,6))+'</div>':'')+'<div class="dj-l">👷 '+djEsc(names.join(', '))+'</div></td></tr>';
+    });
+    secs += sec('🌳','Faldar Pani / Spray','#9a5316', tbl(['Zone','Kaam / Labour'], rows));
+  }
+  if(D.fld && D.fld.length){
+    count += D.fld.length;
+    let tt = 0;
+    const rows = D.fld.map(function(r){
+      const q = djN(djV(r,9)); tt += q;
+      const names = splitNames(djV(r,10)); names.forEach(function(n){ addLab(n, '🌳 Loading'); });
+      return '<tr><td>'+djEsc(djV(r,2))+'</td><td><b>'+djEsc(djV(r,7))+'</b>'+(djV(r,8)?' <span class="dj-m">'+djEsc(djV(r,8))+'</span>':'')+'<div class="dj-m">'+djEsc([djV(r,3),djV(r,4),djV(r,5)].filter(Boolean).join(' · '))+'</div><div class="dj-l">👷 '+djEsc(names.join(', '))+'</div></td><td class="r"><b>'+djFmt(q)+'</b></td></tr>';
+    });
+    totFzLoad = tt;
+    secs += sec('🌳','Faldar Loading','#9a5316', tbl(['Zone','Paudha / Party',{t:'Qty',r:1}], rows,
+      '<tr class="dj-tot"><td colspan="2">TOTAL</td><td class="r">'+djFmt(tt)+'</td></tr>'));
+  }
+  // Labour-wise
+  const ln = Object.keys(labs).sort();
+  if(ln.length){
+    const rows = ln.map(function(n, i){
+      const uniq = labs[n].filter(function(x, j, a){ return a.indexOf(x)===j; });
+      return '<tr><td class="r dj-m">'+(i+1)+'</td><td><b>'+djEsc(n)+'</b></td><td class="dj-sm">'+djEsc(uniq.join(' · '))+'</td></tr>';
+    });
+    secs += sec('👷','Labour-wise ('+ln.length+')','#455a64', tbl([{t:'#',r:1},'Labour','Kya kaam kiya'], rows));
+  }
+
+  const tiles = [];
+  if(totSow) tiles.push(['🌱', djFmt(totSow), 'Plants Sowing']);
+  if(totShift) tiles.push(['🔄', djFmt(totShift), 'Tray Shift']);
+  if(totDisp) tiles.push(['🚚', djFmt(totDisp), 'Plants Dispatch']);
+  if(totFzBag) tiles.push(['🌳', djFmt(totFzBag), 'Bag Shifting']);
+  if(totFzLoad) tiles.push(['🚛', djFmt(totFzLoad), 'Paudhe Load']);
+  tiles.push(['👷', ln.length, 'Labour']);
+  const titleEl = document.querySelector('#menuTitle span');
+  const nursery = titleEl ? titleEl.textContent : 'Tirupati Green House Nursery';
+  const d = new Date(date+'T00:00:00');
+  const dStr = d.toLocaleDateString('en-IN',{weekday:'long', day:'2-digit', month:'short', year:'numeric'});
+  const now = new Date();
+  const html =
+    '<div class="dj-card">'+
+      '<div class="dj-top"><div class="dj-n">🌱 '+djEsc(nursery)+'</div>'+
+        '<div class="dj-tt">Daily Work Report</div>'+
+        '<div class="dj-sub">👷 <b>'+djEsc(sup)+'</b> &nbsp;•&nbsp; 📅 '+djEsc(dStr)+'</div></div>'+
+      '<div class="dj-tiles">'+tiles.map(function(t){ return '<div class="dj-tile"><div class="dj-ti">'+t[0]+'</div><div class="dj-tv">'+t[1]+'</div><div class="dj-tl">'+t[2]+'</div></div>'; }).join('')+'</div>'+
+      secs+
+      '<div class="dj-foot">Bana: '+now.toLocaleDateString('en-IN')+' '+now.toTimeString().slice(0,5)+' &nbsp;•&nbsp; TGH Nursery App</div>'+
+    '</div>';
+  return {html:html, count:count};
 }
 
 </script>
