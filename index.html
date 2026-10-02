@@ -56,6 +56,7 @@ body{font-family:'Baloo 2',sans-serif;background:var(--gd);min-height:100vh;colo
 .sbadge.admin{background:rgba(255,215,0,0.2);color:#ffd700;}
 .sbadge.manager{background:rgba(66,165,245,0.2);color:#90caf9;}
 .sbadge.supervisor{background:rgba(76,175,120,0.2);color:var(--gg);}
+.sbadge.marketing{background:rgba(206,147,216,0.22);color:#f6dcff;}
 .logbtn{background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);
   border-radius:20px;padding:4px 12px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;}
 .backbtn{display:flex;align-items:center;gap:6px;color:var(--gg);background:rgba(255,255,255,0.08);
@@ -68,6 +69,7 @@ body{font-family:'Baloo 2',sans-serif;background:var(--gd);min-height:100vh;colo
 .role-banner.admin{background:linear-gradient(135deg,#f57f17,#f9a825);}
 .role-banner.manager{background:linear-gradient(135deg,var(--bm),var(--bl));}
 .role-banner.supervisor{background:linear-gradient(135deg,var(--gm),var(--gl));}
+.role-banner.marketing{background:linear-gradient(135deg,#6a1b9a,#8e24aa);}
 .role-banner .rico{font-size:32px;width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--gp),#d5efdf);flex-shrink:0;}
 .role-banner .rtext h3{font-size:17px;font-weight:800;color:white;}
 .role-banner .rtext p{font-size:11px;color:rgba(255,255,255,0.8);}
@@ -497,6 +499,94 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .dj-l{font-size:13.5px;color:#3d5449;margin-top:3px;}
 .dj-sm{font-size:13.5px;color:#3d5449;}
 .dj-foot{text-align:center;font-size:12px;color:#8a9a93;margin-top:14px;}
+
+/* ══════════ DESKTOP VIEW (laptop / computer — 1024px se badi screen) ══════════ */
+#deskSide{display:none;}
+@media (min-width:1024px){
+  body.has-side{background:#eef3f0;}
+  body.has-side .screen:not(#loginScreen){margin-left:264px;}
+  /* ── Sidebar ── */
+  body.has-side #deskSide{display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;width:264px;z-index:150;
+    background:linear-gradient(180deg,#0f2e20 0%,#173f2c 55%,#1d4d35 100%);color:#d7efe1;box-shadow:4px 0 24px rgba(10,35,24,0.18);}
+  .ds-brand{padding:20px 20px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,0.08);}
+  .ds-logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#4caf78,#2d7a4f);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 12px rgba(76,175,120,0.35);}
+  .ds-bt{font-size:17px;font-weight:800;color:white;line-height:1.1;}
+  .ds-bs{font-size:11.5px;color:#9fd0b4;font-weight:500;}
+  .ds-user{margin:14px 14px 6px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.07);display:flex;align-items:center;gap:10px;}
+  .ds-av{width:34px;height:34px;border-radius:50%;background:#a8e6c0;color:#123524;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0;}
+  .ds-un{font-size:13.5px;font-weight:700;color:white;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ds-ur{font-size:11px;color:#9fd0b4;}
+  .ds-nav{flex:1;overflow-y:auto;padding:6px 10px 10px;}
+  .ds-nav::-webkit-scrollbar{width:6px;}.ds-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:3px;}
+  .ds-sec{font-size:10.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#7fb897;margin:14px 10px 6px;}
+  .ds-it{display:flex;align-items:center;gap:11px;padding:8px 11px;border-radius:10px;cursor:pointer;font-size:13.5px;font-weight:600;color:#d7efe1;transition:background 0.15s,color 0.15s;margin-bottom:1px;}
+  .ds-it i{font-size:18px;width:20px;text-align:center;color:#8fd3ad;flex-shrink:0;}
+  .ds-it span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ds-it:hover{background:rgba(255,255,255,0.08);color:white;}
+  .ds-it.on{background:white;color:#14402b;box-shadow:0 4px 14px rgba(0,0,0,0.18);}
+  .ds-it.on i{color:#2d7a4f;}
+  .ds-foot{padding:12px 14px 16px;border-top:1px solid rgba(255,255,255,0.08);}
+  .ds-out{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,0.18);background:transparent;color:#ffd0cc;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;}
+  .ds-out:hover{background:rgba(229,57,53,0.18);}
+  /* ── Header ── */
+  body.has-side .hdr{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 32px;
+    background:linear-gradient(135deg,#1a4731,#2d7a4f);box-shadow:0 2px 14px rgba(10,35,24,0.15);}
+  body.has-side .htop{flex:1;min-width:0;}
+  body.has-side .htop h1{font-size:21px;}
+  body.has-side .htop h1 span{font-size:12.5px;}
+  body.has-side .hico{width:44px;height:44px;font-size:22px;}
+  body.has-side .sbar{margin-top:0;gap:10px;}
+  body.has-side .backbtn{display:none;}
+  body.has-side .sbadge{font-size:12px;padding:5px 12px;}
+  /* ── Page area ── */
+  body.has-side .wrap{max-width:1240px;padding:8px 32px 60px;}
+  body.has-side .mwrap{max-width:1240px;padding:22px 32px 60px;}
+  body.has-side .card{margin:18px 0 0;padding:20px 22px;border-radius:16px;}
+  body.has-side .sumcard{margin:18px 0 0;}
+  body.has-side .subbtn{width:100%;margin:18px 0 0;max-width:420px;margin-left:auto;display:flex;}
+  body.has-side label{font-size:11.5px;}
+  body.has-side input,body.has-side select,body.has-side textarea{font-size:14.5px;padding:10px 12px;}
+  /* Menu (home) — 4 column */
+  body.has-side .mgrid{grid-template-columns:repeat(4,1fr);gap:16px;}
+  body.has-side .mcard{padding:24px 16px 20px;}
+  body.has-side .role-banner{padding:20px 24px;}
+  /* Filter card: ek line me sab filter */
+  body.has-side .card.dk-filter{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 16px;align-items:end;}
+  body.has-side .card.dk-filter>.g2,body.has-side .card.dk-filter>.g3{display:contents;}
+  body.has-side .card.dk-filter>.ctitle{grid-column:1/-1;margin-bottom:0;}
+  body.has-side .card.dk-filter>.fr{margin:0;}
+  body.has-side .card.dk-filter>button{margin:0!important;height:44px;grid-column:span 1;}
+  body.has-side .card.dk-filter.dk-n5{grid-template-columns:repeat(5,minmax(0,1fr));}
+  /* Form card: 3 column */
+  body.has-side .card.dk-flat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 16px;align-items:end;}
+  body.has-side .card.dk-flat>.g2,body.has-side .card.dk-flat>.g3{display:contents;}
+  body.has-side .card.dk-flat>.ctitle{grid-column:1/-1;margin-bottom:0;}
+  body.has-side .card.dk-flat>.fr{margin:0;}
+  body.has-side .card.dk-filter input[style],body.has-side .card.dk-flat input[style]{padding:10px 12px!important;border:2px solid var(--g2)!important;border-radius:var(--rs)!important;}
+  /* Booking form: varieties 2 column */
+  body.has-side #bkLineCon{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px!important;}
+  body.has-side #bkLineCon>.card{margin:0;}
+  body.has-side #bookingScreen .wrap>button{max-width:320px;}
+  /* Dispatch / spray lines bhi 2 column */
+  body.has-side #dpLineCon{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px!important;}
+  body.has-side #dpLineCon>.card{margin:0;}
+  /* Booking report: cards grid */
+  body.has-side #bookingReportContent{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px;align-items:start;margin-top:18px;}
+  body.has-side #bookingReportContent>*{grid-column:1/-1;margin:0!important;}
+  body.has-side #bookingReportContent>.bk-card,body.has-side #bookingReportContent>.crop-card{grid-column:auto;}
+  body.has-side .rep-card:has(> .crop-card){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:start;}
+  body.has-side .rep-card:has(> .crop-card)>:not(.crop-card){grid-column:1/-1;}
+  body.has-side .rep-card:has(> .crop-card)>.crop-card{margin:0;}
+  body.has-side .bk-card:hover{box-shadow:0 6px 22px rgba(16,40,28,0.12);}
+  /* Daily JPG: preview chhoti */
+  body.has-side #djPreview{max-width:760px;margin:18px auto 0;}
+  /* Report tables thodi chaudi */
+  body.has-side .rep-card{border-radius:16px;}
+  /* Modals desktop par thode bade */
+  body.has-side #addPayModal>div,body.has-side #addVarModal>div,body.has-side #delivModal>div{max-width:520px!important;}
+  body.has-side #varDelivModal>div{max-width:640px!important;}
+  body.has-side .toast{left:calc(50% + 132px);}
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -1778,7 +1868,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261002-1715';
+const APP_VERSION = '20261002-1805';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -6388,6 +6478,98 @@ function djBuild(date, sup, D){
   tiles.push(['👷', ln.length, 'Labour']);
   return {html:djWrap('Daily Work Report', '👷', sup, date, tiles, secs), count:count};
 }
+
+
+// ════════════════════════════════════════════════════════════════
+// DESKTOP VIEW — sidebar menu (sirf badi screen par dikhta hai, mobile wahi rahega)
+// ════════════════════════════════════════════════════════════════
+function deskEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function deskVisible(el){ while(el && el !== document.body){ if(el.style && el.style.display === 'none') return false; el = el.parentElement; } return true; }
+function deskBuildSide(){
+  if(!curUser) return;
+  let side = document.getElementById('deskSide');
+  if(!side){ side = document.createElement('aside'); side.id = 'deskSide'; document.body.appendChild(side); }
+  const menu = ['supMenu','mgrMenu','adminMenu','marketingMenu'].map(function(id){ return document.getElementById(id); })
+    .filter(function(m){ return m && m.style.display !== 'none'; })[0];
+  const items = [];   // {sec, label, icon, card}
+  if(menu){
+    const seen = {};
+    menu.querySelectorAll('.mcard').forEach(function(card){
+      if(card.classList.contains('soon') || !card.getAttribute('onclick') || !deskVisible(card)) return;
+      const acc = card.closest('.msec-acc');
+      const sec = acc ? (acc.querySelector('.mh-left')||{}).textContent.trim() : '';
+      const label = ((card.querySelector('.ttl')||{}).textContent||'').trim();
+      const ic = card.querySelector('.ico i');
+      const key = sec+'|'+label;
+      if(!label || seen[key]) return; seen[key] = 1;
+      items.push({sec:sec, label:label, icon:ic ? ic.className : 'ti ti-point', card:card});
+    });
+  }
+  const titleEl = document.querySelector('#menuTitle span');
+  const role = curUser.role || '';
+  let h = '<div class="ds-brand"><div class="ds-logo">🌱</div><div><div class="ds-bt">TGH Nursery</div><div class="ds-bs">'+deskEsc(titleEl?titleEl.textContent.replace('Tirupati Green House Nursery, ',''):'')+'</div></div></div>'+
+    '<div class="ds-user"><div class="ds-av">'+deskEsc((curUser.name||'?').charAt(0).toUpperCase())+'</div><div style="min-width:0;"><div class="ds-un">'+deskEsc(curUser.name)+'</div><div class="ds-ur">'+deskEsc(role)+'</div></div></div>'+
+    '<div class="ds-nav"><div class="ds-it on" data-i="home"><i class="ti ti-home"></i><span>Home</span></div>';
+  let lastSec = null;
+  items.forEach(function(it, i){
+    if(it.sec !== lastSec){ if(it.sec) h += '<div class="ds-sec">'+deskEsc(it.sec)+'</div>'; lastSec = it.sec; }
+    h += '<div class="ds-it" data-i="'+i+'"><i class="'+deskEsc(it.icon)+'"></i><span>'+deskEsc(it.label)+'</span></div>';
+  });
+  h += '</div><div class="ds-foot"><button class="ds-out" onclick="doLogout()"><i class="ti ti-logout"></i> Logout</button></div>';
+  side.innerHTML = h;
+  side.querySelectorAll('.ds-it').forEach(function(el){
+    el.addEventListener('click', function(){
+      side.querySelectorAll('.ds-it.on').forEach(function(x){ x.classList.remove('on'); });
+      el.classList.add('on');
+      const i = el.getAttribute('data-i');
+      if(i === 'home'){ goMenu(); return; }
+      const it = items[+i]; if(it && it.card) it.card.click();
+    });
+  });
+  document.body.classList.add('has-side');
+}
+function deskTeardown(){
+  document.body.classList.remove('has-side');
+  const side = document.getElementById('deskSide'); if(side) side.innerHTML = '';
+}
+// Filter wale aur form wale cards ko desktop layout ke liye pehchaan lo (mobile par koi asar nahi)
+function deskTagCards(){
+  document.querySelectorAll('.screen .wrap > .card').forEach(function(card){
+    const kids = Array.prototype.slice.call(card.children);
+    const btn = kids.filter(function(k){ return k.tagName === 'BUTTON'; });
+    const isFilter = btn.length === 1 && /^load|Report|repBtn/i.test(btn[0].getAttribute('onclick')||'') &&
+                     /filter|🔍/i.test((card.querySelector('.ctitle')||{}).textContent||'');
+    const simple = kids.every(function(k){
+      return k.classList.contains('ctitle') || k.classList.contains('g2') || k.classList.contains('g3') || k.classList.contains('fr') ||
+             (k.tagName === 'INPUT' && k.type === 'hidden') || (isFilter && k.tagName === 'BUTTON');
+    });
+    if(!simple) return;
+    let fields = 0;
+    kids.forEach(function(k){
+      if(k.classList.contains('g2') || k.classList.contains('g3')) fields += k.children.length;
+      else if(k.classList.contains('fr')) fields += 1;
+    });
+    if(isFilter){
+      card.classList.add('dk-filter');
+      if((fields + 1) % 5 === 0 || fields + 1 === 5) card.classList.add('dk-n5');
+    } else if(fields >= 3){
+      card.classList.add('dk-flat');
+    }
+  });
+}
+(function(){
+  const _loginOk = loginOk;
+  loginOk = function(name, role){ _loginOk(name, role); try{ deskBuildSide(); }catch(e){} };
+  const _logout = doLogout;
+  doLogout = function(){ _logout(); if(!curUser) deskTeardown(); };
+  const _goMenu = goMenu;
+  goMenu = function(){
+    _goMenu();
+    const side = document.getElementById('deskSide');
+    if(side){ side.querySelectorAll('.ds-it.on').forEach(function(x){ x.classList.remove('on'); }); const hm = side.querySelector('[data-i="home"]'); if(hm) hm.classList.add('on'); }
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', deskTagCards); else deskTagCards();
+})();
 
 </script>
 
