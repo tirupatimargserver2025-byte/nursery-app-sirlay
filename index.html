@@ -1661,7 +1661,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
     <div style="font-size:13px;color:var(--g8);margin-bottom:12px;" id="avInfo"></div>
     <div class="g2">
       <div><label>🥬 Crop</label><input type="text" id="avCrop" list="cropList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;" onchange="avLoadVar()"></div>
-      <div><label>🌱 Variety</label><input type="text" id="avVar" list="varietyList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;"></div>
+      <div><label>🌱 Variety</label><input type="text" id="avVar" list="varietyList" placeholder="🔍 Pehle crop chuno..." onchange="cvVarCheck('avCrop','avVar')" style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;"></div>
     </div>
     <div class="g2">
       <div><label>🌿 Plant</label><input type="number" id="avPlant" placeholder="0" min="0"></div>
@@ -1708,7 +1708,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20260916-0818';
+const APP_VERSION = '20261002-1540';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -3550,15 +3550,7 @@ function resetSprayTargets(){
   const con = document.getElementById('spLineCon'); if(con){ con.innerHTML=''; spLineCnt=0; addSprayLine(); }
 }
 
-function loadShiftingVarieties(){
-  const crop = document.getElementById('shCrop').value;
-  const sel = document.getElementById('shVariety');
-  sel.innerHTML = '<option value="">-- Variety Chunein --</option>';
-  // Exactly like Seed Sowing: use VDATA
-  if(crop && VDATA[crop]){
-    VDATA[crop].forEach(v => sel.innerHTML += '<option>'+v+'</option>');
-  }
-}
+function loadShiftingVarieties(){ cvFilter('shCrop', 'shVariety'); }
 
 function loadShiftingLabour(){
   const date = document.getElementById('shDate').value;
@@ -3739,9 +3731,7 @@ function openShiftingReport(){
   show('shiftingReportScreen');
 }
 
-function loadShrVariety(){
-  // Datalist से suggestions आएँगी
-}
+function loadShrVariety(){ cvFilter('shrCrop', 'shrVariety'); }
 
 function loadShiftingReport(){
   const from = document.getElementById('shrFrom').value;
@@ -3910,10 +3900,7 @@ function removeDpLine(id){
 }
 
 function dpLoadVar(id){
-  const crop = document.getElementById('dp-crop-'+id).value;
-  const sel = document.getElementById('dp-var-'+id);
-  sel.innerHTML = '<option value="">-- Variety --</option>';
-  if(crop && VDATA[crop]){ VDATA[crop].forEach(v => sel.innerHTML += '<option>'+v+'</option>'); }
+  cvFilter('dp-crop-'+id, 'dp-var-'+id);
   dpValidate(id);
 }
 
@@ -4097,7 +4084,7 @@ function addBkLine(){
     '</div>' +
     '<div class="g2">' +
       '<div><label>🥬 Crop</label><input type="text" id="bk-crop-'+id+'" list="cropList" placeholder="🔍 Search crop..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;" onchange="bkLoadVar('+id+')"></div>' +
-      '<div><label>🌱 Variety</label><input type="text" id="bk-var-'+id+'" list="varietyList" placeholder="🔍 Search variety..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;"></div>' +
+      '<div><label>🌱 Variety</label><input type="text" id="bk-var-'+id+'" list="varietyList" placeholder="🔍 Pehle crop chuno..." onchange="bkVarCheck('+id+')" style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;"></div>' +
     '</div>' +
     '<div class="g2">' +
       '<div><label>🌿 Plant</label><input type="number" id="bk-plant-'+id+'" placeholder="0" min="0" oninput="bkCalcTotal()"></div>' +
@@ -4113,14 +4100,75 @@ function removeBkLine(id){
   if(document.getElementById('bkLineCon').children.length === 0) addBkLine();
 }
 
-function bkLoadVar(id){
-  const crop = document.getElementById('bk-crop-'+id).value;
-  const sel = document.getElementById('bk-var-'+id);
-  sel.innerHTML = '<option value="">-- Variety --</option>';
-  if(crop && VDATA[crop]){
-    VDATA[crop].forEach(v => sel.innerHTML += '<option>'+v+'</option>');
-  }
+// ══ CROP -> VARIETY: har variety box me sirf us crop ki variety ══
+function cvNorm(s){ return String(s||'').replace(/[^\p{L}\p{M}\p{N}]+/gu,' ').trim().toLowerCase(); }
+function cvFindCrop(v){
+  v = String(v||'').trim(); if(!v) return '';
+  if(VDATA[v]) return v;
+  var n = cvNorm(v), ks = Object.keys(VDATA);
+  for(var i=0;i<ks.length;i++){ if(cvNorm(ks[i])===n) return ks[i]; }
+  return '';
 }
+function cvFindVar(crop, v){
+  v = String(v||'').trim(); var arr = VDATA[crop]||[]; if(!v) return '';
+  if(arr.indexOf(v)>-1) return v;
+  var n = cvNorm(v);
+  for(var i=0;i<arr.length;i++){ if(cvNorm(arr[i])===n) return arr[i]; }
+  return '';
+}
+function cvEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+// Variety box ko apni alag list do — crop chuna ho to sirf usi ki variety
+function cvFilter(cropId, varId){
+  var ci = document.getElementById(cropId), vi = document.getElementById(varId);
+  if(!ci || !vi) return;
+  var crop = cvFindCrop(ci.value), list = [];
+  if(crop){ list = VDATA[crop].slice(); }
+  else { Object.keys(VDATA).forEach(function(k){ VDATA[k].forEach(function(v){ if(list.indexOf(v)===-1) list.push(v); }); }); }
+  var dlId = 'cvdl-'+varId, dl = document.getElementById(dlId);
+  if(!dl){ dl = document.createElement('datalist'); dl.id = dlId; document.body.appendChild(dl); }
+  dl.innerHTML = list.map(function(v){ return '<option value="'+cvEsc(v)+'">'; }).join('');
+  vi.setAttribute('list', dlId);
+  // pehle se bhari variety is crop ki nahi hai to hata do
+  if(crop && vi.value && !cvFindVar(crop, vi.value)) vi.value = '';
+}
+// LOCK: crop list me nahi to hata do (booking ke liye)
+function cvCropCheck(cropId, varId){
+  var ci = document.getElementById(cropId); if(!ci) return;
+  var t = ci.value.trim();
+  if(t){
+    var c = cvFindCrop(t);
+    if(c){ ci.value = c; ci.style.borderColor = ''; }
+    else {
+      toast(Object.keys(VDATA).length ? '❌ "'+t+'" crop list me nahi hai — Manager se Variety Master me add karwao' : '⚠️ Crop list load nahi hui — app refresh karo','error');
+      ci.value = ''; ci.style.borderColor = 'var(--rd)';
+      var vx = document.getElementById(varId); if(vx) vx.value = '';
+    }
+  }
+  cvFilter(cropId, varId);
+}
+function cvVarCheck(cropId, varId){
+  var ci = document.getElementById(cropId), vi = document.getElementById(varId); if(!ci || !vi) return;
+  var t = vi.value.trim(); if(!t){ vi.style.borderColor=''; return; }
+  var crop = cvFindCrop(ci.value);
+  if(!crop){ toast('❗ Pehle list se Crop chuno','error'); vi.value=''; vi.style.borderColor='var(--rd)'; return; }
+  var v = cvFindVar(crop, t);
+  if(v){ vi.value = v; vi.style.borderColor = ''; }
+  else { toast('❌ "'+t+'" '+crop+' ki variety list me nahi hai — Manager se Variety Master me add karwao','error'); vi.value=''; vi.style.borderColor='var(--rd)'; }
+}
+// Save se pehle pakka check — galat ho to error message, sahi ho to '' (aur value list jaisi kar deta hai)
+function cvLock(cropId, varId){
+  var ci = document.getElementById(cropId), vi = document.getElementById(varId);
+  var ct = (ci&&ci.value||'').trim(), vt = (vi&&vi.value||'').trim();
+  if(!Object.keys(VDATA).length) return 'Crop/Variety list load nahi hui — internet check karke app refresh karo';
+  var crop = cvFindCrop(ct);
+  if(!crop) return '"'+ct+'" crop list me nahi hai — Manager se Variety Master me add karwao';
+  var v = cvFindVar(crop, vt);
+  if(!v) return '"'+vt+'" '+crop+' ki variety list me nahi hai — Manager se Variety Master me add karwao';
+  ci.value = crop; vi.value = v; return '';
+}
+function bkVarCheck(id){ cvVarCheck('bk-crop-'+id, 'bk-var-'+id); }
+
+function bkLoadVar(id){ cvCropCheck('bk-crop-'+id, 'bk-var-'+id); }
 
 function submitBooking(){
   if(isSaving){ return; }
@@ -4157,10 +4205,12 @@ function submitBooking(){
     if(empty) return;
 
     if(!crop || !variety){ errMsg = 'Har line mein Crop aur Variety chuno!'; return; }
+    const lockErr = cvLock('bk-crop-'+id, 'bk-var-'+id);
+    if(lockErr){ errMsg = lockErr; return; }
     if(plant === 0){ errMsg = variety+': Plant zaroori hai!'; return; }
     if(!deliveryDate){ errMsg = variety+': Delivery date zaroori hai!'; return; }
 
-    collected.push({crop, variety, plant, rate, deliveryDate});
+    collected.push({crop: document.getElementById('bk-crop-'+id).value, variety: document.getElementById('bk-var-'+id).value, plant, rate, deliveryDate});
   });
 
   if(errMsg){ toast('❗ '+errMsg, 'error'); return; }
@@ -4755,9 +4805,7 @@ function openBookingReport(){
   show('bookingReportScreen');
 }
 
-function loadBrVariety(){
-  // Datalist से suggestions आएँगी
-}
+function loadBrVariety(){ cvFilter('brCrop', 'brVariety'); }
 
 function loadBookingReport(){
   const from = document.getElementById('brFrom').value;
@@ -5318,20 +5366,18 @@ function openAddVar(bid){
   document.getElementById('addVarModal').style.display = 'flex';
 }
 function closeAddVar(){ document.getElementById('addVarModal').style.display = 'none'; }
-function avLoadVar(){
-  const crop = document.getElementById('avCrop').value;
-  const sel = document.getElementById('avVar');
-  sel.innerHTML = '<option value="">-- Variety --</option>';
-  if(crop && VDATA[crop]){ VDATA[crop].forEach(v => sel.innerHTML += '<option>'+v+'</option>'); }
-}
+function avLoadVar(){ cvCropCheck('avCrop', 'avVar'); }
 function submitAddVariety(){
   if(isSaving){ return; }
-  const crop = document.getElementById('avCrop').value;
-  const variety = document.getElementById('avVar').value;
+  let crop = document.getElementById('avCrop').value;
+  let variety = document.getElementById('avVar').value;
   const plant = parseInt(document.getElementById('avPlant').value) || 0;
   const rate = parseFloat(document.getElementById('avRate').value) || 0;
   const deliv = document.getElementById('avDeliv').value;
   if(!crop || !variety){ toast('❗ Crop aur Variety chuno!', 'error'); return; }
+  const lockErr = cvLock('avCrop','avVar');
+  if(lockErr){ toast('❗ '+lockErr, 'error'); return; }
+  crop = document.getElementById('avCrop').value; variety = document.getElementById('avVar').value;
   if(plant === 0){ toast('❗ Plant daalo!', 'error'); return; }
   if(!deliv){ toast('❗ Delivery date daalo!', 'error'); return; }
 
@@ -5614,9 +5660,7 @@ function openVarietyReport(){
   show('varietyReportScreen');
 }
 
-function loadVrVariety(){
-  // Datalist से suggestions आएँगी
-}
+function loadVrVariety(){ cvFilter('vrCrop', 'vrVariety'); }
 
 function loadVarietyReport(){
   const cropF = document.getElementById('vrCrop').value;
@@ -5748,9 +5792,7 @@ function openDispatchReport(){
   show('dispatchReportScreen');
 }
 
-function loadDrVariety(){
-  // Datalist से suggestions आएँगी
-}
+function loadDrVariety(){ cvFilter('drCrop', 'drVariety'); }
 
 function loadDispatchReport(){
   const from = document.getElementById('drFrom').value;
