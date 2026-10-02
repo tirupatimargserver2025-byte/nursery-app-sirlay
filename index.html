@@ -726,10 +726,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div class="dsc" style="color:rgba(255,255,255,0.85);">Sari report ek hi jagah — tabs me jaaye bina</div>
         </div>
       </div>
-      <div class="msec-acc" data-open="1"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-clipboard-list"></i>Booking</div><div class="mh-right"><span class="msec-count">1</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
+      <div class="msec-acc" data-open="1"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-clipboard-list"></i>Booking</div><div class="mh-right"><span class="msec-count">2</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard entry" onclick="openBookingForm()">
           <div class="ico"><i class="ti ti-edit"></i></div><div class="ttl">Nayi Booking</div>
           <div class="dsc">Farmer booking + PDF</div>
+        </div>
+        <div class="mcard report" onclick="openDailyJpg()">
+          <div class="ico"><i class="ti ti-brand-whatsapp"></i></div><div class="ttl">Daily Report JPG</div>
+          <div class="dsc">Aaj ki booking — WhatsApp par</div>
         </div>
       </div></div></div>
       <div class="msec-acc" data-open="0"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-clipboard-list"></i>Reports</div><div class="mh-right"><span class="msec-count">10</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
@@ -1772,7 +1776,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261002-1705';
+const APP_VERSION = '20261002-1710';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -6009,14 +6013,18 @@ function djF(r, i){ var c = r.c && r.c[i]; if(!c) return ''; if(c.f!=null && c.f
 function djTime(r, i){ var s = String(djF(r,i)); var m = s.match(/(\d{1,2}):(\d{2})/); return m ? (m[1].padStart(2,'0')+':'+m[2]) : ''; }
 
 function openDailyJpg(){
-  const isSup = curUser && curUser.role === 'Supervisor';
+  const isSup = curUser && (curUser.role === 'Supervisor' || curUser.role === 'Marketing');
   document.getElementById('djDate').value = localISO(new Date());
   const sel = document.getElementById('djSup');
-  sel.innerHTML = '<option value="">-- Supervisor chuno --</option>';
-  Object.keys(SUP_DATA).filter(function(n){ return SUP_DATA[n] && SUP_DATA[n].role==='Supervisor'; })
-    .forEach(function(n){ sel.innerHTML += '<option value="'+djEsc(n)+'">'+djEsc(n)+'</option>'; });
+  sel.innerHTML = '<option value="">-- Naam chuno --</option>';
+  ['Supervisor','Marketing'].forEach(function(role){
+    const names = Object.keys(SUP_DATA).filter(function(n){ return SUP_DATA[n] && SUP_DATA[n].role===role; });
+    if(!names.length) return;
+    sel.innerHTML += '<optgroup label="'+(role==='Marketing'?'📣 Marketing':'👷 Supervisor')+'">'+
+      names.map(function(n){ return '<option value="'+djEsc(n)+'">'+djEsc(n)+'</option>'; }).join('')+'</optgroup>';
+  });
   document.getElementById('djSupRow').style.display = isSup ? 'none' : 'block';
-  document.getElementById('djSupShow').textContent = isSup ? ('👷 '+curUser.name) : '';
+  document.getElementById('djSupShow').textContent = isSup ? ((curUser.role==='Marketing'?'📣 ':'👷 ')+curUser.name) : '';
   document.getElementById('djStatus').innerHTML = '';
   document.getElementById('djPreview').style.display = 'none';
   DJ_BLOB = null;
@@ -6039,13 +6047,28 @@ const DJ_FZ_SHEETS = [['fbs','F-Bag Shifting',1], ['fws','F-Watering Spraying',1
 
 function djMake(){
   const date = document.getElementById('djDate').value;
-  const isSup = curUser && curUser.role === 'Supervisor';
+  const isSup = curUser && (curUser.role === 'Supervisor' || curUser.role === 'Marketing');
   const sup = isSup ? curUser.name : document.getElementById('djSup').value;
   if(!date){ toast('❗ Date chuno','error'); return; }
-  if(!sup){ toast('❗ Supervisor chuno','error'); return; }
+  if(!sup){ toast('❗ Naam chuno','error'); return; }
   const st = document.getElementById('djStatus');
   st.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--g5);">⏳ Entries jod rahe hain...</div>';
   document.getElementById('djPreview').style.display = 'none';
+  // Marketing wale ki report = Booking Data se
+  if(SUP_DATA[sup] && SUP_DATA[sup].role === 'Marketing'){
+    djFetch('Booking Data').then(function(rows){
+      const m = djBuildMkt(date, sup, rows);
+      if(!m.count){
+        st.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--g5);">📭 '+djEsc(sup)+' ki '+djEsc(formatDate(date))+' ko koi booking / payment / delivery nahi mili</div>';
+        return;
+      }
+      const stage = document.getElementById('djStage');
+      stage.innerHTML = djWrap(m.title, m.who, sup, date, m.tiles, m.secs);
+      st.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--g5);">🖼️ Image ban rahi hai...</div>';
+      djRender(stage, date, sup);
+    });
+    return;
+  }
   const list = DJ_SHEETS.concat(typeof FZ_SHEETS !== 'undefined' ? DJ_FZ_SHEETS : []);
   Promise.all(list.map(function(s){ return djFetch(s[1]); })).then(function(arr){
     const D = {};
@@ -6103,6 +6126,96 @@ function djDownload(){
   a.href = URL.createObjectURL(DJ_BLOB); a.download = DJ_NAME;
   document.body.appendChild(a); a.click();
   setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+
+// ── Image ka bahari dhaancha (header + tiles + footer) ──
+function djWrap(title, icon, who, date, tiles, secs){
+  const titleEl = document.querySelector('#menuTitle span');
+  const nursery = titleEl ? titleEl.textContent : 'Tirupati Green House Nursery';
+  const d = new Date(date+'T00:00:00');
+  const dStr = d.toLocaleDateString('en-IN',{weekday:'long', day:'2-digit', month:'short', year:'numeric'});
+  const now = new Date();
+  return '<div class="dj-card">'+
+      '<div class="dj-top"><div class="dj-n">🌱 '+djEsc(nursery)+'</div>'+
+        '<div class="dj-tt">'+djEsc(title)+'</div>'+
+        '<div class="dj-sub">'+icon+' <b>'+djEsc(who)+'</b> &nbsp;•&nbsp; 📅 '+djEsc(dStr)+'</div></div>'+
+      '<div class="dj-tiles">'+tiles.map(function(t){ return '<div class="dj-tile"><div class="dj-ti">'+t[0]+'</div><div class="dj-tv">'+t[1]+'</div><div class="dj-tl">'+t[2]+'</div></div>'; }).join('')+'</div>'+
+      secs+
+      '<div class="dj-foot">Bana: '+now.toLocaleDateString('en-IN')+' '+now.toTimeString().slice(0,5)+' &nbsp;•&nbsp; TGH Nursery App</div>'+
+    '</div>';
+}
+
+// ── Marketing ki Daily Report (Booking Data se) ──
+// Booking Data: 0 Date,1 Farmer,2 Village,3 Tehsil,4 District,5 Mobile,6 Crop,7 Variety,8 Plant,9 Rate,10 Delivery Date,
+// 11 First Pay,12 First Mode,13 First Bank,14 First Date,15 Second Pay,16 Second Mode,17 Second Bank,18 Second Date,
+// 19 Total Received,20 Remarks,21 Status,22 Delivered Date,23 Booking ID,24 Marketing,25 Delivered Plant
+function djBuildMkt(date, person, all){
+  const mine = all.filter(function(r){ return djKey(djV(r,24)) === djKey(person); });
+  const groups = {}, order = [];
+  mine.forEach(function(r){
+    const bid = String(djV(r,23) || ('row'+order.length));
+    if(!groups[bid]){ groups[bid] = []; order.push(bid); }
+    groups[bid].push(r);
+  });
+  const R = function(n){ return '₹'+djFmt(n); };
+  let secs = '', count = 0, totPlants = 0, totValue = 0, totRecv = 0;
+  const tbl = function(head, rows, foot){
+    return '<table class="dj-t"><thead><tr>'+head.map(function(h){ return '<th'+(h.r?' class="r"':'')+'>'+(h.t||h)+'</th>'; }).join('')+'</tr></thead><tbody>'+rows.join('')+(foot||'')+'</tbody></table>';
+  };
+  const sec = function(icon, title, color, body){ return '<div class="dj-sec"><div class="dj-h" style="background:'+color+';">'+icon+' '+title+'</div>'+body+'</div>'; };
+  const farmerCell = function(f){ return '<b>'+djEsc(djV(f,1))+'</b><div class="dj-m">'+djEsc([djV(f,2),djV(f,3)].filter(Boolean).join(', '))+(djV(f,5)?' · 📞 '+djEsc(djV(f,5)):'')+'</div>'; };
+
+  // 1. Aaj ki nayi bookings
+  const newB = order.filter(function(b){ return djISO(djV(groups[b][0],0)) === date; });
+  if(newB.length){
+    count += newB.length;
+    let bp = 0, bv = 0, br = 0;
+    const rows = newB.map(function(b){
+      const rs = groups[b], f = rs[0];
+      const lines = rs.map(function(r){
+        const pl = djN(djV(r,8)), rt = djN(djV(r,9));
+        bp += pl; bv += pl*rt;
+        return '<div>• <b>'+djEsc(djV(r,6))+'</b> – '+djEsc(djV(r,7))+' <span class="dj-m">'+djFmt(pl)+' × ₹'+rt+(djV(r,10)?' · 🚚 '+djEsc(formatDate(djISO(djV(r,10)))):'')+'</span></div>';
+      }).join('');
+      const adv = djN(djV(f,11)); br += adv;
+      return '<tr><td>'+farmerCell(f)+'<div class="dj-m">'+djEsc(b)+'</div></td><td>'+lines+'</td><td class="r"><b>'+R(adv)+'</b>'+(djV(f,12)?'<div class="dj-m">'+djEsc(djV(f,12))+'</div>':'')+'</td></tr>';
+    });
+    totPlants += bp; totValue += bv;
+    secs += sec('📝','Nayi Booking ('+newB.length+')','#1565c0', tbl(['Kisan','Crop – Variety / Plant × Rate',{t:'Advance',r:1}], rows,
+      '<tr class="dj-tot"><td>TOTAL</td><td>'+djFmt(bp)+' plant · Order '+R(bv)+'</td><td class="r">'+R(br)+'</td></tr>'));
+  }
+  // 2. Aaj aaya paisa (pehle ki bookings ka bhi)
+  const pay = [];
+  order.forEach(function(b){
+    const f = groups[b][0];
+    const d1 = djISO(djV(f,14)) || djISO(djV(f,0));
+    if(d1 === date && djN(djV(f,11))) pay.push([f, b, '1st', djN(djV(f,11)), djV(f,12)]);
+    if(djISO(djV(f,18)) === date && djN(djV(f,15))) pay.push([f, b, '2nd', djN(djV(f,15)), djV(f,16)]);
+  });
+  if(pay.length){
+    count += pay.length;
+    let t = 0;
+    const rows = pay.map(function(p){ t += p[3];
+      return '<tr><td>'+farmerCell(p[0])+'<div class="dj-m">'+djEsc(p[1])+'</div></td><td>'+p[2]+' Payment<div class="dj-m">'+djEsc(p[4]||'')+'</div></td><td class="r"><b>'+R(p[3])+'</b></td></tr>'; });
+    totRecv = t;
+    secs += sec('💰','Aaj Aaya Payment','#2e7d32', tbl(['Kisan','Kaunsa',{t:'Rakam',r:1}], rows,
+      '<tr class="dj-tot"><td colspan="2">TOTAL</td><td class="r">'+R(t)+'</td></tr>'));
+  }
+  // 3. Aaj delivery (meri bookings ki)
+  const dl = [];
+  order.forEach(function(b){ groups[b].forEach(function(r){
+    if(djISO(djV(r,22)) === date || String(djV(r,26)||'').indexOf(date) > -1) dl.push([r, b]);
+  }); });
+  if(dl.length){
+    count += dl.length;
+    let t = 0;
+    const rows = dl.map(function(x){ const r = x[0]; const q = djN(djV(r,25)) || djN(djV(r,8)); t += q;
+      return '<tr><td>'+farmerCell(r)+'</td><td><b>'+djEsc(djV(r,6))+'</b> – '+djEsc(djV(r,7))+'<div class="dj-m">'+djEsc(djV(r,21)||'')+'</div></td><td class="r"><b>'+djFmt(q)+'</b></td></tr>'; });
+    secs += sec('🚚','Aaj Delivery','#ef6c00', tbl(['Kisan','Crop – Variety',{t:'Plant',r:1}], rows,
+      '<tr class="dj-tot"><td colspan="2">TOTAL</td><td class="r">'+djFmt(t)+'</td></tr>'));
+  }
+  const tiles = [['📝', newB.length, 'Nayi Booking'], ['🌱', djFmt(totPlants), 'Plant Book'], ['💰', R(totRecv), 'Aaj Aaya Paisa']];
+  return {count:count, secs:secs, tiles:tiles, title:'Daily Booking Report', who:'📣'};
 }
 
 // ── Image ka HTML ──
@@ -6270,21 +6383,7 @@ function djBuild(date, sup, D){
   if(totFzBag) tiles.push(['🌳', djFmt(totFzBag), 'Bag Shifting']);
   if(totFzLoad) tiles.push(['🚛', djFmt(totFzLoad), 'Paudhe Load']);
   tiles.push(['👷', ln.length, 'Labour']);
-  const titleEl = document.querySelector('#menuTitle span');
-  const nursery = titleEl ? titleEl.textContent : 'Tirupati Green House Nursery';
-  const d = new Date(date+'T00:00:00');
-  const dStr = d.toLocaleDateString('en-IN',{weekday:'long', day:'2-digit', month:'short', year:'numeric'});
-  const now = new Date();
-  const html =
-    '<div class="dj-card">'+
-      '<div class="dj-top"><div class="dj-n">🌱 '+djEsc(nursery)+'</div>'+
-        '<div class="dj-tt">Daily Work Report</div>'+
-        '<div class="dj-sub">👷 <b>'+djEsc(sup)+'</b> &nbsp;•&nbsp; 📅 '+djEsc(dStr)+'</div></div>'+
-      '<div class="dj-tiles">'+tiles.map(function(t){ return '<div class="dj-tile"><div class="dj-ti">'+t[0]+'</div><div class="dj-tv">'+t[1]+'</div><div class="dj-tl">'+t[2]+'</div></div>'; }).join('')+'</div>'+
-      secs+
-      '<div class="dj-foot">Bana: '+now.toLocaleDateString('en-IN')+' '+now.toTimeString().slice(0,5)+' &nbsp;•&nbsp; TGH Nursery App</div>'+
-    '</div>';
-  return {html:html, count:count};
+  return {html:djWrap('Daily Work Report', '👷', sup, date, tiles, secs), count:count};
 }
 
 </script>
