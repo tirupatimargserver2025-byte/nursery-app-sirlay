@@ -606,6 +606,59 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   body.has-side #varDelivModal>div{max-width:640px!important;}
   body.has-side .toast{left:calc(50% + 132px);}
 }
+
+/* ══ COMMAND CENTER DASHBOARD ══ */
+.db-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.db-chip{padding:7px 14px;border-radius:20px;border:1.5px solid var(--g2);background:white;font-family:inherit;font-size:13px;font-weight:700;color:#3d5449;cursor:pointer;}
+.db-chip.on{background:var(--gm);border-color:var(--gm);color:white;}
+.db-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.db-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 10px 4px;}
+.db-tile{background:white;border-radius:14px;padding:12px 12px 10px;cursor:pointer;border-left:4px solid var(--tc);box-shadow:0 2px 10px rgba(16,40,28,0.08);transition:transform .15s;}
+.db-tile:hover{transform:translateY(-2px);}
+.db-ti{font-size:18px;}
+.db-tv{font-size:20px;font-weight:900;color:var(--tc);line-height:1.15;margin-top:2px;}
+.db-tl{font-size:11.5px;font-weight:800;color:#3d5449;text-transform:uppercase;letter-spacing:.3px;}
+.db-ts{font-size:11.5px;color:#6b7c75;margin-top:1px;}
+.dbn{background:white;border-radius:12px;margin:8px 0 0;border:1px solid #e3ece7;overflow:hidden;}
+.dbn-sec{margin:12px 10px 0;border-radius:16px;box-shadow:0 2px 12px rgba(16,40,28,0.08);}
+.dbn-h{display:flex;align-items:center;gap:10px;padding:11px 13px;cursor:pointer;user-select:none;}
+.dbn-h:hover{background:#f6faf7;}
+.dbn-sec>.dbn-h{padding:14px 15px;}
+.dbn-ic{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.dbn-l{flex:1;min-width:0;}
+.dbn-t{font-weight:800;color:#1a2e26;font-size:14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.dbn-sec>.dbn-h .dbn-t{font-size:15.5px;}
+.dbn-s{font-size:12px;color:#5f7068;font-weight:500;margin-top:1px;}
+.dbn-v{font-weight:900;color:var(--gd);font-size:15px;text-align:right;white-space:nowrap;}
+.dbn-v small{font-size:11px;font-weight:600;color:#6b7c75;}
+.dbn-mini{font-size:12px;font-weight:700;}
+.dbn-c{color:#2d7a4f;font-size:18px;transition:transform .2s;flex-shrink:0;}
+.dbn[data-open="1"]>.dbn-h .dbn-c{transform:rotate(180deg);}
+.dbn-b{display:none;padding:0 10px 10px;}
+.dbn[data-open="1"]>.dbn-b{display:block;}
+.dbn[data-open="1"]>.dbn-h{border-bottom:1px solid #eef3f0;}
+.dbn .dbn{background:#fbfdfc;}
+.dbn .dbn .dbn{background:#f5faf7;}
+.dbn .dbn .dbn .dbn{background:#eef6f1;}
+.dbn-leaf>.dbn-b{padding-top:8px;}
+.dbt-w{overflow-x:auto;margin-top:6px;}
+.dbt{width:100%;border-collapse:collapse;font-size:12.5px;background:white;border-radius:8px;overflow:hidden;}
+.dbt th{background:#eef6f1;color:#3d5449;font-size:11px;font-weight:800;text-transform:uppercase;text-align:left;padding:7px 9px;white-space:nowrap;}
+.dbt td{padding:7px 9px;border-top:1px solid #eef3f0;vertical-align:top;}
+.dbt .r{text-align:right;}
+.dbt-tot td{background:#e3f5ea;color:#1a5c34;font-weight:800;}
+.dbt-s{font-size:11px;color:#6b7c75;}
+.dbt-empty{color:#8a9a93;text-align:center;}
+.dbn-info{font-size:12.5px;color:#3d5449;margin-top:8px;}
+.dbn-note{font-size:12px;color:#5f7068;margin-top:6px;}
+.dbn-acts{display:flex;gap:8px;margin-top:10px;}
+.dbn-acts .bk-abtn{flex:0 0 auto;padding:8px 16px;}
+@media (min-width:1024px){
+  body.has-side #dashScreen .db-tiles{grid-template-columns:repeat(7,minmax(0,1fr));margin:18px 0 6px;gap:12px;}
+  body.has-side #dashScreen .dbn-sec{margin:14px 0 0;}
+  body.has-side #dashScreen .db-row{grid-template-columns:repeat(4,minmax(0,1fr));align-items:end;}
+  body.has-side .dbt{font-size:13px;}
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -1098,21 +1151,29 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 <div class="screen" id="dashScreen">
   <div class="hdr">
     <div class="htop"><div class="hico" style="background:var(--pu);">📊</div>
-      <h1>Dashboard <span>Sari Report Ek Jagah</span></h1></div>
+      <h1>Dashboard <span>Sab kuch ek jagah — har cheez kholkar dekho</span></h1></div>
     <div class="sbar">
       <button class="backbtn" onclick="goMenu()">← Menu</button>
       <div class="dbadge" id="dashSupB"></div></div>
   </div>
   <div class="wrap">
     <div class="card">
-      <div class="ctitle">📅 Date Filter</div>
-      <div class="g2">
-        <div><label>From Date</label><input type="date" id="dashFrom"></div>
-        <div><label>To Date</label><input type="date" id="dashTo"></div>
+      <div class="db-bar">
+        <button class="db-chip" data-k="today" onclick="dbRange('today')">Aaj</button>
+        <button class="db-chip" data-k="yest" onclick="dbRange('yest')">Kal</button>
+        <button class="db-chip" data-k="7" onclick="dbRange('7')">7 Din</button>
+        <button class="db-chip" data-k="month" onclick="dbRange('month')">Ye Mahina</button>
+        <button class="db-chip" data-k="30" onclick="dbRange('30')">30 Din</button>
+        <button class="db-chip" onclick="dbExpandAll(true)" style="margin-left:auto;">⊕ Sab kholo</button>
+        <button class="db-chip" onclick="dbExpandAll(false)">⊖ Band</button>
       </div>
-      <div style="margin-top:8px;"><label>🔍 Search (kisi bhi report me)</label>
-        <input type="text" id="dashSearch" placeholder="Farmer, village, crop, labour..." oninput="dashFilterSearch()" style="width:100%;padding:10px;border:1px solid var(--g2);border-radius:8px;font-size:14px;"></div>
-      <button onclick="loadDashboard()" style="width:100%;padding:12px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;">🔄 Dashboard Load Karo</button>
+      <div class="db-row">
+        <div><label>📅 From</label><input type="date" id="dashFrom" onchange="dbRange('custom')"></div>
+        <div><label>📅 To</label><input type="date" id="dashTo" onchange="dbRange('custom')"></div>
+        <div id="dashSupWrap"><label>👷 Supervisor</label><select id="dashSup" onchange="dbRender()"></select></div>
+        <div><label>🔍 Search</label><input type="text" id="dashSearch" placeholder="Kisan, gaon, crop, labour..." oninput="dashFilterSearch()"></div>
+      </div>
+      <button onclick="loadDashboard()" style="width:100%;padding:10px;margin-top:10px;background:var(--gm);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">🔄 Naya Data Lao</button>
     </div>
     <div id="dashContent"></div>
   </div>
@@ -1887,7 +1948,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261002-1830';
+const APP_VERSION = '20261002-1930';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -4670,19 +4731,6 @@ function generateBookingPDF(d){
 
 // ─────── BOOKING REPORT ───────
 // ════════════════════════ BOSS DASHBOARD ════════════════════════
-function openDashboard(){
-  const from = new Date(); from.setDate(from.getDate()-30);
-  document.getElementById('dashFrom').valueAsDate = from;
-  document.getElementById('dashTo').valueAsDate = new Date();
-  document.getElementById('dashSearch').value = '';
-  const isSup = (curUser.role === 'Supervisor');
-  document.getElementById('dashSupB').textContent =
-    (isSup?'👷':curUser.role==='Manager'?'👔':curUser.role==='Marketing'?'📣':'👑')+' '+curUser.name;
-  document.getElementById('dashContent').innerHTML = '';
-  show('dashScreen');
-  loadDashboard();
-}
-
 // gviz parse helper
 function dashParse(txt){
   try{
@@ -4702,233 +4750,6 @@ function dashDate(r){
 function nz(v){ return (v===undefined||v===null)?'':v; }
 function num(v){ const n=parseFloat(v); return isNaN(n)?0:n; }
 
-function loadDashboard(){
-  const from = document.getElementById('dashFrom').value;
-  const to = document.getElementById('dashTo').value;
-  const con = document.getElementById('dashContent');
-  const isSup = (curUser.role === 'Supervisor');
-  const me = curUser.name;
-  con.innerHTML = '<div class="card" style="text-align:center;padding:30px;"><div style="font-size:34px;">⏳</div><div style="font-weight:700;color:var(--gd);margin-top:6px;">Sari report load ho rahi hai...</div><div style="font-size:12px;color:var(--g5);margin-top:4px;">Thoda time lagega — 10 report ek saath</div></div>';
-
-  const ts = Date.now();
-  const S = name => fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+name+'&headers=1&t='+ts).then(r=>r.text()).catch(()=>'');
-
-  Promise.all([
-    S('Seed%20Sowing%20Data'),      // 0
-    S('Seed%20Labour%20Data'),      // 1
-    S('Watering%20Records'),        // 2
-    S('Spraying%20Records'),        // 3
-    S('Chemical%20Records'),        // 4
-    S('Attendance%20Records'),      // 5
-    S('Morning%20Assignment'),      // 6
-    S('Shifting%20Data'),           // 7
-    S('Dispatch%20Data'),           // 8
-    S('Booking%20Data'),            // 9
-    S('W-S%20Labour')               // 10
-  ]).then(function(T){
-    const seed=dashParse(T[0]), seedLab=dashParse(T[1]), wat=dashParse(T[2]),
-          spr=dashParse(T[3]), chem=dashParse(T[4]), att=dashParse(T[5]),
-          assign=dashParse(T[6]), shift=dashParse(T[7]), disp=dashParse(T[8]),
-          book=dashParse(T[9]), wsLab=dashParse(T[10]);
-    [seed,seedLab,wat,spr,chem,att,assign,shift,disp,book,wsLab].forEach(function(arr){
-      arr.forEach(function(r){ r._d=dashDate(r); });
-    });
-
-    // date + supervisor filter helper (supervisor col varies per sheet)
-    function flt(arr, supCol){
-      return arr.filter(function(r){
-        if(!r._d || r._d<from || r._d>to) return false;
-        if(isSup && supCol!==null && (nz(r.c[supCol]?.v).toString()!==me)) return false;
-        return true;
-      });
-    }
-
-    let html='';
-
-    // ═══ 1. SEED SOWING ═══ (Data: 0Date 1Sup 2Area 4Veg 5Var 6Lot 7Pkt 8Trays 11Plants)
-    (function(){
-      const rows=flt(seed,1);
-      let pkt=0,tray=0,pl=0;
-      rows.forEach(function(r){pkt+=num(r.c[7]?.v);tray+=num(r.c[8]?.v);pl+=num(r.c[11]?.v);});
-      let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+pkt.toLocaleString()+'</span><div class="dsl">Total PKT</div></div><div class="dsi"><span class="dsv">'+tray.toLocaleString()+'</span><div class="dsl">Trays</div></div><div class="dsi"><span class="dsv">'+pl.toLocaleString()+'</span><div class="dsl">Plants</div></div></div>';
-      if(rows.length){
-        body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th>'+(isSup?'':'<th>Sup</th>')+'<th>Area</th><th>Veg</th><th>Variety</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';
-        rows.forEach(function(r){
-          body+='<tr><td>'+formatDate(r._d)+'</td>'+(isSup?'':'<td>'+nz(r.c[1]?.v)+'</td>')+'<td>'+nz(r.c[2]?.v)+'</td><td>'+nz(r.c[4]?.v)+'</td><td>'+nz(r.c[5]?.v)+'</td><td>'+num(r.c[7]?.v)+'</td><td>'+num(r.c[8]?.v)+'</td><td>'+num(r.c[11]?.v).toLocaleString()+'</td></tr>';
-        });
-        body+='<tr class="dtot-row"><td colspan="'+(isSup?4:5)+'">TOTAL</td><td>'+pkt+'</td><td>'+tray+'</td><td>'+pl.toLocaleString()+'</td></tr>';
-        body+='</tbody></table></div>';
-      } else body+='<div class="dash-empty">Koi seed sowing record nahi.</div>';
-      html+=dashCard('🌱','Seed Sowing',rows.length,body);
-    })();
-
-    // ═══ 2. WATERING ═══ (ab sirf 0Date 1Sup 2Area — labour W-S Labour sheet me)
-    (function(){
-      const rows=flt(wat,1);
-      // Labour count nikalo (W-S Labour: 0Date 2Area 3Type 4Labour)
-      const wLab=wsLab.filter(function(l){
-        if(!l._d || l._d<from || l._d>to) return false;
-        if(nz(l.c[3]?.v).toString()!=='water') return false;
-        if(isSup && nz(l.c[1]?.v).toString()!==me) return false;
-        return true;
-      });
-      let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+rows.length+'</span><div class="dsl">Records</div></div><div class="dsi"><span class="dsv">'+wLab.length+'</span><div class="dsl">Labour Entries</div></div></div>';
-      if(rows.length){
-        body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th>'+(isSup?'':'<th>Sup</th>')+'<th>Area</th><th>Labour</th></tr></thead><tbody>';
-        rows.forEach(function(r){
-          const ls=wLab.filter(function(l){ return l._d===r._d && nz(l.c[2]?.v)===nz(r.c[2]?.v); })
-                       .map(function(l){ return nz(l.c[4]?.v); }).filter(Boolean);
-          body+='<tr><td>'+formatDate(r._d)+'</td>'+(isSup?'':'<td>'+nz(r.c[1]?.v)+'</td>')+'<td>'+nz(r.c[2]?.v)+'</td><td>'+(ls.join(', ')||'—')+'</td></tr>';
-        });
-        body+='<tr class="dtot-row"><td colspan="'+(isSup?2:3)+'">TOTAL</td><td>'+rows.length+' din</td></tr>';
-        body+='</tbody></table></div>';
-      } else body+='<div class="dash-empty">Koi watering record nahi.</div>';
-      html+=dashCard('💧','Watering',rows.length,body);
-    })();
-
-    // ═══ 3. SPRAY / DRENCHING ═══ (Spraying: 0Date 1Sup 2Area 3Crop(target) 8Sprayer 9Pump ; Chemical: 0Date 1Sup 2Area 3Crop 5Chem 6WorkType 7Dose 8Unit 9Purpose)
-    (function(){
-      const rows=flt(spr,1);
-      const chemRows=flt(chem,1);
-      let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+rows.length+'</span><div class="dsl">Spray Sessions</div></div><div class="dsi"><span class="dsv">'+chemRows.length+'</span><div class="dsl">Chemical Entries</div></div></div>';
-      if(rows.length){
-        body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th>'+(isSup?'':'<th>Sup</th>')+'<th>Area</th><th>Kahan Kiya</th><th>Pumps</th></tr></thead><tbody>';
-        rows.forEach(function(r){
-          body+='<tr><td>'+formatDate(r._d)+'</td>'+(isSup?'':'<td>'+nz(r.c[1]?.v)+'</td>')+'<td>'+nz(r.c[2]?.v)+'</td><td>'+sprayScopeLabel(nz(r.c[3]?.v),'')+'</td><td>'+nz(r.c[9]?.v)+'</td></tr>';
-        });
-        body+='</tbody></table></div>';
-      }
-      if(chemRows.length){
-        body+='<div class="dash-sub">📒 Register Detail</div><div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th><th>Area</th><th>Paudha</th><th>Variety</th><th>Dawai</th><th>Kya Kiya</th><th>Matra</th></tr></thead><tbody>';
-        chemRows.forEach(function(r){
-          const wt=nz(r.c[6]?.v)||'Spray'; const badge=wt==='Drench'?'💧 Drench':'🌿 Spray';
-          const mat=(nz(r.c[7]?.v)+' '+nz(r.c[8]?.v)).trim();
-          body+='<tr><td>'+formatDate(r._d)+'</td><td>'+nz(r.c[2]?.v)+'</td><td><b>'+nz(r.c[3]?.v)+'</b></td><td>'+(nz(r.c[4]?.v)||'—')+'</td><td>'+nz(r.c[5]?.v)+'</td><td>'+badge+'</td><td><b>'+mat+'</b></td></tr>';
-        });
-        body+='</tbody></table></div>';
-      }
-      if(!rows.length && !chemRows.length) body+='<div class="dash-empty">Koi spray/drench record nahi.</div>';
-      html+=dashCard('🌿','Spray / Drenching',rows.length,body);
-    })();
-
-    // ═══ 4. ATTENDANCE ═══ (asli: 0Date 1Sup 2Area 4Labour 5Status; status='Present'/'Half Day'/'Absent')
-    (function(){
-      const rows=flt(att,1);
-      let present=0,half=0,absent=0;
-      rows.forEach(function(r){const st=nz(r.c[5]?.v).toString();if(st==='Present')present++;else if(st==='Half Day')half++;else if(st==='Absent')absent++;});
-      let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+present+'</span><div class="dsl">Present</div></div><div class="dsi"><span class="dsv">'+half+'</span><div class="dsl">Half Day</div></div><div class="dsi"><span class="dsv">'+absent+'</span><div class="dsl">Absent</div></div></div>';
-      if(rows.length){
-        body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th>'+(isSup?'':'<th>Sup</th>')+'<th>Area</th><th>Labour</th><th>Status</th></tr></thead><tbody>';
-        rows.forEach(function(r){
-          body+='<tr><td>'+formatDate(r._d)+'</td>'+(isSup?'':'<td>'+nz(r.c[1]?.v)+'</td>')+'<td>'+nz(r.c[2]?.v)+'</td><td>'+nz(r.c[4]?.v)+'</td><td>'+attBadge(nz(r.c[5]?.v))+'</td></tr>';
-        });
-        body+='<tr class="dtot-row"><td colspan="'+(isSup?4:5)+'">Total: '+rows.length+' entries</td></tr>';
-        body+='</tbody></table></div>';
-      } else body+='<div class="dash-empty">Koi attendance record nahi.</div>';
-      html+=dashCard('👷','Attendance',rows.length,body);
-    })();
-
-    // ═══ 5. MORNING ASSIGNMENT ═══ (0Date 1Sup 2Area 3Kaam 4Labour)
-    (function(){
-      const rows=flt(assign,1);
-      let totLab=0; rows.forEach(function(r){totLab+=nz(r.c[4]?.v).toString().split(',').filter(function(s){return s.trim();}).length;});
-      let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+rows.length+'</span><div class="dsl">Assignments</div></div><div class="dsi"><span class="dsv">'+totLab+'</span><div class="dsl">Total Labour</div></div></div>';
-      if(rows.length){
-        body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th>'+(isSup?'':'<th>Sup</th>')+'<th>Area</th><th>Kaam</th><th>Labour</th></tr></thead><tbody>';
-        rows.forEach(function(r){
-          body+='<tr><td>'+formatDate(r._d)+'</td>'+(isSup?'':'<td>'+nz(r.c[1]?.v)+'</td>')+'<td>'+nz(r.c[2]?.v)+'</td><td>'+nz(r.c[3]?.v)+'</td><td>'+nz(r.c[4]?.v)+'</td></tr>';
-        });
-        body+='</tbody></table></div>';
-      } else body+='<div class="dash-empty">Koi assignment record nahi.</div>';
-      html+=dashCard('📋','Morning Assignment',rows.length,body);
-    })();
-
-    // ═══ 6. SHIFTING ═══ (asli: 0Date 1Sup 2Area 3Crop 4Var 5Labour 6Trays)
-    (function(){
-      const rows=flt(shift,1);
-      let trays=0; rows.forEach(function(r){trays+=num(r.c[6]?.v);});
-      let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+rows.length+'</span><div class="dsl">Records</div></div><div class="dsi"><span class="dsv">'+trays.toLocaleString()+'</span><div class="dsl">Total Trays</div></div></div>';
-      if(rows.length){
-        body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th>'+(isSup?'':'<th>Sup</th>')+'<th>Area</th><th>Crop</th><th>Variety</th><th>Labour</th><th>Trays</th></tr></thead><tbody>';
-        rows.forEach(function(r){
-          body+='<tr><td>'+formatDate(r._d)+'</td>'+(isSup?'':'<td>'+nz(r.c[1]?.v)+'</td>')+'<td>'+nz(r.c[2]?.v)+'</td><td>'+nz(r.c[3]?.v)+'</td><td>'+nz(r.c[4]?.v)+'</td><td>'+nz(r.c[5]?.v)+'</td><td>'+num(r.c[6]?.v)+'</td></tr>';
-        });
-        body+='<tr class="dtot-row"><td colspan="'+(isSup?5:6)+'">TOTAL</td><td>'+trays.toLocaleString()+'</td></tr>';
-        body+='</tbody></table></div>';
-      } else body+='<div class="dash-empty">Koi shifting record nahi.</div>';
-      html+=dashCard('🔄','Shifting',rows.length,body);
-    })();
-
-    // ═══ 7. DISPATCH ═══ (0Date 1Area 2Sup 3Gaadi 4Driver 6Crop 7Var 12Total ...) supervisor col=2
-    (function(){
-      const rows=flt(disp,2);
-      let plants=0; rows.forEach(function(r){plants+=num(r.c[12]?.v);});
-      let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+rows.length+'</span><div class="dsl">Dispatches</div></div><div class="dsi"><span class="dsv">'+plants.toLocaleString()+'</span><div class="dsl">Total Plants</div></div></div>';
-      if(rows.length){
-        body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th><th>Area</th>'+(isSup?'':'<th>Sup</th>')+'<th>Gaadi</th><th>Crop</th><th>Variety</th><th>Plants</th></tr></thead><tbody>';
-        rows.forEach(function(r){
-          body+='<tr><td>'+formatDate(r._d)+'</td><td>'+nz(r.c[1]?.v)+'</td>'+(isSup?'':'<td>'+nz(r.c[2]?.v)+'</td>')+'<td>'+nz(r.c[3]?.v)+'</td><td>'+nz(r.c[6]?.v)+'</td><td>'+nz(r.c[7]?.v)+'</td><td>'+num(r.c[12]?.v).toLocaleString()+'</td></tr>';
-        });
-        body+='<tr class="dtot-row"><td colspan="'+(isSup?5:6)+'">TOTAL</td><td>'+plants.toLocaleString()+'</td></tr>';
-        body+='</tbody></table></div>';
-      } else body+='<div class="dash-empty">Koi dispatch record nahi.</div>';
-      html+=dashCard('🚚','Dispatch',rows.length,body);
-    })();
-
-    // ═══ 8. BOOKING ═══ (0Date 1Farmer 2Village 5Crop 6Var 7Plant 18TotalRecv 20Status)  marketing/all only, supervisor=skip
-    if(!isSup){
-      (function(){
-        const rows=flt(book,null);
-        let plants=0,recv=0;
-        rows.forEach(function(r){plants+=num(r.c[8]?.v);recv+=num(r.c[19]?.v);});
-        let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+rows.length+'</span><div class="dsl">Bookings</div></div><div class="dsi"><span class="dsv">'+plants.toLocaleString()+'</span><div class="dsl">Total Plants</div></div><div class="dsi"><span class="dsv">₹'+recv.toLocaleString()+'</span><div class="dsl">Received</div></div></div>';
-        if(rows.length){
-          body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Date</th><th>Farmer</th><th>Village</th><th>Crop</th><th>Variety</th><th>Plants</th><th>Status</th></tr></thead><tbody>';
-          rows.forEach(function(r){
-            body+='<tr><td>'+formatDate(r._d)+'</td><td>'+nz(r.c[1]?.v)+'</td><td>'+nz(r.c[2]?.v)+'</td><td>'+nz(r.c[6]?.v)+'</td><td>'+nz(r.c[7]?.v)+'</td><td>'+num(r.c[8]?.v).toLocaleString()+'</td><td>'+bkBadge(nz(r.c[21]?.v))+'</td></tr>';
-          });
-          body+='<tr class="dtot-row"><td colspan="5">TOTAL</td><td>'+plants.toLocaleString()+'</td><td></td></tr>';
-          body+='</tbody></table></div>';
-        } else body+='<div class="dash-empty">Koi booking record nahi.</div>';
-        html+=dashCard('📝','Booking',rows.length,body);
-      })();
-
-      // ═══ 9. VARIETY SUMMARY (from booking) ═══
-      (function(){
-        const rows=flt(book,null);
-        const byCV={};
-        rows.forEach(function(r){
-          const c=nz(r.c[6]?.v)||'?', v=nz(r.c[7]?.v)||'?';
-          const key=c+' / '+v;
-          if(!byCV[key]) byCV[key]={plants:0,count:0};
-          byCV[key].plants+=num(r.c[8]?.v); byCV[key].count++;
-        });
-        const keys=Object.keys(byCV).sort(function(a,b){return byCV[b].plants-byCV[a].plants;});
-        let totPl=0; keys.forEach(function(k){totPl+=byCV[k].plants;});
-        let body='<div class="dash-stat"><div class="dsi"><span class="dsv">'+keys.length+'</span><div class="dsl">Crop/Variety</div></div><div class="dsi"><span class="dsv">'+totPl.toLocaleString()+'</span><div class="dsl">Total Plants</div></div></div>';
-        if(keys.length){
-          body+='<div class="dash-wrap"><table class="dash-tbl"><thead><tr><th>Crop / Variety</th><th>Bookings</th><th>Plants</th></tr></thead><tbody>';
-          keys.forEach(function(k){
-            body+='<tr><td>'+k+'</td><td>'+byCV[k].count+'</td><td>'+byCV[k].plants.toLocaleString()+'</td></tr>';
-          });
-          body+='<tr class="dtot-row"><td>TOTAL</td><td>'+rows.length+'</td><td>'+totPl.toLocaleString()+'</td></tr>';
-          body+='</tbody></table></div>';
-        } else body+='<div class="dash-empty">Koi data nahi.</div>';
-        html+=dashCard('🌾','Variety Summary',keys.length,body);
-      })();
-    }
-
-    con.innerHTML = html || '<div class="dash-empty">Koi data nahi mila.</div>';
-    // Search dobara apply karo agar search box me kuch hai
-    dashFilterSearch();
-  }).catch(function(e){
-    con.innerHTML = '<div class="card" style="text-align:center;color:var(--rd);padding:20px;">⚠️ Dashboard load nahi hua. Internet check karo aur dobara try karo.</div>';
-  });
-}
-
-// Ek collapsible card banao
-// Attendance status -> rangeen badge
-// Booking status -> rangeen badge
 function bkBadge(st){
   st=(st||'Pending').toString();
   var cls = st==='Delivered' ? 'badge-green' : (st==='Partial' ? 'badge-orange' : 'badge-gray');
@@ -4949,35 +4770,6 @@ function dashCard(icon, title, count, bodyHtml){
     '</div>'+
     '<div class="dash-body">'+bodyHtml+'</div>'+
   '</div>';
-}
-
-// Search — kisi bhi card me matching row dikhe, baaki hide
-function dashFilterSearch(){
-  const q = (document.getElementById('dashSearch')?.value||'').trim().toLowerCase();
-  const cards = document.querySelectorAll('#dashContent .dash-card');
-  cards.forEach(function(card){
-    const rows = card.querySelectorAll('.dash-tbl tbody tr:not(.dtot-row)');
-    if(!q){
-      card.classList.remove('dash-hidden');
-      rows.forEach(function(r){ r.classList.remove('dash-hidden'); });
-      return;
-    }
-    let anyMatch=false;
-    rows.forEach(function(r){
-      const txt=r.textContent.toLowerCase();
-      if(txt.includes(q)){ r.classList.remove('dash-hidden'); anyMatch=true; }
-      else r.classList.add('dash-hidden');
-    });
-    // Card title bhi match kare to poora card dikhao
-    const titleMatch = (card.getAttribute('data-title')||'').includes(q);
-    if(anyMatch || titleMatch){
-      card.classList.remove('dash-hidden');
-      card.classList.add('open'); // match hone par khol do
-      if(titleMatch && !anyMatch) rows.forEach(function(r){ r.classList.remove('dash-hidden'); });
-    } else {
-      card.classList.add('dash-hidden');
-    }
-  });
 }
 
 function openBookingReport(){
@@ -6591,6 +6383,410 @@ function deskTagCards(){
   };
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', deskTagCards); else deskTagCards();
 })();
+
+// ════════════════════════════════════════════════════════════════
+// COMMAND CENTER DASHBOARD — sab kuch ek jagah, har cheez aakhri entry tak khulti hai
+// ════════════════════════════════════════════════════════════════
+let DB_RAW = null;          // sheets ka data (ek baar load, phir filter client par)
+let DBX = {};               // lazy body builders
+let DBX_N = 0;
+function dbEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function dbN(n){ return Number(n||0).toLocaleString('en-IN'); }
+function dbV(r,i){ const c = r.c && r.c[i]; return (c && c.v!=null) ? c.v : ''; }
+function dbS(r,i){ return String(dbV(r,i)).trim(); }
+function dbNum(r,i){ const n = parseFloat(dbV(r,i)); return isNaN(n) ? 0 : n; }
+function dbD(v){ return (typeof djISO==='function') ? djISO(v) : dashDate({c:[{v:v}]}); }
+function dbGrp(arr, keyFn){
+  const m = new Map();
+  arr.forEach(function(r){ const k = keyFn(r) || '—'; if(!m.has(k)) m.set(k, []); m.get(k).push(r); });
+  return m;
+}
+function dbSum(arr, fn){ let s = 0; arr.forEach(function(r){ s += fn(r) || 0; }); return s; }
+// Ek khulne wala node. body = string ya function (lazy)
+function dbNode(label, sub, value, body, opts){
+  opts = opts || {};
+  const id = 'dbx' + (++DBX_N);
+  if(typeof body === 'function') DBX[id] = body;
+  return '<div class="dbn'+(opts.cls?' '+opts.cls:'')+'" data-open="0" data-k="'+id+'"'+(opts.sec?' id="dbsec-'+opts.sec+'"':'')+'>'+
+    '<div class="dbn-h" onclick="dbTog(this)">'+
+      (opts.icon ? '<div class="dbn-ic" style="background:'+(opts.color||'#e8f5ee')+';">'+opts.icon+'</div>' : '')+
+      '<div class="dbn-l"><div class="dbn-t">'+label+'</div>'+(sub?'<div class="dbn-s">'+sub+'</div>':'')+'</div>'+
+      '<div class="dbn-v">'+(value||'')+'</div>'+
+      '<i class="ti ti-chevron-down dbn-c"></i>'+
+    '</div>'+
+    '<div class="dbn-b">'+(typeof body === 'string' ? body : '')+'</div>'+
+  '</div>';
+}
+function dbTog(h){
+  const n = h.parentElement;
+  const open = n.getAttribute('data-open') === '1';
+  if(!open){
+    const k = n.getAttribute('data-k');
+    if(DBX[k]){ n.querySelector(':scope > .dbn-b').innerHTML = DBX[k](); delete DBX[k]; }
+  }
+  n.setAttribute('data-open', open ? '0' : '1');
+}
+function dbTbl(head, rows, foot){
+  return '<div class="dbt-w"><table class="dbt"><thead><tr>'+head.map(function(h){ return '<th'+(h.r?' class="r"':'')+'>'+(h.t||h)+'</th>'; }).join('')+'</tr></thead><tbody>'+
+    rows.join('')+(foot?'<tr class="dbt-tot">'+foot+'</tr>':'')+'</tbody></table></div>';
+}
+function dbBadge(t, cls){ return '<span class="badge '+(cls||'badge-gray')+'">'+dbEsc(t)+'</span>'; }
+function dbSorted(m, valFn){ return Array.from(m.entries()).sort(function(a,b){ return valFn(b[1]) - valFn(a[1]); }); }
+function dbFD(d){ return (typeof formatDate==='function') ? formatDate(d) : d; }
+
+function openDashboard(){
+  const isSup = (curUser.role === 'Supervisor');
+  document.getElementById('dashSupB').textContent =
+    (isSup?'👷':curUser.role==='Manager'?'👔':curUser.role==='Marketing'?'📣':'👑')+' '+curUser.name;
+  document.getElementById('dashSearch').value = '';
+  const sel = document.getElementById('dashSup');
+  if(isSup){ document.getElementById('dashSupWrap').style.display = 'none'; }
+  else {
+    document.getElementById('dashSupWrap').style.display = '';
+    sel.innerHTML = '<option value="">👥 Sab Supervisor</option>' + Object.keys(SUP_DATA).filter(function(n){ return SUP_DATA[n] && SUP_DATA[n].role==='Supervisor'; })
+      .map(function(n){ return '<option value="'+dbEsc(n)+'">'+dbEsc(n)+'</option>'; }).join('');
+  }
+  dbRange('today', true);
+  show('dashScreen');
+  loadDashboard();
+}
+function dbRange(k, silent){
+  const t = new Date(), f = new Date();
+  if(k==='yest'){ t.setDate(t.getDate()-1); f.setDate(f.getDate()-1); }
+  else if(k==='7'){ f.setDate(f.getDate()-6); }
+  else if(k==='month'){ f.setDate(1); }
+  else if(k==='30'){ f.setDate(f.getDate()-29); }
+  if(k !== 'custom'){
+    document.getElementById('dashFrom').value = localISO(f);
+    document.getElementById('dashTo').value = localISO(t);
+  }
+  document.querySelectorAll('.db-chip').forEach(function(c){ c.classList.toggle('on', c.getAttribute('data-k')===k); });
+  if(!silent && DB_RAW) dbRender();
+}
+function loadDashboard(){
+  const con = document.getElementById('dashContent');
+  con.innerHTML = '<div class="card" style="text-align:center;padding:30px;"><div style="font-size:34px;">⏳</div><div style="font-weight:700;color:var(--gd);margin-top:6px;">Saari sheets se data aa raha hai...</div></div>';
+  const ts = Date.now();
+  const S = function(name){ return fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(name)+'&headers=1&t='+ts).then(function(r){ return r.text(); }).catch(function(){ return ''; }); };
+  const names = ['Seed Sowing Data','Seed Labour Data','Watering Records','Spraying Records','Chemical Records','Attendance Records','Morning Assignment','Shifting Data','Dispatch Data','Booking Data','W-S Labour'];
+  const keys  = ['seed','seedLab','wat','spr','chem','att','ma','shf','dsp','bk','wsl'];
+  Promise.all(names.map(S)).then(function(T){
+    DB_RAW = {};
+    keys.forEach(function(k,i){ DB_RAW[k] = dashParse(T[i]); DB_RAW[k].forEach(function(r){ r._d = dbD(dbV(r,0)); r._t = r.c.map(function(c){ return c&&c.v!=null?String(c.v):''; }).join(' ').toLowerCase(); }); });
+    dbRender();
+  }).catch(function(){ con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--rd);">⚠️ Data load nahi hua — internet check karo</div>'; });
+}
+function dashFilterSearch(){
+  clearTimeout(window._dbq);
+  window._dbq = setTimeout(function(){ if(DB_RAW) dbRender(); }, 300);
+}
+
+function dbRender(){
+  const from = document.getElementById('dashFrom').value, to = document.getElementById('dashTo').value;
+  const q = (document.getElementById('dashSearch').value||'').trim().toLowerCase();
+  const isSup = curUser.role === 'Supervisor';
+  const supF = isSup ? curUser.name : (document.getElementById('dashSup').value||'');
+  DBX = {}; DBX_N = 0;
+  const R = DB_RAW;
+  const inR = function(d){ return d && (!from || d >= from) && (!to || d <= to); };
+  const F = function(arr, supCol, dateFn){
+    return arr.filter(function(r){
+      const d = dateFn ? dateFn(r) : r._d;
+      if(!inR(d)) return false;
+      if(supF && supCol!=null && dbS(r,supCol) !== supF) return false;
+      if(q && r._t.indexOf(q) === -1) return false;
+      return true;
+    });
+  };
+  const seed = F(R.seed,1), seedLab = R.seedLab, wat = F(R.wat,1), spr = F(R.spr,1), chem = F(R.chem,1),
+        att = F(R.att,1), ma = F(R.ma,1), shf = F(R.shf,1), dsp = F(R.dsp,2), wsl = F(R.wsl,1);
+  // Booking: booking date se (supervisor filter nahi — marketing ka kaam)
+  const bkAll = R.bk.filter(function(r){ return !q || r._t.indexOf(q) > -1; });
+  const bk = bkAll.filter(function(r){ return inR(r._d); });
+  // Payments: tareekh payment ki (booking pehle ki ho sakti hai)
+  const pays = [];
+  dbGrp(bkAll, function(r){ return dbS(r,23) || ('x'+Math.random()); }).forEach(function(rows, bid){
+    const f = rows[0];
+    const d1 = dbD(dbV(f,14)) || f._d;
+    if(dbNum(f,11) && inR(d1)) pays.push({d:d1, bid:bid, f:f, amt:dbNum(f,11), mode:dbS(f,12)||'Cash', bank:dbS(f,13), which:'1st'});
+    const d2 = dbD(dbV(f,18));
+    if(dbNum(f,15) && inR(d2)) pays.push({d:d2, bid:bid, f:f, amt:dbNum(f,15), mode:dbS(f,16)||'Cash', bank:dbS(f,17), which:'2nd'});
+  });
+
+  const T = {
+    sow: dbSum(seed, function(r){ return dbNum(r,11); }),
+    sowPkt: dbSum(seed, function(r){ return dbNum(r,7); }),
+    shf: dbSum(shf, function(r){ return dbNum(r,6); }),
+    dsp: dbSum(dsp, function(r){ return dbNum(r,12); }),
+    bkPl: dbSum(bk, function(r){ return dbNum(r,8); }),
+    bkVal: dbSum(bk, function(r){ return dbNum(r,8)*dbNum(r,9); }),
+    bkCnt: new Set(bk.map(function(r){ return dbS(r,23); })).size,
+    pay: dbSum(pays, function(p){ return p.amt; }),
+    attP: att.filter(function(r){ return dbS(r,5)==='Present'; }).length + att.filter(function(r){ return dbS(r,5)==='Half Day'; }).length*0.5,
+    wage: dbSum(att, function(r){ return dbNum(r,7)+dbNum(r,9); }),
+    spr: chem.length
+  };
+  const tile = function(sec, icon, val, lbl, sub, color){
+    return '<div class="db-tile" onclick="dbGo(\''+sec+'\')" style="--tc:'+color+';"><div class="db-ti">'+icon+'</div><div class="db-tv">'+val+'</div><div class="db-tl">'+lbl+'</div>'+(sub?'<div class="db-ts">'+sub+'</div>':'')+'</div>';
+  };
+  let h = '<div class="db-tiles">'+
+    tile('sow','🌱',dbN(T.sow),'Plants Sowing',dbN(T.sowPkt)+' PKT','#2e7d32')+
+    tile('shf','🔄',dbN(T.shf),'Tray Shifting',shf.length+' entry','#ef6c00')+
+    tile('dsp','🚚',dbN(T.dsp),'Plants Dispatch',new Set(dsp.map(function(r){return r._d+dbS(r,3);})).size+' gaadi','#37474f')+
+    tile('bk','📝',dbN(T.bkPl),'Plants Booked',T.bkCnt+' booking • ₹'+dbN(T.bkVal),'#1565c0')+
+    tile('pay','💰','₹'+dbN(T.pay),'Payment Aaya',pays.length+' payment','#2e7d32')+
+    tile('att','👷',dbN(T.attP),'Labour Present','₹'+dbN(T.wage)+' wage','#7b1fa2')+
+    tile('spr','🌿',dbN(T.spr),'Dawai Entry',wat.length+' pani','#6a1b9a')+
+    '</div>';
+
+  // ── 1. VARIETY KA SAFAR ──
+  const vj = {};
+  const vAdd = function(crop, v, k, n){ crop = crop||'—'; v = v||'—'; if(!vj[crop]) vj[crop] = {}; if(!vj[crop][v]) vj[crop][v] = {sow:0, shf:0, bk:0, dsp:0, del:0}; vj[crop][v][k] += n; };
+  seed.forEach(function(r){ vAdd(dbS(r,4), dbS(r,5), 'sow', dbNum(r,11)); });
+  shf.forEach(function(r){ vAdd(dbS(r,3), dbS(r,4), 'shf', dbNum(r,6)); });
+  bk.forEach(function(r){ vAdd(dbS(r,6), dbS(r,7), 'bk', dbNum(r,8)); vAdd(dbS(r,6), dbS(r,7), 'del', dbNum(r,25)); });
+  dsp.forEach(function(r){ vAdd(dbS(r,6), dbS(r,7), 'dsp', dbNum(r,12)); });
+  const vjCrops = Object.keys(vj);
+  if(vjCrops.length){
+    const cTot = function(c){ let s={sow:0,shf:0,bk:0,dsp:0,del:0}; Object.values(vj[c]).forEach(function(x){ for(const k in s) s[k]+=x[k]; }); return s; };
+    h += dbNode('Variety ka Safar', 'Boya → Shift → Book → Dispatch — har variety ka hisaab', vjCrops.length+' crop', function(){
+      return vjCrops.sort(function(a,b){ return cTot(b).sow - cTot(a).sow; }).map(function(c){
+        const t = cTot(c);
+        return dbNode(dbEsc(c), Object.keys(vj[c]).length+' variety', '<span class="dbn-mini">🌱'+dbN(t.sow)+' · 📝'+dbN(t.bk)+' · 🚚'+dbN(t.dsp)+'</span>', function(){
+          const rows = Object.keys(vj[c]).sort(function(a,b){ return vj[c][b].sow - vj[c][a].sow; }).map(function(v){
+            const x = vj[c][v];
+            return '<tr><td><b>'+dbEsc(v)+'</b></td><td class="r">'+dbN(x.sow)+'</td><td class="r">'+dbN(x.shf)+'</td><td class="r">'+dbN(x.bk)+'</td><td class="r">'+dbN(x.del)+'</td><td class="r">'+dbN(x.dsp)+'</td><td class="r"><b>'+dbN(Math.max(0,x.bk-x.del))+'</b></td></tr>';
+          });
+          return dbTbl(['Variety',{t:'Boya (plant)',r:1},{t:'Shift (tray)',r:1},{t:'Book',r:1},{t:'Deliver',r:1},{t:'Dispatch',r:1},{t:'Book baaki',r:1}], rows,
+            '<td>TOTAL</td><td class="r">'+dbN(t.sow)+'</td><td class="r">'+dbN(t.shf)+'</td><td class="r">'+dbN(t.bk)+'</td><td class="r">'+dbN(t.del)+'</td><td class="r">'+dbN(t.dsp)+'</td><td class="r">'+dbN(Math.max(0,t.bk-t.del))+'</td>');
+        });
+      }).join('');
+    }, {cls:'dbn-sec', sec:'vj', icon:'🌾', color:'#e8f5e9'});
+  }
+
+  // ── 2. SEED SOWING: Crop → Variety → Entry → Labour ──
+  if(seed.length){
+    const byC = dbGrp(seed, function(r){ return dbS(r,4); });
+    h += dbNode('Seed Sowing', seed.length+' entry • '+new Set(seed.map(function(r){ return dbS(r,5); })).size+' variety • '+dbN(T.sowPkt)+' PKT', dbN(T.sow)+' <small>plant</small>', function(){
+      return dbSorted(byC, function(a){ return dbSum(a,function(r){return dbNum(r,11);}); }).map(function(e){
+        const byV = dbGrp(e[1], function(r){ return dbS(r,5); });
+        return dbNode(dbEsc(e[0]), byV.size+' variety • '+e[1].length+' entry', dbN(dbSum(e[1],function(r){return dbNum(r,11);})), function(){
+          return dbSorted(byV, function(a){ return dbSum(a,function(r){return dbNum(r,11);}); }).map(function(v){
+            return dbNode(dbEsc(v[0]), v[1].length+' entry • '+dbN(dbSum(v[1],function(r){return dbNum(r,7);}))+' PKT • '+dbN(dbSum(v[1],function(r){return dbNum(r,8);}))+' tray', dbN(dbSum(v[1],function(r){return dbNum(r,11);})), function(){
+              return v[1].sort(function(a,b){ return a._d<b._d?1:-1; }).map(function(r){
+                const labs = seedLab.filter(function(l){ return l._d===r._d && dbS(l,1)===dbS(r,1) && dbS(l,2)===dbS(r,2) && dbS(l,3)===dbS(r,4) && dbS(l,4)===dbS(r,5) && dbS(l,5)===dbS(r,6); });
+                return dbNode('📅 '+dbFD(r._d)+' • '+dbEsc(dbS(r,2)), '👷 '+dbEsc(dbS(r,1))+(dbS(r,6)?' • Lot '+dbEsc(dbS(r,6)):'')+' • '+dbNum(r,7)+' PKT • '+dbNum(r,8)+' tray × '+dbNum(r,9)+' cup', dbN(dbNum(r,11)),
+                  dbTbl(['Labour',{t:'PKT',r:1},{t:'Tray',r:1},{t:'Plants',r:1}], labs.map(function(l){ return '<tr><td>'+dbEsc(dbS(l,6))+'</td><td class="r">'+dbNum(l,7)+'</td><td class="r">'+dbNum(l,8)+'</td><td class="r">'+dbN(dbNum(l,9))+'</td></tr>'; }).concat(labs.length?[]:['<tr><td colspan="4" class="dbt-empty">Labour ki entry nahi</td></tr>']))+
+                  (dbS(r,12)?'<div class="dbn-note">📝 '+dbEsc(dbS(r,12))+'</div>':''), {cls:'dbn-leaf'});
+              }).join('');
+            });
+          }).join('');
+        });
+      }).join('');
+    }, {cls:'dbn-sec', sec:'sow', icon:'🌱', color:'#e8f5e9'});
+  }
+
+  // ── 3. SHIFTING: Crop → Variety → (Date • Area) → Labour ──
+  if(shf.length){
+    const byC = dbGrp(shf, function(r){ return dbS(r,3); });
+    h += dbNode('Shifting', shf.length+' labour entry', dbN(T.shf)+' <small>tray</small>', function(){
+      return dbSorted(byC, function(a){ return dbSum(a,function(r){return dbNum(r,6);}); }).map(function(e){
+        const byV = dbGrp(e[1], function(r){ return dbS(r,4); });
+        return dbNode(dbEsc(e[0]), byV.size+' variety', dbN(dbSum(e[1],function(r){return dbNum(r,6);})), function(){
+          return dbSorted(byV, function(a){ return dbSum(a,function(r){return dbNum(r,6);}); }).map(function(v){
+            const byD = dbGrp(v[1], function(r){ return r._d+'|'+dbS(r,2)+'|'+dbS(r,1); });
+            return dbNode(dbEsc(v[0]), byD.size+' din/area', dbN(dbSum(v[1],function(r){return dbNum(r,6);})), function(){
+              return Array.from(byD.entries()).sort(function(a,b){ return a[0]<b[0]?1:-1; }).map(function(d){
+                const p = d[0].split('|');
+                return dbNode('📅 '+dbFD(p[0])+' • '+dbEsc(p[1]), '👷 '+dbEsc(p[2])+' • '+d[1].length+' labour', dbN(dbSum(d[1],function(r){return dbNum(r,6);})),
+                  dbTbl(['Labour',{t:'Tray',r:1}], d[1].map(function(r){ return '<tr><td>'+dbEsc(dbS(r,5))+'</td><td class="r">'+dbN(dbNum(r,6))+'</td></tr>'; })), {cls:'dbn-leaf'});
+              }).join('');
+            });
+          }).join('');
+        });
+      }).join('');
+    }, {cls:'dbn-sec', sec:'shf', icon:'🔄', color:'#fff3e0'});
+  }
+
+  // ── 4. DISPATCH: Date → Gaadi → Lines ──
+  if(dsp.length){
+    const byD = dbGrp(dsp, function(r){ return r._d; });
+    h += dbNode('Dispatch', byD.size+' din • '+dsp.length+' line', dbN(T.dsp)+' <small>plant</small>', function(){
+      return Array.from(byD.entries()).sort(function(a,b){ return a[0]<b[0]?1:-1; }).map(function(d){
+        const byG = dbGrp(d[1], function(r){ return dbS(r,3)+'|'+dbS(r,4)+'|'+dbS(r,2); });
+        return dbNode('📅 '+dbFD(d[0]), byG.size+' gaadi', dbN(dbSum(d[1],function(r){return dbNum(r,12);})), function(){
+          return Array.from(byG.entries()).map(function(g){
+            const p = g[0].split('|');
+            return dbNode('🚙 '+dbEsc(p[0]||'—'), '👨 '+dbEsc(p[1]||'—')+' • 👷 '+dbEsc(p[2])+' • Meter '+dbEsc(dbS(g[1][0],5)), dbN(dbSum(g[1],function(r){return dbNum(r,12);})),
+              dbTbl(['Crop – Variety','Area',{t:'Carret × Plant',r:1},{t:'Direct',r:1},{t:'Total',r:1},'Sowing'], g[1].map(function(r){
+                return '<tr><td><b>'+dbEsc(dbS(r,6))+'</b> – '+dbEsc(dbS(r,7))+'</td><td>'+dbEsc(dbS(r,1))+'</td><td class="r">'+dbNum(r,9)+' × '+dbNum(r,10)+'</td><td class="r">'+dbN(dbNum(r,11))+'</td><td class="r"><b>'+dbN(dbNum(r,12))+'</b></td><td>'+(dbS(r,13)==='YES'?dbBadge('✓ Match','badge-green'):dbBadge('Check','badge-red'))+'</td></tr>';
+              })), {cls:'dbn-leaf'});
+          }).join('');
+        });
+      }).join('');
+    }, {cls:'dbn-sec', sec:'dsp', icon:'🚚', color:'#eceff1'});
+  }
+
+  // ── 5. BOOKING: Crop → Variety → Kisan → Detail ──
+  if(bk.length){
+    const byC = dbGrp(bk, function(r){ return dbS(r,6); });
+    const bkMap = dbGrp(bkAll, function(r){ return dbS(r,23); });
+    h += dbNode('Booking', T.bkCnt+' booking • Order ₹'+dbN(T.bkVal), dbN(T.bkPl)+' <small>plant</small>', function(){
+      return dbSorted(byC, function(a){ return dbSum(a,function(r){return dbNum(r,8);}); }).map(function(e){
+        const byV = dbGrp(e[1], function(r){ return dbS(r,7); });
+        return dbNode(dbEsc(e[0]), byV.size+' variety • '+e[1].length+' booking', dbN(dbSum(e[1],function(r){return dbNum(r,8);})), function(){
+          return dbSorted(byV, function(a){ return dbSum(a,function(r){return dbNum(r,8);}); }).map(function(v){
+            return dbNode(dbEsc(v[0]), v[1].length+' kisan', dbN(dbSum(v[1],function(r){return dbNum(r,8);})), function(){
+              return v[1].sort(function(a,b){ return a._d<b._d?1:-1; }).map(function(r){
+                const st = dbS(r,21)||'Pending';
+                const all = bkMap.get(dbS(r,23)) || [r], f = all[0];
+                const lines = all.map(function(x){ return '<tr><td>'+dbEsc(dbS(x,6))+' – '+dbEsc(dbS(x,7))+'</td><td class="r">'+dbN(dbNum(x,8))+' × ₹'+dbNum(x,9)+'</td><td>'+dbFD(dbD(dbV(x,10)))+'</td><td class="r">'+dbN(dbNum(x,25))+'</td><td>'+dbBadge(dbS(x,21)||'Pending', dbS(x,21)==='Delivered'?'badge-green':dbS(x,21)==='Partial'?'badge-orange':'badge-gray')+'</td></tr>'; });
+                return dbNode('👨 '+dbEsc(dbS(r,1))+' '+dbBadge(st, st==='Delivered'?'badge-green':st==='Partial'?'badge-orange':'badge-gray'),
+                  dbEsc(dbS(r,2))+' • '+dbN(dbNum(r,8))+' × ₹'+dbNum(r,9)+' • 📅 '+dbFD(r._d), '₹'+dbN(dbNum(r,8)*dbNum(r,9)),
+                  '<div class="dbn-info">🆔 '+dbEsc(dbS(r,23))+' • 📱 '+dbEsc(dbS(f,5))+' • 🏛️ '+dbEsc(dbS(f,3))+', '+dbEsc(dbS(f,4))+(dbS(f,24)?' • 📣 '+dbEsc(dbS(f,24)):'')+'</div>'+
+                  dbTbl(['Crop – Variety',{t:'Plant × Rate',r:1},'Delivery',{t:'Diya',r:1},'Status'], lines)+
+                  '<div class="dbn-info">💰 1st: <b>₹'+dbN(dbNum(f,11))+'</b> '+dbEsc(dbS(f,12))+(dbNum(f,15)?' • 2nd: <b>₹'+dbN(dbNum(f,15))+'</b> '+dbEsc(dbS(f,16)):'')+' • Total: <b>₹'+dbN(dbNum(f,19))+'</b></div>'+
+                  '<div class="dbn-acts"><button class="bk-abtn bk-slip" onclick="event.stopPropagation();dbSlip(\''+dbEsc(dbS(r,23))+'\')"><i class="ti ti-file-download"></i> Slip</button></div>',
+                  {cls:'dbn-leaf'});
+              }).join('');
+            });
+          }).join('');
+        });
+      }).join('');
+    }, {cls:'dbn-sec', sec:'bk', icon:'📝', color:'#e3f2fd'});
+  }
+
+  // ── 6. PAYMENT: Date → Mode → Kisan ──
+  if(pays.length){
+    const byD = dbGrp(pays, function(p){ return p.d; });
+    h += dbNode('Payment Aaya', pays.length+' payment', '₹'+dbN(T.pay), function(){
+      return Array.from(byD.entries()).sort(function(a,b){ return a[0]<b[0]?1:-1; }).map(function(d){
+        const byM = dbGrp(d[1], function(p){ return /bank|icici|phone/i.test(p.mode+' '+p.bank) ? (/cash/i.test(p.mode)?'Cash + Bank':'Bank') : 'Cash'; });
+        return dbNode('📅 '+dbFD(d[0]), d[1].length+' payment', '₹'+dbN(dbSum(d[1],function(p){return p.amt;})), function(){
+          return Array.from(byM.entries()).map(function(m){
+            return dbNode((m[0]==='Cash'?'💵 ':'🏦 ')+m[0], m[1].length+' payment', '₹'+dbN(dbSum(m[1],function(p){return p.amt;})),
+              dbTbl(['Kisan','Booking','Kaunsa','Mode / Bank',{t:'Rakam',r:1}], m[1].map(function(p){ return '<tr><td><b>'+dbEsc(dbS(p.f,1))+'</b><div class="dbt-s">'+dbEsc(dbS(p.f,2))+'</div></td><td>'+dbEsc(p.bid)+'</td><td>'+p.which+'</td><td>'+dbEsc(p.mode)+(p.bank?' • '+dbEsc(p.bank):'')+'</td><td class="r"><b>₹'+dbN(p.amt)+'</b></td></tr>'; })), {cls:'dbn-leaf'});
+          }).join('');
+        });
+      }).join('');
+    }, {cls:'dbn-sec', sec:'pay', icon:'💰', color:'#e8f5e9'});
+  }
+
+  // ── 7. ATTENDANCE: Date → Status → Labour ──
+  if(att.length){
+    const byD = dbGrp(att, function(r){ return r._d; });
+    h += dbNode('Attendance', byD.size+' din • '+att.length+' entry • ₹'+dbN(T.wage)+' wage', dbN(T.attP)+' <small>present</small>', function(){
+      return Array.from(byD.entries()).sort(function(a,b){ return a[0]<b[0]?1:-1; }).map(function(d){
+        const byS = dbGrp(d[1], function(r){ return dbS(r,5); });
+        const pc = (byS.get('Present')||[]).length, hc = (byS.get('Half Day')||[]).length, ac = (byS.get('Absent')||[]).length;
+        return dbNode('📅 '+dbFD(d[0]), '✅ '+pc+' • ½ '+hc+' • ❌ '+ac, '₹'+dbN(dbSum(d[1],function(r){return dbNum(r,7)+dbNum(r,9);})), function(){
+          return ['Present','Half Day','Absent'].concat(Array.from(byS.keys()).filter(function(k){ return ['Present','Half Day','Absent'].indexOf(k)===-1; })).filter(function(k){ return byS.has(k); }).map(function(k){
+            const rs = byS.get(k);
+            return dbNode(dbBadge(k, k==='Present'?'badge-green':k==='Half Day'?'badge-orange':'badge-red'), rs.length+' labour', '₹'+dbN(dbSum(rs,function(r){return dbNum(r,7)+dbNum(r,9);})),
+              dbTbl(['Labour','Kaam',{t:'Wage',r:1},{t:'OT',r:1},'Entry by'], rs.map(function(r){ return '<tr><td><b>'+dbEsc(dbS(r,4))+'</b></td><td>'+dbEsc(dbS(r,3))+'</td><td class="r">₹'+dbN(dbNum(r,7))+'</td><td class="r">'+(dbNum(r,8)?dbNum(r,8)+'h • ₹'+dbN(dbNum(r,9)):'—')+'</td><td>'+dbEsc(dbS(r,1))+'</td></tr>'; })), {cls:'dbn-leaf'});
+          }).join('');
+        });
+      }).join('');
+    }, {cls:'dbn-sec', sec:'att', icon:'👷', color:'#f3e5f5'});
+  }
+
+  // ── 8. PANI / SPRAY: Area → Date → Dawai + Labour ──
+  if(wat.length || chem.length || spr.length){
+    const areas = dbGrp(wat.concat(spr, chem), function(r){ return dbS(r,2); });
+    h += dbNode('Pani / Spray', wat.length+' pani • '+chem.length+' dawai', areas.size+' <small>area</small>', function(){
+      return Array.from(areas.keys()).sort().map(function(a){
+        const w = wat.filter(function(r){ return dbS(r,2)===a; }), c = chem.filter(function(r){ return dbS(r,2)===a; }), s = spr.filter(function(r){ return dbS(r,2)===a; });
+        const days = Array.from(new Set(w.concat(c,s).map(function(r){ return r._d; }))).sort().reverse();
+        return dbNode('📍 '+dbEsc(a), days.length+' din', (w.length?'💧'+w.length+' ':'')+(c.length?'🧪'+c.length:''), function(){
+          return days.map(function(d){
+            const wd = w.filter(function(r){ return r._d===d; }), cd = c.filter(function(r){ return r._d===d; }), sd = s.filter(function(r){ return r._d===d; });
+            const labs = R.wsl.filter(function(l){ return l._d===d && dbS(l,2)===a; });
+            let body = '';
+            if(wd.length) body += dbTbl(['💧 Pani','Method',{t:'Litre',r:1},'Samay'], wd.map(function(r){ return '<tr><td>'+dbEsc(dbS(r,1))+'</td><td>'+dbEsc(dbS(r,6))+'</td><td class="r">'+dbN(dbNum(r,7))+'</td><td>'+(typeof djTime==='function'?djTime(r,4)+' – '+djTime(r,5):'')+'</td></tr>'; }));
+            if(cd.length) body += dbTbl(['🧪 Dawai','Kya kiya',{t:'Matra',r:1},'Crop – Variety'], cd.map(function(r){ return '<tr><td><b>'+dbEsc(dbS(r,5))+'</b></td><td>'+dbEsc(dbS(r,6)||'Spray')+'</td><td class="r">'+dbNum(r,7)+' '+dbEsc(dbS(r,8))+'</td><td>'+dbEsc([dbS(r,3),dbS(r,4)].filter(Boolean).join(' – ')||'Poora area')+'</td></tr>'; }));
+            if(labs.length) body += dbTbl(['👷 Labour','Kaam',{t:'Ghante',r:1},{t:'Pump',r:1}], labs.map(function(l){ return '<tr><td>'+dbEsc(dbS(l,4))+'</td><td>'+(dbS(l,3)==='spray'?'Spray':'Pani')+'</td><td class="r">'+(dbNum(l,5)||'—')+'</td><td class="r">'+(dbNum(l,6)||'—')+'</td></tr>'; }));
+            return dbNode('📅 '+dbFD(d), (wd.length?wd.length+' pani ':'')+(cd.length?cd.length+' dawai ':'')+(sd.length?'• '+dbSum(sd,function(r){return dbNum(r,9);})+' pump':''), labs.length+' labour', body, {cls:'dbn-leaf'});
+          }).join('');
+        });
+      }).join('');
+    }, {cls:'dbn-sec', sec:'spr', icon:'🌿', color:'#f3e5f5'});
+  }
+
+  // ── 9. MORNING ASSIGNMENT: Date → Area ──
+  if(ma.length){
+    const byD = dbGrp(ma, function(r){ return r._d; });
+    h += dbNode('Morning Assignment', byD.size+' din • '+ma.length+' kaam', dbN(dbSum(ma,function(r){return dbNum(r,5);}))+' <small>labour</small>', function(){
+      return Array.from(byD.entries()).sort(function(a,b){ return a[0]<b[0]?1:-1; }).map(function(d){
+        return dbNode('📅 '+dbFD(d[0]), d[1].length+' kaam', dbN(dbSum(d[1],function(r){return dbNum(r,5);}))+' labour',
+          dbTbl(['Supervisor','Area','Kaam','Labour'], d[1].map(function(r){ return '<tr><td>'+dbEsc(dbS(r,1))+'</td><td>'+dbEsc(dbS(r,2))+'</td><td><b>'+dbEsc(dbS(r,3))+'</b></td><td>'+dbEsc(dbS(r,4))+' <span class="dbt-s">('+dbNum(r,5)+')</span></td></tr>'; })), {cls:'dbn-leaf'});
+      }).join('');
+    }, {cls:'dbn-sec', sec:'ma', icon:'📋', color:'#fff3e0'});
+  }
+
+  // ── 10. LABOUR-WISE: Labour → Date → kya kiya ──
+  const LW = {};
+  const lwAdd = function(n, d, txt){ n = String(n||'').trim(); if(!n) return; if(!LW[n]) LW[n] = {}; if(!LW[n][d]) LW[n][d] = []; LW[n][d].push(txt); };
+  seedLab.filter(function(l){ return inR(l._d) && (!supF || dbS(l,1)===supF) && (!q || l._t.indexOf(q)>-1); }).forEach(function(l){ lwAdd(dbS(l,6), l._d, '🌱 Sowing '+dbS(l,4)+' — '+dbNum(l,7)+' PKT / '+dbNum(l,8)+' tray'); });
+  shf.forEach(function(r){ lwAdd(dbS(r,5), r._d, '🔄 Shifting '+dbS(r,4)+' — '+dbNum(r,6)+' tray'); });
+  wsl.forEach(function(r){ lwAdd(dbS(r,4), r._d, (dbS(r,3)==='spray'?'🌿 Spray ':'💧 Pani ')+dbS(r,2)+(dbNum(r,6)?' — '+dbNum(r,6)+' pump':'')); });
+  att.forEach(function(r){ lwAdd(dbS(r,4), r._d, '👷 '+dbS(r,5)+' — ₹'+dbN(dbNum(r,7)+dbNum(r,9))); });
+  ma.forEach(function(r){ String(dbS(r,4)).split(',').forEach(function(n){ lwAdd(n, r._d, '📋 '+dbS(r,3)+' ('+dbS(r,2)+')'); }); });
+  const lwNames = Object.keys(LW);
+  if(lwNames.length){
+    h += dbNode('Labour-wise', 'Kis labour ne kis din kya kiya', lwNames.length+' <small>labour</small>', function(){
+      return lwNames.sort().map(function(n){
+        const days = Object.keys(LW[n]).sort().reverse();
+        return dbNode('👤 '+dbEsc(n), days.length+' din', Object.values(LW[n]).reduce(function(s,a){ return s+a.length; },0)+' kaam',
+          dbTbl(['Date','Kya kiya'], days.map(function(d){ return '<tr><td style="white-space:nowrap;">'+dbFD(d)+'</td><td>'+LW[n][d].map(dbEsc).join('<br>')+'</td></tr>'; })), {cls:'dbn-leaf'});
+      }).join('');
+    }, {cls:'dbn-sec', sec:'lw', icon:'👤', color:'#e0f2f1'});
+  }
+
+  // ── 11. SUPERVISOR-WISE (sirf Manager/Admin) ──
+  if(!isSup){
+    const SW = {};
+    const swAdd = function(s, k, n){ s = String(s||'').trim(); if(!s) return; if(!SW[s]) SW[s] = {sow:0,sowE:0,shf:0,dsp:0,wat:0,chem:0,ma:0,att:0}; SW[s][k] += n; };
+    seed.forEach(function(r){ swAdd(dbS(r,1),'sow',dbNum(r,11)); swAdd(dbS(r,1),'sowE',1); });
+    shf.forEach(function(r){ swAdd(dbS(r,1),'shf',dbNum(r,6)); });
+    dsp.forEach(function(r){ swAdd(dbS(r,2),'dsp',dbNum(r,12)); });
+    wat.forEach(function(r){ swAdd(dbS(r,1),'wat',1); });
+    chem.forEach(function(r){ swAdd(dbS(r,1),'chem',1); });
+    ma.forEach(function(r){ swAdd(dbS(r,1),'ma',1); });
+    att.forEach(function(r){ swAdd(dbS(r,1),'att',1); });
+    const sn = Object.keys(SW);
+    if(sn.length){
+      h += dbNode('Supervisor-wise', 'Kis supervisor ne kitna kaam darj kiya', sn.length+' <small>supervisor</small>',
+        dbTbl(['Supervisor',{t:'Sowing',r:1},{t:'Shift tray',r:1},{t:'Dispatch',r:1},{t:'Pani',r:1},{t:'Dawai',r:1},{t:'Assign',r:1},{t:'Attendance',r:1}],
+          sn.sort().map(function(s){ const x = SW[s]; return '<tr><td><b>'+dbEsc(s)+'</b></td><td class="r">'+dbN(x.sow)+'<div class="dbt-s">'+x.sowE+' entry</div></td><td class="r">'+dbN(x.shf)+'</td><td class="r">'+dbN(x.dsp)+'</td><td class="r">'+x.wat+'</td><td class="r">'+x.chem+'</td><td class="r">'+x.ma+'</td><td class="r">'+x.att+'</td></tr>'; })),
+        {cls:'dbn-sec', sec:'sw', icon:'👔', color:'#e3f2fd'});
+    }
+  }
+
+  if(typeof dbFaldarSections === 'function') h += dbFaldarSections(inR, supF, q);
+
+  const any = seed.length||shf.length||dsp.length||bk.length||pays.length||att.length||wat.length||chem.length||ma.length;
+  if(!any) h += '<div class="card" style="text-align:center;padding:24px;color:var(--g5);">📭 Is date / filter me koi entry nahi mili</div>';
+  document.getElementById('dashContent').innerHTML = h;
+}
+function dbGo(sec){
+  const el = document.getElementById('dbsec-'+sec);
+  if(!el) return;
+  if(el.getAttribute('data-open') !== '1') dbTog(el.querySelector('.dbn-h'));
+  el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function dbExpandAll(open){
+  // sirf top-level sections khole/band kare (andar wale lazy hain)
+  document.querySelectorAll('#dashContent > .dbn').forEach(function(n){
+    const isOpen = n.getAttribute('data-open') === '1';
+    if(open !== isOpen) dbTog(n.querySelector('.dbn-h'));
+  });
+}
+
+function dbSlip(bid){
+  if(typeof pdBookings === 'undefined' || !pdBookings) pdBookings = {};
+  pdBookings[bid] = DB_RAW.bk.filter(function(x){ return dbS(x,23) === bid; });
+  redownloadSlip(bid);
+}
 
 </script>
 
