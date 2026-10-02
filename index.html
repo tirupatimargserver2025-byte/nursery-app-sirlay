@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>🌱 Nursery Management App</title>
+<title>Tirumala Green House Nursery</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/dist/tabler-icons.min.css">
 
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -29,8 +29,12 @@ body{font-family:'Baloo 2',sans-serif;background:var(--gd);min-height:100vh;colo
   background:linear-gradient(135deg,var(--gd),#0a2318);}
 .lbox{background:white;border-radius:24px;padding:32px 24px;width:100%;max-width:380px;
   box-shadow:0 20px 60px rgba(0,0,0,0.4);text-align:center;}
-.llogo{font-size:60px;margin-bottom:8px;}
-.ltitle{font-size:24px;font-weight:800;color:var(--gd);margin-bottom:2px;}
+.llogo{margin:0 auto 10px;width:110px;height:110px;border-radius:22px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(26,71,49,0.18);border:1px solid #e6efe9;overflow:hidden;}
+.llogo img{max-width:92%;max-height:92%;object-fit:contain;}
+.hico.hlogo{background:white!important;padding:3px;overflow:hidden;}
+.hico.hlogo img{width:100%;height:100%;object-fit:contain;border-radius:9px;}
+#menuTitle{font-size:15px;letter-spacing:0.2px;}
+.ltitle{font-size:21px;font-weight:800;color:var(--gd);margin-bottom:2px;line-height:1.2;}
 .lsub{font-size:13px;color:var(--g5);margin-bottom:20px;}
 .pin-inp{letter-spacing:8px;font-size:22px!important;font-weight:700;text-align:center;}
 .lbtn{width:100%;padding:14px;background:linear-gradient(135deg,var(--gl),var(--gm));
@@ -509,8 +513,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   body.has-side #deskSide{display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;width:264px;z-index:150;
     background:linear-gradient(180deg,#0f2e20 0%,#173f2c 55%,#1d4d35 100%);color:#d7efe1;box-shadow:4px 0 24px rgba(10,35,24,0.18);}
   .ds-brand{padding:20px 20px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,0.08);}
-  .ds-logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#4caf78,#2d7a4f);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 12px rgba(76,175,120,0.35);}
-  .ds-bt{font-size:17px;font-weight:800;color:white;line-height:1.1;}
+  .ds-logo{width:48px;height:48px;border-radius:12px;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;padding:3px;box-shadow:0 4px 12px rgba(0,0,0,0.25);}
+  .ds-logo img{width:100%;height:100%;object-fit:contain;}
+  .ds-bt{font-size:14px;font-weight:800;color:white;line-height:1.2;letter-spacing:0.2px;}
   .ds-bs{font-size:11.5px;color:#9fd0b4;font-weight:500;}
   .ds-user{margin:14px 14px 6px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.07);display:flex;align-items:center;gap:10px;}
   .ds-av{width:34px;height:34px;border-radius:50%;background:#a8e6c0;color:#123524;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0;}
@@ -533,6 +538,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
     background:linear-gradient(135deg,#1a4731,#2d7a4f);box-shadow:0 2px 14px rgba(10,35,24,0.15);}
   body.has-side .htop{flex:1;min-width:0;}
   body.has-side .htop h1{font-size:21px;}
+  body.has-side .hico.hlogo{width:48px;height:48px;}
   body.has-side .htop h1 span{font-size:12.5px;}
   body.has-side .hico{width:44px;height:44px;font-size:22px;}
   body.has-side .sbar{margin-top:0;gap:10px;}
@@ -595,9 +601,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 <!-- ════ LOGIN ════ -->
 <div class="screen" id="loginScreen" style="display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#1a4731,#0a2318);">
   <div class="lbox">
-    <div class="llogo">🌱</div>
-    <div class="ltitle">TGH Nursery</div>
-    <div class="lsub">Tirupati Green House Nursery, Sirlay</div>
+    <div class="llogo"><img class="app-logo" alt="Logo"></div>
+    <div class="ltitle">TIRUMALA GREEN HOUSE NURSERY</div>
+    <div class="lsub">Tirupati Nursery Road, Sirlay</div>
     <div class="linfo" id="loadInfo">⏳ Loading...</div>
     <div class="fr"><label>👷 Apna Naam Chunein</label>
       <select id="loginName"><option value="">-- Naam Chunein --</option></select></div>
@@ -612,8 +618,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 <div class="screen" id="menuScreen">
   <div class="hdr">
     <div class="htop">
-      <div class="hico" id="menuIco">🌱</div>
-      <h1 id="menuTitle">TGH Nursery <span>Tirupati Green House Nursery, Sirlay</span></h1>
+      <div class="hico hlogo" id="menuIco"><img class="app-logo" alt="Logo"></div>
+      <h1 id="menuTitle">TIRUMALA GREEN HOUSE NURSERY <span>Tirupati Nursery Road, Sirlay</span></h1>
       <div class="dbadge" id="dateTop"></div>
     </div>
     <div class="sbar">
@@ -1868,7 +1874,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261002-1805';
+const APP_VERSION = '20261002-1815';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -1924,6 +1930,8 @@ window.onload = () => {
   loadAll();
 };
 
+// App me logo (slip wala) har jagah
+window.addEventListener('DOMContentLoaded', function(){ document.querySelectorAll('img.app-logo').forEach(function(i){ i.src = TGH_LOGO; }); });
 // ════ SHOW SCREEN ════
 function togCvsum(h){var a=h.closest('.cvsum-card');a.setAttribute('data-open',a.getAttribute('data-open')==='1'?'0':'1');}
 function togCrop(h){var a=h.closest('.crop-card');a.setAttribute('data-open',a.getAttribute('data-open')==='1'?'0':'1');}
@@ -4190,6 +4198,8 @@ function submitDispatch(){
 
 
 // ═══════════════════ BOOKING MODULE ═══════════════════
+const NURSERY_NAME = 'TIRUMALA GREEN HOUSE NURSERY';
+const NURSERY_ADDR = 'Tirupati Nursery Road, Sirlay';
 const TGH_LOGO = "data:image/jpeg;base64,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";
 let bkLineCnt = 0;
 
@@ -4540,7 +4550,7 @@ function generateBookingPDF(d){
         '<div style="flex:1;padding:12px 16px;">' +
           '<div style="font-size:22px;font-weight:800;color:#1a472a;line-height:1.2;">Tirumala Green House Nursery Sirlay</div>' +
           '<div style="font-size:12px;color:#333;margin-top:5px;line-height:1.6;">' +
-            'Village Sirlay, Tehsil Barwaha, District Khargone (MP)<br/>' +
+            'Tirupati Nursery Road, Sirlay, Tehsil Barwaha, District Khargone (MP)<br/>' +
             'Phone: 9479457713 / 9479457722<br/>' +
             'Email: tirupatinursery@gmail.com &nbsp;|&nbsp; https://tirupatinursery.com' +
           '</div>' +
@@ -6223,18 +6233,17 @@ function djDownload(){
 
 // ── Image ka bahari dhaancha (header + tiles + footer) ──
 function djWrap(title, icon, who, date, tiles, secs){
-  const titleEl = document.querySelector('#menuTitle span');
-  const nursery = titleEl ? titleEl.textContent : 'Tirupati Green House Nursery';
+  const nursery = NURSERY_NAME;
   const d = new Date(date+'T00:00:00');
   const dStr = d.toLocaleDateString('en-IN',{weekday:'long', day:'2-digit', month:'short', year:'numeric'});
   const now = new Date();
   return '<div class="dj-card">'+
-      '<div class="dj-top"><div class="dj-n">🌱 '+djEsc(nursery)+'</div>'+
+      '<div class="dj-top"><div class="dj-n" style="display:flex;align-items:center;gap:10px;"><img src="'+TGH_LOGO+'" style="height:40px;width:40px;object-fit:contain;background:white;border-radius:8px;padding:2px;">'+djEsc(nursery)+' <span style="opacity:0.75;font-weight:500;">· '+djEsc(NURSERY_ADDR)+'</span></div>'+
         '<div class="dj-tt">'+djEsc(title)+'</div>'+
         '<div class="dj-sub">'+icon+' <b>'+djEsc(who)+'</b> &nbsp;•&nbsp; 📅 '+djEsc(dStr)+'</div></div>'+
       '<div class="dj-tiles">'+tiles.map(function(t){ return '<div class="dj-tile"><div class="dj-ti">'+t[0]+'</div><div class="dj-tv">'+t[1]+'</div><div class="dj-tl">'+t[2]+'</div></div>'; }).join('')+'</div>'+
       secs+
-      '<div class="dj-foot">Bana: '+now.toLocaleDateString('en-IN')+' '+now.toTimeString().slice(0,5)+' &nbsp;•&nbsp; TGH Nursery App</div>'+
+      '<div class="dj-foot">Bana: '+now.toLocaleDateString('en-IN')+' '+now.toTimeString().slice(0,5)+' &nbsp;•&nbsp; '+djEsc(NURSERY_NAME)+'</div>'+
     '</div>';
 }
 
@@ -6505,9 +6514,8 @@ function deskBuildSide(){
       items.push({sec:sec, label:label, icon:ic ? ic.className : 'ti ti-point', card:card});
     });
   }
-  const titleEl = document.querySelector('#menuTitle span');
   const role = curUser.role || '';
-  let h = '<div class="ds-brand"><div class="ds-logo">🌱</div><div><div class="ds-bt">TGH Nursery</div><div class="ds-bs">'+deskEsc(titleEl?titleEl.textContent.replace('Tirupati Green House Nursery, ',''):'')+'</div></div></div>'+
+  let h = '<div class="ds-brand"><div class="ds-logo"><img src="'+TGH_LOGO+'" alt=""></div><div style="min-width:0;"><div class="ds-bt">'+deskEsc(NURSERY_NAME)+'</div><div class="ds-bs">'+deskEsc(NURSERY_ADDR)+'</div></div></div>'+
     '<div class="ds-user"><div class="ds-av">'+deskEsc((curUser.name||'?').charAt(0).toUpperCase())+'</div><div style="min-width:0;"><div class="ds-un">'+deskEsc(curUser.name)+'</div><div class="ds-ur">'+deskEsc(role)+'</div></div></div>'+
     '<div class="ds-nav"><div class="ds-it on" data-i="home"><i class="ti ti-home"></i><span>Home</span></div>';
   let lastSec = null;
