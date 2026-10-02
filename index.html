@@ -57,7 +57,7 @@ body{font-family:'Baloo 2',sans-serif;background:var(--gd);min-height:100vh;colo
   color:white;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;}
 .sbar{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
 .sbadge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid rgba(255,255,255,0.3);}
-.sbadge.admin{background:rgba(255,215,0,0.2);color:#ffd700;}
+.sbadge.admin{background:rgba(94,234,212,0.16);color:#b8f5e8;border-color:rgba(94,234,212,0.35);}
 .sbadge.manager{background:rgba(66,165,245,0.2);color:#90caf9;}
 .sbadge.supervisor{background:rgba(76,175,120,0.2);color:var(--gg);}
 .sbadge.marketing{background:rgba(206,147,216,0.22);color:#f6dcff;}
@@ -70,7 +70,7 @@ body{font-family:'Baloo 2',sans-serif;background:var(--gd);min-height:100vh;colo
 /* MENU */
 .mwrap{max-width:540px;margin:0 auto;padding:18px 14px 90px;}
 .role-banner{border-radius:16px;padding:16px 18px;margin-bottom:8px;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#ffffff,#f4faf6);border:1px solid #e6f0ea;box-shadow:0 2px 10px rgba(16,40,28,0.05);}
-.role-banner.admin{background:linear-gradient(135deg,#f57f17,#f9a825);}
+.role-banner.admin{background:linear-gradient(135deg,#0b4f4a,#13786d 60%,#1a9585);}
 .role-banner.manager{background:linear-gradient(135deg,var(--bm),var(--bl));}
 .role-banner.supervisor{background:linear-gradient(135deg,var(--gm),var(--gl));}
 .role-banner.marketing{background:linear-gradient(135deg,#6a1b9a,#8e24aa);}
@@ -507,7 +507,20 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 /* ══════════ DESKTOP VIEW (laptop / computer — 1024px se badi screen) ══════════ */
 #deskSide{display:none;}
 @media (min-width:1024px){
-  body.has-side{background:#eef3f0;}
+  body.has-side{background:linear-gradient(160deg,#173f2d 0%,#11301f 55%,#0d2619 100%) fixed;}
+  /* Menu ke section — gehre dabbe, andar cards halke */
+  body.has-side .msec-acc{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);box-shadow:none;}
+  body.has-side .msec-head .mh-left{color:#d3f1df;}
+  body.has-side .msec-head .mh-left i,body.has-side .msec-chev{color:#8fd3ad!important;}
+  body.has-side .msec-count{background:rgba(168,230,192,0.18);color:#c8f2da;}
+  body.has-side .mcard{background:linear-gradient(180deg,#f7fbf8,#eaf3ee);border-color:transparent!important;box-shadow:0 2px 10px rgba(0,0,0,0.18);}
+  body.has-side .mcard:hover{box-shadow:0 10px 26px rgba(0,0,0,0.30);}
+  body.has-side .mwrap div[style*="letter-spacing:1px"]{color:#a8e6c0!important;}
+  body.has-side .mwrap div[style*="letter-spacing:1px"] i{color:#a8e6c0!important;}
+  body.has-side .role-banner{box-shadow:0 6px 22px rgba(0,0,0,0.25);border-color:transparent;}
+  /* Data wale cards: halka off-white, chhaya gehri */
+  body.has-side .card,body.has-side .rep-card,body.has-side .bk-card,body.has-side .crop-card{background:#f8fbf9;border-color:rgba(255,255,255,0.4);box-shadow:0 4px 18px rgba(0,0,0,0.22);}
+  body.has-side .hdr{background:linear-gradient(135deg,#0f2e20,#1a4731);border-bottom:1px solid rgba(255,255,255,0.06);}
   body.has-side .screen:not(#loginScreen){margin-left:264px;}
   /* ── Sidebar ── */
   body.has-side #deskSide{display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;width:264px;z-index:150;
@@ -1874,7 +1887,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261002-1815';
+const APP_VERSION = '20261002-1830';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
