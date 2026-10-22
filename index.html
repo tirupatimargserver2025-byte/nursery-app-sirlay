@@ -226,6 +226,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .rep-title{font-size:15px;font-weight:800;color:#1a2e26;margin-bottom:4px;letter-spacing:-0.2px;}
 .rep-sub{font-size:12px;color:var(--g5);margin-bottom:12px;}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+#reportContent .crop-card[data-open="1"] .crop-body{max-height:none;}
+#reportContent .rep-card:has(> .crop-card){display:block!important;}
+#reportContent .rep-card > .crop-card{margin:0 0 10px!important;}
 .stat-item{background:var(--g1);border-radius:10px;padding:10px;text-align:center;}
 .stat-item .sv{font-size:22px;font-weight:800;color:var(--gm);display:block;}
 .stat-item .sl{font-size:10px;color:var(--g5);text-transform:uppercase;}
@@ -1194,6 +1197,15 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
         <div><label>From Date</label><input type="date" id="repFrom"></div>
         <div><label>To Date</label><input type="date" id="repTo"></div>
       </div>
+      <div class="g2" id="repExtra">
+        <div><label>📍 Area</label><select id="repArea" onchange="repReRender()"><option value="">📍 Sab Area</option></select></div>
+        <div><label>💉 Kaam</label><select id="repKaam" onchange="repReRender()">
+          <option value="">Sab (Sowing + Attendance + Pani/Spray)</option>
+          <option value="pani">💧 Sirf Pani</option>
+          <option value="spray">🌿 Sirf Spray</option>
+          <option value="drench">💉 Sirf Drench</option>
+        </select></div>
+      </div>
       <button id="repBtn" onclick="repBtnClick()" style="width:100%;padding:10px;background:var(--pu);color:white;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;">🔍 Report Dekho</button>
     </div>
     <div id="reportContent"></div>
@@ -1948,7 +1960,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261002-1930';
+const APP_VERSION = '20261022-1440';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -2234,6 +2246,7 @@ function openMod(mod) {
   } else if(mod==='attReport') {
     document.getElementById('repSupB').textContent=(curUser.role==='Manager'?'👔':'👑')+' '+curUser.name;
     document.getElementById('repTitle').textContent='👷 Attendance Report';
+    document.getElementById('repExtra').style.display='none';
     // Reset date range: last 30 days to today (so naye entries dikhein)
     document.getElementById('repTo').value = localISO(new Date());
     const attF = new Date(); attF.setDate(attF.getDate()-30);
@@ -2270,6 +2283,7 @@ function openMod(mod) {
   } else if(mod==='report'||mod==='waterReport') {
     document.getElementById('repSupB').textContent=(curUser.role==='Manager'?'👔':'👑')+' '+curUser.name;
     document.getElementById('repTitle').textContent='📊 Daily Report';
+    document.getElementById('repExtra').style.display='';
     show('reportScreen');
   } else if(mod==='adminUsers') {
     loadUserList();
@@ -3317,80 +3331,154 @@ function repBtnClick(){
   else loadReport();
 }
 
+let REP_DATA = null, REP_FROM = '', REP_TO = '';
 function loadReport(){
   const from=document.getElementById('repFrom').value;
   const to=document.getElementById('repTo').value;
   const con=document.getElementById('reportContent');
   con.innerHTML='<div class="card" style="margin-top:10px;text-align:center;padding:20px;"><div style="font-size:40px;margin-bottom:10px;">⏳</div><div style="font-weight:700;color:var(--gd);font-size:15px;">Report Load Ho Rahi Hai...</div></div>';
-  
-  // Load from multiple sheets
-  const sheets=['Variety Records','Attendance Records','Spraying Records','Watering Records','Morning Assignment'];
+  // Sahi sheets (pehle 'Variety Records' purani sheet padhi ja rahi thi — isliye Seed Sowing 0 aata tha)
+  const sheets=['Seed Sowing Data','Attendance Records','Spraying Records','Watering Records','Chemical Records','W-S Labour'];
   const results={};
   let loaded=0;
-  
+  const done=function(){ loaded++; if(loaded===sheets.length){ REP_DATA=results; REP_FROM=from; REP_TO=to; repFillAreas(); renderReport(results, from, to); } };
   sheets.forEach(sheet=>{
-    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(sheet)+'&tq='+encodeURIComponent('select * where A >= date \''+from+'\' and A <= date \''+to+'\''))
+    fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&headers=1&sheet='+encodeURIComponent(sheet)+'&tq='+encodeURIComponent('select * where A >= date \''+from+'\' and A <= date \''+to+'\'')+'&t='+Date.now())
       .then(r=>r.text())
       .then(txt=>{
         try{
           const json=JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
-          results[sheet]=json.table.rows||[];
+          results[sheet]=(json.table&&json.table.rows||[]).filter(r=>r.c&&r.c[0]&&r.c[0].v!=null&&r.c[0].v!=='Date');
         }catch(e){results[sheet]=[];}
-        loaded++;
-        if(loaded===sheets.length) renderReport(results, from, to);
-      }).catch(()=>{results[sheet]=[];loaded++;if(loaded===sheets.length) renderReport(results,from,to);});
+        done();
+      }).catch(()=>{results[sheet]=[];done();});
   });
 }
+// Area dropdown: data me jo area aaye wahi (dono nursery me apne aap sahi)
+function repFillAreas(){
+  const sel=document.getElementById('repArea'); if(!sel||!REP_DATA) return;
+  const cur=sel.value, set={};
+  ['Seed Sowing Data','Attendance Records','Spraying Records','Watering Records','Chemical Records','W-S Labour'].forEach(function(s){
+    (REP_DATA[s]||[]).forEach(function(r){ const a=String(r.c[2]?.v||'').trim(); if(a) set[a]=1; });
+  });
+  sel.innerHTML='<option value="">📍 Sab Area</option>'+Object.keys(set).sort().map(function(a){ return '<option'+(a===cur?' selected':'')+'>'+a+'</option>'; }).join('');
+}
+function repReRender(){ if(REP_DATA) renderReport(REP_DATA, REP_FROM, REP_TO); }
+function repV(r,i){ const c=r.c&&r.c[i]; return (c&&c.v!=null)?c.v:''; }
+function repS(r,i){ return String(repV(r,i)).trim(); }
+function repN(r,i){ const n=parseFloat(repV(r,i)); return isNaN(n)?0:n; }
+function repD(r){ return (typeof djISO==='function') ? djISO(repV(r,0)) : String(repV(r,0)); }
+function repE(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function renderReport(data, from, to){
   const con=document.getElementById('reportContent');
+  const areaF=(document.getElementById('repArea')||{}).value||'';
+  const kaamF=(document.getElementById('repKaam')||{}).value||'';
+  const aOk=function(r){ return !areaF || repS(r,2)===areaF; };
+  const range=(typeof formatDate==='function'?formatDate(from)+' se '+formatDate(to):from+' se '+to)+(areaF?' • 📍 '+repE(areaF):'');
   let html='';
-  
-  // Variety Records
-  const vRows=data['Variety Records']||[];
-  const totalPlants=vRows.reduce((s,r)=>s+(parseFloat(r.c?.[11]?.v)||0),0);
-  html+='<div class="rep-card"><div class="rep-title">🌱 Seed Sowing</div><div class="rep-sub">'+from+' se '+to+'</div>'+
-    '<div class="stat-grid">'+
-    '<div class="stat-item"><span class="sv">'+vRows.length+'</span><div class="sl">Entries</div></div>'+
-    '<div class="stat-item"><span class="sv">'+totalPlants.toLocaleString()+'</span><div class="sl">Total Plants</div></div>'+
-    '<div class="stat-item"><span class="sv">'+new Set(vRows.map(r=>r.c?.[1]?.v)).size+'</span><div class="sl">Supervisors</div></div>'+
+
+  // ── Seed Sowing ──
+  if(!kaamF){
+    const vRows=(data['Seed Sowing Data']||[]).filter(aOk);
+    const totalPlants=vRows.reduce((s,r)=>s+repN(r,11),0);
+    html+='<div class="rep-card"><div class="rep-title">🌱 Seed Sowing</div><div class="rep-sub">'+range+'</div>'+
+      '<div class="stat-grid">'+
+      '<div class="stat-item"><span class="sv">'+vRows.length+'</span><div class="sl">Entries</div></div>'+
+      '<div class="stat-item"><span class="sv">'+totalPlants.toLocaleString('en-IN')+'</span><div class="sl">Total Plants</div></div>'+
+      '<div class="stat-item"><span class="sv">'+new Set(vRows.map(r=>repS(r,1))).size+'</span><div class="sl">Supervisors</div></div>'+
+      '</div>';
+    if(vRows.length>0){
+      html+='<div style="overflow-x:auto;"><table class="att-table"><thead><tr><th>Date</th><th>Supervisor</th><th>Area</th><th>Crop – Variety</th><th>PKT</th><th>Tray</th><th>Plants</th></tr></thead><tbody>';
+      vRows.slice().sort((a,b)=>repD(a)<repD(b)?1:-1).forEach(r=>{
+        html+='<tr><td>'+(typeof formatDate==='function'?formatDate(repD(r)):repD(r))+'</td><td>'+repE(repS(r,1))+'</td><td>'+repE(repS(r,2))+'</td><td style="text-align:left;">'+repE(repS(r,4))+' – '+repE(repS(r,5))+'</td><td>'+repN(r,7)+'</td><td>'+repN(r,8)+'</td><td><b>'+repN(r,11).toLocaleString('en-IN')+'</b></td></tr>';
+      });
+      html+='</tbody></table></div>';
+    }
+    html+='</div>';
+
+    // ── Attendance ──
+    const attRows=(data['Attendance Records']||[]).filter(aOk);
+    const present=attRows.filter(r=>repS(r,5)==='Present').length;
+    const half=attRows.filter(r=>repS(r,5)==='Half Day').length;
+    const absent=attRows.filter(r=>repS(r,5)==='Absent').length;
+    const totalWage=attRows.reduce((s,r)=>s+repN(r,7)+repN(r,9),0);
+    html+='<div class="rep-card"><div class="rep-title">👷 Attendance</div><div class="rep-sub">'+range+'</div>'+
+      '<div class="stat-grid">'+
+      '<div class="stat-item"><span class="sv" style="color:var(--gm);">'+present+'</span><div class="sl">Present</div></div>'+
+      '<div class="stat-item"><span class="sv" style="color:#f57c00;">'+half+'</span><div class="sl">Half Day</div></div>'+
+      '<div class="stat-item"><span class="sv" style="color:var(--rd);">'+absent+'</span><div class="sl">Absent</div></div>'+
+      '</div>'+
+      '<div style="background:var(--gp);border-radius:10px;padding:10px;text-align:center;font-weight:700;color:var(--gm);">💰 Total Wage: ₹'+totalWage.toLocaleString('en-IN')+'</div>'+
+      '</div>';
+  }
+
+  // ── Watering & Spraying (poori detail) ──
+  const isDrench=function(r){ return /drench|ड्रिं/i.test(repS(r,6)); };
+  let wat=(data['Watering Records']||[]).filter(aOk);
+  let chem=(data['Chemical Records']||[]).filter(aOk);
+  const spr=(data['Spraying Records']||[]).filter(aOk);
+  const wsl=(data['W-S Labour']||[]).filter(aOk);
+  if(kaamF==='pani') chem=[];
+  if(kaamF==='spray'){ wat=[]; chem=chem.filter(function(r){ return !isDrench(r); }); }
+  if(kaamF==='drench'){ wat=[]; chem=chem.filter(isDrench); }
+  const nSpray=chem.filter(function(r){ return !isDrench(r); }).length, nDrench=chem.filter(isDrench).length;
+  const pumps=(kaamF==='pani'?0:spr.reduce(function(s,r){ return s+repN(r,9); },0));
+  html+='<div class="rep-card"><div class="rep-title">💧 Watering & Spraying</div><div class="rep-sub">'+range+(kaamF?' • '+({pani:'💧 Sirf Pani',spray:'🌿 Sirf Spray',drench:'💉 Sirf Drench'})[kaamF]:'')+'</div>'+
+    '<div class="stat-grid" style="grid-template-columns:repeat(4,1fr);">'+
+    '<div class="stat-item"><span class="sv" style="color:var(--bm);">'+wat.length+'</span><div class="sl">Pani</div></div>'+
+    '<div class="stat-item"><span class="sv" style="color:#2e7d32;">'+nSpray+'</span><div class="sl">Spray (dawai)</div></div>'+
+    '<div class="stat-item"><span class="sv" style="color:#6a1b9a;">'+nDrench+'</span><div class="sl">Drench (dawai)</div></div>'+
+    '<div class="stat-item"><span class="sv">'+pumps+'</span><div class="sl">Pump</div></div>'+
     '</div>';
-  if(vRows.length>0){
-    html+='<div style="overflow-x:auto;"><table class="att-table"><thead><tr><th>Date</th><th>Supervisor</th><th>Variety</th><th>PKT</th><th>Plants</th></tr></thead><tbody>';
-    vRows.slice(0,20).forEach(r=>{
-      if(!r.c) return;
-      html+='<tr><td>'+(r.c[0]?.v||'')+' </td><td>'+(r.c[1]?.v||'')+'</td><td>'+(r.c[5]?.v||'')+'</td><td>'+(r.c[7]?.v||0)+'</td><td>'+(r.c[11]?.v||0)+'</td></tr>';
+  // Date -> Area
+  const keys={};
+  wat.concat(chem).forEach(function(r){ keys[repD(r)+'|'+repS(r,2)]=1; });
+  const kl=Object.keys(keys).sort(function(a,b){ return a<b?1:-1; });
+  if(!kl.length){
+    html+='<div style="text-align:center;color:var(--g5);padding:12px;">Is filter me koi pani / spray / drench entry nahi mili</div>';
+  } else {
+    // Date-wise group
+    const byDate={}; kl.forEach(function(k){ const d=k.split('|')[0]; (byDate[d]=byDate[d]||[]).push(k.split('|').slice(1).join('|')); });
+    Object.keys(byDate).sort().reverse().forEach(function(d, di){
+      const areas=byDate[d];
+      const dW=wat.filter(function(r){ return repD(r)===d; }), dC=chem.filter(function(r){ return repD(r)===d; });
+      html+='<div class="crop-card" data-open="'+(di===0?'1':'0')+'">'+
+        '<div class="crop-head" onclick="togCrop(this)">'+
+          '<div style="flex:1;"><div style="font-weight:800;font-size:14.5px;color:#1a2e26;">📅 '+(typeof formatDate==='function'?formatDate(d):d)+'</div>'+
+          '<div style="font-size:12px;color:#5a6a63;font-weight:500;margin-top:2px;">'+areas.length+' area • '+(dW.length?dW.length+' pani • ':'')+(dC.length?dC.length+' dawai':'')+'</div></div>'+
+          '<i class="ti ti-chevron-down crop-chev" style="color:#2d7a4f;font-size:18px;margin-left:10px;"></i>'+
+        '</div><div class="crop-body" style="padding:0 10px 10px;">';
+      areas.sort().forEach(function(a){
+        const w=dW.filter(function(r){ return repS(r,2)===a; }), c=dC.filter(function(r){ return repS(r,2)===a; });
+        const s=spr.filter(function(r){ return repD(r)===d && repS(r,2)===a; });
+        const labs=wsl.filter(function(l){ return repD(l)===d && repS(l,2)===a && (kaamF==='pani'?repS(l,3)==='water':kaamF?repS(l,3)==='spray':true); });
+        html+='<div style="margin-top:10px;border:1px solid #e3ece7;border-radius:10px;overflow:hidden;background:#fbfdfc;">'+
+          '<div style="padding:8px 12px;background:#eef6f1;font-weight:800;color:#1a4731;font-size:13.5px;">📍 '+repE(a)+
+          (s.length&&kaamF!=='pani'?' <span style="font-weight:600;color:#5a6a63;font-size:12px;">• '+s.reduce(function(x,r){ return x+repN(r,9); },0)+' pump</span>':'')+'</div>';
+        if(c.length){
+          html+='<div style="overflow-x:auto;"><table class="att-table"><thead><tr><th>🧪 Dawai / Khaad</th><th>Kya kiya</th><th>Matra</th><th>Crop – Variety</th><th>Supervisor</th></tr></thead><tbody>'+
+            c.map(function(r){ const dr=isDrench(r);
+              return '<tr><td style="text-align:left;"><b>'+repE(repS(r,5)||'—')+'</b></td><td><span class="badge '+(dr?'badge-purple':'badge-green')+'">'+(dr?'💉 Drench':'🌿 Spray')+'</span></td><td>'+(repN(r,7)||'')+' '+repE(repS(r,8))+'</td><td style="text-align:left;">'+repE([repS(r,3),repS(r,4)].filter(Boolean).join(' – ')||'Poora area')+'</td><td>'+repE(repS(r,1))+'</td></tr>'; }).join('')+
+            '</tbody></table></div>';
+        }
+        if(w.length){
+          html+='<div style="overflow-x:auto;"><table class="att-table"><thead><tr><th>💧 Pani</th><th>Litre</th><th>Samay</th><th>Plants</th><th>Supervisor</th></tr></thead><tbody>'+
+            w.map(function(r){ const t1=(typeof djTime==='function'?djTime(r,4):''), t2=(typeof djTime==='function'?djTime(r,5):'');
+              return '<tr><td>'+repE(repS(r,6)||'—')+'</td><td>'+(repN(r,7)?repN(r,7).toLocaleString('en-IN'):'—')+'</td><td>'+(t1||t2?t1+' – '+t2:'—')+'</td><td>'+repE(repS(r,8)||'—')+'</td><td>'+repE(repS(r,1))+'</td></tr>'; }).join('')+
+            '</tbody></table></div>';
+        }
+        if(labs.length){
+          html+='<div style="overflow-x:auto;"><table class="att-table"><thead><tr><th>👷 Labour</th><th>Kaam</th><th>Ghante</th><th>Pump</th></tr></thead><tbody>'+
+            labs.map(function(l){ return '<tr><td style="text-align:left;">'+repE(repS(l,4))+'</td><td>'+(repS(l,3)==='spray'?'Spray':'Pani')+'</td><td>'+(repN(l,5)||'—')+'</td><td>'+(repN(l,6)||'—')+'</td></tr>'; }).join('')+
+            '</tbody></table></div>';
+        }
+        html+='</div>';
+      });
+      html+='</div></div>';
     });
-    html+='</tbody></table></div>';
-    if(vRows.length>20) html+='<div style="text-align:center;color:var(--g5);padding:8px;font-size:12px;">... aur '+(vRows.length-20)+' entries</div>';
   }
   html+='</div>';
-
-  // Attendance Records
-  const attRows=data['Attendance Records']||[];
-  const present=attRows.filter(r=>r.c?.[5]?.v==='Present').length;
-  const half=attRows.filter(r=>r.c?.[5]?.v==='Half Day').length;
-  const absent=attRows.filter(r=>r.c?.[5]?.v==='Absent').length;
-  const totalWage=attRows.reduce((s,r)=>s+(parseFloat(r.c?.[7]?.v)||0)+(parseFloat(r.c?.[9]?.v)||0),0);
-  html+='<div class="rep-card"><div class="rep-title">👷 Attendance</div><div class="rep-sub">'+from+' se '+to+'</div>'+
-    '<div class="stat-grid">'+
-    '<div class="stat-item"><span class="sv" style="color:var(--gm);">'+present+'</span><div class="sl">Present</div></div>'+
-    '<div class="stat-item"><span class="sv" style="color:#f57c00;">'+half+'</span><div class="sl">Half Day</div></div>'+
-    '<div class="stat-item"><span class="sv" style="color:var(--rd);">'+absent+'</span><div class="sl">Absent</div></div>'+
-    '</div>'+
-    '<div style="background:var(--gp);border-radius:10px;padding:10px;text-align:center;font-weight:700;color:var(--gm);">💰 Total Wage: ₹'+totalWage+'</div>'+
-    '</div>';
-
-  // Watering + Spraying
-  const spRows=data['Spraying Records']||[];
-  const watRows=data['Watering Records']||[];
-  html+='<div class="rep-card"><div class="rep-title">💧 Watering & Spraying</div><div class="rep-sub">'+from+' se '+to+'</div>'+
-    '<div class="stat-grid">'+
-    '<div class="stat-item"><span class="sv">'+watRows.length+'</span><div class="sl">Watering</div></div>'+
-    '<div class="stat-item"><span class="sv">'+spRows.length+'</span><div class="sl">Spraying</div></div>'+
-    '<div class="stat-item"><span class="sv">'+(watRows.length+spRows.length)+'</span><div class="sl">Total</div></div>'+
-    '</div></div>';
-
   con.innerHTML=html;
 }
 
