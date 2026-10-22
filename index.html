@@ -229,6 +229,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 #reportContent .crop-card[data-open="1"] .crop-body{max-height:none;}
 #reportContent .rep-card:has(> .crop-card){display:block!important;}
 #reportContent .rep-card > .crop-card{margin:0 0 10px!important;}
+.rep-sp td{font-size:13px;}
+.rep-sp tr.rep-newday td{border-top:2px solid #b8d9c5;}
+.rep-sp tbody tr:nth-child(even) td{background:#f8fbf9;}
 .stat-item{background:var(--g1);border-radius:10px;padding:10px;text-align:center;}
 .stat-item .sv{font-size:22px;font-weight:800;color:var(--gm);display:block;}
 .stat-item .sl{font-size:10px;color:var(--g5);text-transform:uppercase;}
@@ -1960,7 +1963,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261022-1440';
+const APP_VERSION = '20261022-1500';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -3431,52 +3434,34 @@ function renderReport(data, from, to){
     '<div class="stat-item"><span class="sv" style="color:#6a1b9a;">'+nDrench+'</span><div class="sl">Drench (dawai)</div></div>'+
     '<div class="stat-item"><span class="sv">'+pumps+'</span><div class="sl">Pump</div></div>'+
     '</div>';
-  // Date -> Area
-  const keys={};
-  wat.concat(chem).forEach(function(r){ keys[repD(r)+'|'+repS(r,2)]=1; });
-  const kl=Object.keys(keys).sort(function(a,b){ return a<b?1:-1; });
-  if(!kl.length){
+  // Ek hi table: Date-wise kaunsi dawai/khaad — Spray ya Drench (aur Pani)
+  const rowsT=[];
+  chem.forEach(function(r){ rowsT.push({d:repD(r), a:repS(r,2), k:isDrench(r)?'drench':'spray', r:r}); });
+  wat.forEach(function(r){ rowsT.push({d:repD(r), a:repS(r,2), k:'pani', r:r}); });
+  rowsT.sort(function(x,y){ return x.d<y.d?1:x.d>y.d?-1:(x.a<y.a?-1:x.a>y.a?1:(x.k<y.k?-1:1)); });
+  if(!rowsT.length){
     html+='<div style="text-align:center;color:var(--g5);padding:12px;">Is filter me koi pani / spray / drench entry nahi mili</div>';
   } else {
-    // Date-wise group
-    const byDate={}; kl.forEach(function(k){ const d=k.split('|')[0]; (byDate[d]=byDate[d]||[]).push(k.split('|').slice(1).join('|')); });
-    Object.keys(byDate).sort().reverse().forEach(function(d, di){
-      const areas=byDate[d];
-      const dW=wat.filter(function(r){ return repD(r)===d; }), dC=chem.filter(function(r){ return repD(r)===d; });
-      html+='<div class="crop-card" data-open="'+(di===0?'1':'0')+'">'+
-        '<div class="crop-head" onclick="togCrop(this)">'+
-          '<div style="flex:1;"><div style="font-weight:800;font-size:14.5px;color:#1a2e26;">📅 '+(typeof formatDate==='function'?formatDate(d):d)+'</div>'+
-          '<div style="font-size:12px;color:#5a6a63;font-weight:500;margin-top:2px;">'+areas.length+' area • '+(dW.length?dW.length+' pani • ':'')+(dC.length?dC.length+' dawai':'')+'</div></div>'+
-          '<i class="ti ti-chevron-down crop-chev" style="color:#2d7a4f;font-size:18px;margin-left:10px;"></i>'+
-        '</div><div class="crop-body" style="padding:0 10px 10px;">';
-      areas.sort().forEach(function(a){
-        const w=dW.filter(function(r){ return repS(r,2)===a; }), c=dC.filter(function(r){ return repS(r,2)===a; });
-        const s=spr.filter(function(r){ return repD(r)===d && repS(r,2)===a; });
-        const labs=wsl.filter(function(l){ return repD(l)===d && repS(l,2)===a && (kaamF==='pani'?repS(l,3)==='water':kaamF?repS(l,3)==='spray':true); });
-        html+='<div style="margin-top:10px;border:1px solid #e3ece7;border-radius:10px;overflow:hidden;background:#fbfdfc;">'+
-          '<div style="padding:8px 12px;background:#eef6f1;font-weight:800;color:#1a4731;font-size:13.5px;">📍 '+repE(a)+
-          (s.length&&kaamF!=='pani'?' <span style="font-weight:600;color:#5a6a63;font-size:12px;">• '+s.reduce(function(x,r){ return x+repN(r,9); },0)+' pump</span>':'')+'</div>';
-        if(c.length){
-          html+='<div style="overflow-x:auto;"><table class="att-table"><thead><tr><th>🧪 Dawai / Khaad</th><th>Kya kiya</th><th>Matra</th><th>Crop – Variety</th><th>Supervisor</th></tr></thead><tbody>'+
-            c.map(function(r){ const dr=isDrench(r);
-              return '<tr><td style="text-align:left;"><b>'+repE(repS(r,5)||'—')+'</b></td><td><span class="badge '+(dr?'badge-purple':'badge-green')+'">'+(dr?'💉 Drench':'🌿 Spray')+'</span></td><td>'+(repN(r,7)||'')+' '+repE(repS(r,8))+'</td><td style="text-align:left;">'+repE([repS(r,3),repS(r,4)].filter(Boolean).join(' – ')||'Poora area')+'</td><td>'+repE(repS(r,1))+'</td></tr>'; }).join('')+
-            '</tbody></table></div>';
-        }
-        if(w.length){
-          html+='<div style="overflow-x:auto;"><table class="att-table"><thead><tr><th>💧 Pani</th><th>Litre</th><th>Samay</th><th>Plants</th><th>Supervisor</th></tr></thead><tbody>'+
-            w.map(function(r){ const t1=(typeof djTime==='function'?djTime(r,4):''), t2=(typeof djTime==='function'?djTime(r,5):'');
-              return '<tr><td>'+repE(repS(r,6)||'—')+'</td><td>'+(repN(r,7)?repN(r,7).toLocaleString('en-IN'):'—')+'</td><td>'+(t1||t2?t1+' – '+t2:'—')+'</td><td>'+repE(repS(r,8)||'—')+'</td><td>'+repE(repS(r,1))+'</td></tr>'; }).join('')+
-            '</tbody></table></div>';
-        }
-        if(labs.length){
-          html+='<div style="overflow-x:auto;"><table class="att-table"><thead><tr><th>👷 Labour</th><th>Kaam</th><th>Ghante</th><th>Pump</th></tr></thead><tbody>'+
-            labs.map(function(l){ return '<tr><td style="text-align:left;">'+repE(repS(l,4))+'</td><td>'+(repS(l,3)==='spray'?'Spray':'Pani')+'</td><td>'+(repN(l,5)||'—')+'</td><td>'+(repN(l,6)||'—')+'</td></tr>'; }).join('')+
-            '</tbody></table></div>';
-        }
-        html+='</div>';
-      });
-      html+='</div></div>';
+    html+='<div style="overflow-x:auto;"><table class="att-table rep-sp"><thead><tr><th>Date</th><th>Area</th><th>Kya kiya</th><th>Dawai / Khaad</th><th>Matra</th><th>Crop – Variety</th><th>Supervisor</th></tr></thead><tbody>';
+    let lastD='';
+    rowsT.forEach(function(x){
+      const r=x.r, newDay=(x.d!==lastD); lastD=x.d;
+      const dTxt=(typeof formatDate==='function'?formatDate(x.d):x.d);
+      let kya, dawai, matra, cv;
+      if(x.k==='pani'){
+        kya='<span class="badge badge-blue">💧 Pani</span>';
+        dawai=repE(repS(r,6)||'—');
+        matra=repN(r,7)?repN(r,7).toLocaleString('en-IN')+' L':'—';
+        cv=repE(repS(r,8)||'—');
+      } else {
+        kya=x.k==='drench'?'<span class="badge badge-purple">💉 Drench</span>':'<span class="badge badge-green">🌿 Spray</span>';
+        dawai='<b>'+repE(repS(r,5)||'—')+'</b>';
+        matra=(repN(r,7)||'')+' '+repE(repS(r,8));
+        cv=repE([repS(r,3),repS(r,4)].filter(Boolean).join(' – ')||'Poora area');
+      }
+      html+='<tr'+(newDay?' class="rep-newday"':'')+'><td style="white-space:nowrap;font-weight:'+(newDay?'800':'500')+';color:'+(newDay?'#1a4731':'#9aa9a2')+';">'+dTxt+'</td><td>'+repE(x.a)+'</td><td>'+kya+'</td><td style="text-align:left;">'+dawai+'</td><td style="white-space:nowrap;">'+matra+'</td><td style="text-align:left;">'+cv+'</td><td>'+repE(repS(r,1))+'</td></tr>';
     });
+    html+='</tbody></table></div>';
   }
   html+='</div>';
   con.innerHTML=html;
