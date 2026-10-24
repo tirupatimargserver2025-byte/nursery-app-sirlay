@@ -1977,7 +1977,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261024-1615';
+const APP_VERSION = '20261024-1640';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -4946,6 +4946,8 @@ function openBookingReport(){
 
 function loadBrVariety(){ cvFilter('brCrop', 'brVariety'); }
 
+// Crop/Variety ek jaisa: "Maxx basf" aur "Maxx BASF" = "MAXX BASF" (chhote-bade akshar aur faltu space ka fark nahi)
+function bkNorm(s){ return String(s == null ? '' : s).replace(/\s+/g, ' ').trim().toUpperCase(); }
 function loadBookingReport(){
   const from = document.getElementById('brFrom').value;
   const to = document.getElementById('brTo').value;
@@ -4983,8 +4985,8 @@ function loadBookingReport(){
           } else {
             if(r._date < from || r._date > to) return false;
           }
-          if(cropF && (r.c[6]?.v||'').toString() !== cropF) return false;
-          if(varF && (r.c[7]?.v||'').toString() !== varF) return false;
+          if(cropF && bkNorm(r.c[6]?.v) !== bkNorm(cropF)) return false;
+          if(varF && bkNorm(r.c[7]?.v) !== bkNorm(varF)) return false;
           if(farmerF && !(r.c[1]?.v||'').toString().toLowerCase().includes(farmerF)) return false;
           if(villF && !(r.c[2]?.v||'').toString().toLowerCase().includes(villF)) return false;
           if(statusF && (r.c[21]?.v||'Pending').toString() !== statusF) return false;
@@ -5018,7 +5020,7 @@ function loadBookingReport(){
             mobile:(f0.c[5]?.v||''), firstPay:parseFloat(f0.c[11]?.v)||0, secondPay:parseFloat(f0.c[15]?.v)||0,
             totalRec:parseFloat(f0.c[19]?.v)||0, lines:[] };
           groups[bid].lines.push({
-            crop:(r.c[6]?.v||''), variety:(r.c[7]?.v||''), plant:parseInt(r.c[8]?.v)||0,
+            crop:bkNorm(r.c[6]?.v), variety:bkNorm(r.c[7]?.v), plant:parseInt(r.c[8]?.v)||0,
             rate:parseFloat(r.c[9]?.v)||0, deliv:fixD(r.c[10]?.v), delivered:parseFloat(r.c[25]?.v)||0,
             status:(r.c[21]?.v||'Pending').toString()
           });
