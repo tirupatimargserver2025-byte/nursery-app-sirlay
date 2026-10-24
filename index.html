@@ -178,6 +178,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   border:2px solid var(--gl);border-radius:var(--rs);max-height:150px;overflow-y:auto;
   z-index:50;box-shadow:var(--sh);display:none;}
 .ldrop-list.show{display:block;}
+.bk-fs-it{line-height:1.35;}
+.card.dk-flat>.fr.bk-fs{grid-column:1/-1;}
 .ldrop-item{padding:8px 12px;cursor:pointer;font-size:13px;font-weight:600;border-bottom:1px solid var(--g2);}
 .ldrop-item:hover{background:var(--gp);}
 
@@ -1574,6 +1576,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   <div class="wrap">
     <div class="card">
       <div class="ctitle">👨 Farmer Details</div>
+      <div class="fr bk-fs" style="position:relative;">
+        <label>🔍 Purana kisan dhoondho</label>
+        <input type="text" id="bkFs" placeholder="Naam, mobile ya gaon likho..." autocomplete="off" oninput="bkFarmerSearch()" onfocus="bkFarmerSearch()" onblur="setTimeout(function(){document.getElementById('bkFsDrop').className='ldrop-list';},200)" style="border-color:#a8d5b9;background:#f3faf6;">
+        <div class="ldrop-list" id="bkFsDrop" style="max-height:300px;"></div>
+        <div id="bkFsInfo" style="font-size:11.5px;color:#5a6a63;margin-top:4px;"></div>
+      </div>
       <div class="g2">
         <div><label>📅 Booking Date</label><input type="date" id="bkDate"></div>
         <div><label>👨 Farmer Naam <span style="color:var(--rd);">*</span></label><input type="text" id="bkFarmer" placeholder="Kisan ka naam"></div>
@@ -1968,7 +1976,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261024-1610';
+const APP_VERSION = '20261024-1620';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -4365,7 +4373,10 @@ function openBookingForm(){
   document.getElementById('bkFarmer').value = '';
   document.getElementById('bkVillage').value = '';
   document.getElementById('bkTehsil').value = '';
+  if(document.getElementById('bkDistrict')) document.getElementById('bkDistrict').value = '';
   document.getElementById('bkMobile').value = '';
+  document.getElementById('bkFs').value = '';
+  bkLoadFarmers();
   document.getElementById('bkPayMode').value = 'Cash';
   document.getElementById('bkCash').value = '';
   document.getElementById('bkBank1Name').value = '';
@@ -4385,6 +4396,65 @@ function openBookingForm(){
   bkLineCnt = 0;
   addBkLine();
   show('bookingScreen');
+}
+
+// ════ KISAN LIST (Booking Data se apne aap) — purane kisan dhoondh kar bharo ════
+let BK_FARMERS = [], BK_FS_RES = [];
+function bkFsEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function bkLoadFarmers(){
+  const info = document.getElementById('bkFsInfo');
+  if(info) info.textContent = '⏳ Kisan list load ho rahi hai...';
+  fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet=Booking%20Data&headers=1&t='+Date.now())
+    .then(function(r){ return r.text(); })
+    .then(function(txt){
+      let rows = [];
+      try{ const j = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]); rows = (j.table.rows||[]).filter(function(r){ return r.c && r.c[1] && r.c[1].v && r.c[0] && r.c[0].v !== 'Booking Date'; }); }catch(e){}
+      const v = function(r,i){ return (r.c[i] && r.c[i].v!=null) ? String(r.c[i].v).trim() : ''; };
+      const map = {};
+      rows.forEach(function(r){
+        const name = v(r,1), vill = v(r,2), mob = v(r,5).replace(/\D/g,'').slice(-10);
+        if(!name) return;
+        // Har alag naam/gaon/mobile = alag line (aap khud chuno)
+        const key = mob+'|'+name.toLowerCase().replace(/\s+/g,' ')+'|'+vill.toLowerCase().replace(/\s+/g,' ');
+        const d = (typeof djISO==='function') ? djISO(r.c[0].v) : v(r,0);
+        if(!map[key]) map[key] = {name:name, village:vill, tehsil:v(r,3), district:v(r,4), mobile:mob, bids:{}, last:''};
+        const f = map[key];
+        f.bids[v(r,23) || ('r'+Math.random())] = 1;
+        if(d >= f.last){ f.last = d; if(v(r,3)) f.tehsil = v(r,3); if(v(r,4)) f.district = v(r,4); }
+      });
+      BK_FARMERS = Object.values(map).map(function(f){ f.cnt = Object.keys(f.bids).length; f._t = (f.name+' '+f.village+' '+f.mobile+' '+f.tehsil+' '+f.district).toLowerCase(); return f; })
+        .sort(function(a,b){ return a.last < b.last ? 1 : -1; });
+      if(info) info.textContent = '👥 '+BK_FARMERS.length+' purane kisan list me — naam, mobile ya gaon likho';
+    })
+    .catch(function(){ if(info) info.textContent = '⚠️ Kisan list load nahi hui — form me khud bharo'; });
+}
+function bkFarmerSearch(){
+  const inp = document.getElementById('bkFs'), drop = document.getElementById('bkFsDrop');
+  const q = (inp.value||'').toLowerCase().trim();
+  if(!q){ drop.className = 'ldrop-list'; return; }
+  const words = q.split(/\s+/);
+  BK_FS_RES = BK_FARMERS.filter(function(f){ return words.every(function(w){ return f._t.indexOf(w) > -1; }); }).slice(0, 30);
+  if(!BK_FS_RES.length){
+    drop.innerHTML = '<div class="ldrop-item" style="color:var(--g5);">🆕 Koi purana kisan nahi mila — neeche form me naya kisan bharo</div>';
+  } else {
+    drop.innerHTML = BK_FS_RES.map(function(f, i){
+      return '<div class="ldrop-item bk-fs-it" onmousedown="bkPickFarmer('+i+')">'+
+        '<div style="font-weight:800;color:#1a2e26;">👨 '+bkFsEsc(f.name)+' <span style="font-weight:600;color:#5a6a63;">• '+bkFsEsc(f.village||'—')+'</span></div>'+
+        '<div style="font-size:12px;color:#5a6a63;font-weight:500;">📱 '+bkFsEsc(f.mobile||'—')+(f.tehsil?' • '+bkFsEsc(f.tehsil):'')+(f.district?', '+bkFsEsc(f.district):'')+' • '+f.cnt+' booking'+(f.last?' • aakhri '+(typeof formatDate==='function'?formatDate(f.last):f.last):'')+'</div></div>';
+    }).join('');
+  }
+  drop.className = 'ldrop-list show';
+}
+function bkPickFarmer(i){
+  const f = BK_FS_RES[i]; if(!f) return;
+  document.getElementById('bkFarmer').value = f.name;
+  document.getElementById('bkVillage').value = f.village;
+  document.getElementById('bkTehsil').value = f.tehsil;
+  const ds = document.getElementById('bkDistrict'); if(ds) ds.value = f.district;
+  document.getElementById('bkMobile').value = f.mobile;
+  document.getElementById('bkFs').value = '';
+  document.getElementById('bkFsDrop').className = 'ldrop-list';
+  toast('✅ '+f.name+' ('+(f.village||'')+') bhar diya');
 }
 
 // Total input badle to Both box ke logic ke liye rakha (abhi kuch nahi karta, future ke liye)
