@@ -29,10 +29,10 @@ body{font-family:'Baloo 2',sans-serif;background:var(--gd);min-height:100vh;colo
   background:linear-gradient(135deg,var(--gd),#0a2318);}
 .lbox{background:white;border-radius:24px;padding:32px 24px;width:100%;max-width:380px;
   box-shadow:0 20px 60px rgba(0,0,0,0.4);text-align:center;}
-.llogo{margin:0 auto 10px;width:110px;height:110px;border-radius:22px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(26,71,49,0.18);border:1px solid #e6efe9;overflow:hidden;}
-.llogo img{max-width:92%;max-height:92%;object-fit:contain;}
-.hico.hlogo{background:white!important;padding:3px;overflow:hidden;}
-.hico.hlogo img{width:100%;height:100%;object-fit:contain;border-radius:9px;}
+.llogo{margin:0 auto 12px;width:200px;height:100px;display:flex;align-items:center;justify-content:center;background:none;border:none;box-shadow:none;padding:0;}
+.llogo img{width:100%;height:100%;object-fit:contain;border-radius:4px;}
+.hico.hlogo{background:none!important;padding:0;overflow:visible;width:80px;height:40px;border-radius:0;flex-shrink:0;box-shadow:none;border:none;}
+.hico.hlogo img{width:100%;height:100%;object-fit:contain;border-radius:3px;}
 #menuTitle{font-size:15px;letter-spacing:0.2px;}
 .ltitle{font-size:21px;font-weight:800;color:var(--gd);margin-bottom:2px;line-height:1.2;}
 .lsub{font-size:13px;color:var(--g5);margin-bottom:20px;}
@@ -532,8 +532,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   body.has-side #deskSide{display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;width:264px;z-index:150;
     background:linear-gradient(180deg,#0f2e20 0%,#173f2c 55%,#1d4d35 100%);color:#d7efe1;box-shadow:4px 0 24px rgba(10,35,24,0.18);}
   .ds-brand{padding:20px 20px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,0.08);}
-  .ds-logo{width:48px;height:48px;border-radius:12px;background:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;padding:3px;box-shadow:0 4px 12px rgba(0,0,0,0.25);}
-  .ds-logo img{width:100%;height:100%;object-fit:contain;}
+  .ds-brand{flex-direction:column;align-items:flex-start;gap:10px;}
+  .ds-logo{width:120px;height:60px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:none;padding:0;box-shadow:none;border-radius:0;}
+  .ds-logo img{width:100%;height:100%;object-fit:contain;border-radius:3px;}
   .ds-bt{font-size:14px;font-weight:800;color:white;line-height:1.2;letter-spacing:0.2px;}
   .ds-bs{font-size:11.5px;color:#9fd0b4;font-weight:500;}
   .ds-user{margin:14px 14px 6px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.07);display:flex;align-items:center;gap:10px;}
@@ -557,7 +558,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
     background:linear-gradient(135deg,#1a4731,#2d7a4f);box-shadow:0 2px 14px rgba(10,35,24,0.15);}
   body.has-side .htop{flex:1;min-width:0;}
   body.has-side .htop h1{font-size:21px;}
-  body.has-side .hico.hlogo{width:48px;height:48px;}
+  body.has-side .hico.hlogo{width:104px;height:52px;}
   body.has-side .htop h1 span{font-size:12.5px;}
   body.has-side .hico{width:44px;height:44px;font-size:22px;}
   body.has-side .sbar{margin-top:0;gap:10px;}
@@ -931,7 +932,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div class="ico"><i class="ti ti-coin"></i></div><div class="ttl">Labour Report</div>
           <div class="dsc">Labour ka hisaab</div>
         </div>
-        <div class="mcard report" onclick="openMod('report')">
+        <div class="mcard report" onclick="openMod('waterReport')">
           <div class="ico"><i class="ti ti-droplet"></i></div><div class="ttl">Watering Report</div>
           <div class="dsc">Pani / dawai</div>
         </div>
@@ -1963,7 +1964,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261022-1500';
+const APP_VERSION = '20261024-1545';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -2284,9 +2285,12 @@ function openMod(mod) {
     document.getElementById('srFrom').value=localISO(f);
     show('seedReportScreen');
   } else if(mod==='report'||mod==='waterReport') {
-    document.getElementById('repSupB').textContent=(curUser.role==='Manager'?'👔':'👑')+' '+curUser.name;
-    document.getElementById('repTitle').textContent='📊 Daily Report';
+    REP_MODE = (mod==='waterReport') ? 'water' : 'daily';
+    document.getElementById('repSupB').textContent=(curUser.role==='Manager'?'👔':curUser.role==='Marketing'?'📣':'👑')+' '+curUser.name;
+    document.getElementById('repTitle').textContent = REP_MODE==='water' ? '💧 Watering Report' : '📊 Daily Report';
     document.getElementById('repExtra').style.display='';
+    document.getElementById('repKaam').options[0].text = REP_MODE==='water' ? 'Sab (Pani + Spray + Drench)' : 'Sab (Sowing + Attendance + Pani/Spray)';
+    document.getElementById('reportContent').innerHTML='';
     show('reportScreen');
   } else if(mod==='adminUsers') {
     loadUserList();
@@ -3334,7 +3338,7 @@ function repBtnClick(){
   else loadReport();
 }
 
-let REP_DATA = null, REP_FROM = '', REP_TO = '';
+let REP_DATA = null, REP_FROM = '', REP_TO = '', REP_MODE = 'daily';
 function loadReport(){
   const from=document.getElementById('repFrom').value;
   const to=document.getElementById('repTo').value;
@@ -3381,8 +3385,8 @@ function renderReport(data, from, to){
   const range=(typeof formatDate==='function'?formatDate(from)+' se '+formatDate(to):from+' se '+to)+(areaF?' • 📍 '+repE(areaF):'');
   let html='';
 
-  // ── Seed Sowing ──
-  if(!kaamF){
+  // ── Seed Sowing + Attendance (sirf Daily Report me; Watering Report me nahi) ──
+  if(!kaamF && REP_MODE!=='water'){
     const vRows=(data['Seed Sowing Data']||[]).filter(aOk);
     const totalPlants=vRows.reduce((s,r)=>s+repN(r,11),0);
     html+='<div class="rep-card"><div class="rep-title">🌱 Seed Sowing</div><div class="rep-sub">'+range+'</div>'+
@@ -4691,7 +4695,7 @@ function generateBookingPDF(d){
       '<div style="display:flex;border-bottom:2px solid #1a472a;">' +
         // Logo left
         '<div style="padding:14px 16px;border-right:2px solid #1a472a;display:flex;align-items:center;">' +
-          '<img src="' + TGH_LOGO + '" style="height:78px;width:auto;" />' +
+          '<img src="' + TGH_LOGO + '" style="height:78px;width:156px;object-fit:contain;" />' +
         '</div>' +
         // Name + contact
         '<div style="flex:1;padding:12px 16px;">' +
@@ -6116,7 +6120,7 @@ function djWrap(title, icon, who, date, tiles, secs){
   const dStr = d.toLocaleDateString('en-IN',{weekday:'long', day:'2-digit', month:'short', year:'numeric'});
   const now = new Date();
   return '<div class="dj-card">'+
-      '<div class="dj-top"><div class="dj-n" style="display:flex;align-items:center;gap:10px;"><img src="'+TGH_LOGO+'" style="height:40px;width:40px;object-fit:contain;background:white;border-radius:8px;padding:2px;">'+djEsc(nursery)+' <span style="opacity:0.75;font-weight:500;">· '+djEsc(NURSERY_ADDR)+'</span></div>'+
+      '<div class="dj-top"><div class="dj-n" style="display:flex;align-items:center;gap:10px;"><img src="'+TGH_LOGO+'" style="height:48px;width:96px;object-fit:contain;border-radius:3px;">'+djEsc(nursery)+' <span style="opacity:0.75;font-weight:500;">· '+djEsc(NURSERY_ADDR)+'</span></div>'+
         '<div class="dj-tt">'+djEsc(title)+'</div>'+
         '<div class="dj-sub">'+icon+' <b>'+djEsc(who)+'</b> &nbsp;•&nbsp; 📅 '+djEsc(dStr)+'</div></div>'+
       '<div class="dj-tiles">'+tiles.map(function(t){ return '<div class="dj-tile"><div class="dj-ti">'+t[0]+'</div><div class="dj-tv">'+t[1]+'</div><div class="dj-tl">'+t[2]+'</div></div>'; }).join('')+'</div>'+
