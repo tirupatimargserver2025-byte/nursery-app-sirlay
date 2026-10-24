@@ -179,6 +179,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   z-index:50;box-shadow:var(--sh);display:none;}
 .ldrop-list.show{display:block;}
 .bk-fs-it{line-height:1.35;}
+#bkFarmer,#bkVillage,#bkTehsil,#bkDistrict{text-transform:uppercase;}
 .card.dk-flat>.fr.bk-fs{grid-column:1/-1;}
 .ldrop-item{padding:8px 12px;cursor:pointer;font-size:13px;font-weight:600;border-bottom:1px solid var(--g2);}
 .ldrop-item:hover{background:var(--gp);}
@@ -1976,7 +1977,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261024-1620';
+const APP_VERSION = '20261024-1615';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -4417,10 +4418,10 @@ function bkLoadFarmers(){
         // Har alag naam/gaon/mobile = alag line (aap khud chuno)
         const key = mob+'|'+name.toLowerCase().replace(/\s+/g,' ')+'|'+vill.toLowerCase().replace(/\s+/g,' ');
         const d = (typeof djISO==='function') ? djISO(r.c[0].v) : v(r,0);
-        if(!map[key]) map[key] = {name:name, village:vill, tehsil:v(r,3), district:v(r,4), mobile:mob, bids:{}, last:''};
+        if(!map[key]) map[key] = {name:name.toUpperCase(), village:vill.toUpperCase(), tehsil:v(r,3).toUpperCase(), district:v(r,4).toUpperCase(), mobile:mob, bids:{}, last:''};
         const f = map[key];
         f.bids[v(r,23) || ('r'+Math.random())] = 1;
-        if(d >= f.last){ f.last = d; if(v(r,3)) f.tehsil = v(r,3); if(v(r,4)) f.district = v(r,4); }
+        if(d >= f.last){ f.last = d; if(v(r,3)) f.tehsil = v(r,3).toUpperCase(); if(v(r,4)) f.district = v(r,4).toUpperCase(); }
       });
       BK_FARMERS = Object.values(map).map(function(f){ f.cnt = Object.keys(f.bids).length; f._t = (f.name+' '+f.village+' '+f.mobile+' '+f.tehsil+' '+f.district).toLowerCase(); return f; })
         .sort(function(a,b){ return a.last < b.last ? 1 : -1; });
@@ -4574,10 +4575,10 @@ function bkLoadVar(id){ cvCropCheck('bk-crop-'+id, 'bk-var-'+id); }
 function submitBooking(){
   if(isSaving){ return; }
   const bkDate = document.getElementById('bkDate').value;
-  const farmer = document.getElementById('bkFarmer').value.trim();
-  const village = document.getElementById('bkVillage').value.trim();
-  const tehsil = document.getElementById('bkTehsil').value.trim();
-  const district = document.getElementById('bkDistrict').value.trim();
+  const farmer = document.getElementById('bkFarmer').value.trim().toUpperCase();
+  const village = document.getElementById('bkVillage').value.trim().toUpperCase();
+  const tehsil = document.getElementById('bkTehsil').value.trim().toUpperCase();
+  const district = document.getElementById('bkDistrict').value.trim().toUpperCase();
   const mobile = document.getElementById('bkMobile').value.trim();
   const payMode = document.getElementById('bkPayMode').value;
   const payDate = document.getElementById('bkPayDate').value;
@@ -4746,6 +4747,10 @@ function submitBooking(){
 function generateBookingPDF(d){
   // Sirf safe characters (garbage hatao)
   const clean = (s) => String(s == null ? '' : s).replace(/[^\x20-\x7E]/g, '').trim();
+  // Slip par kisan ki details aur variety CAPITAL me
+  const UP = (s) => String(s == null ? '' : s).toUpperCase();
+  d = Object.assign({}, d, { farmer:UP(d.farmer), village:UP(d.village), tehsil:UP(d.tehsil), district:UP(d.district),
+        lines:(d.lines||[]).map(function(l){ return Object.assign({}, l, { crop:UP(l.crop), variety:UP(l.variety) }); }) });
 
   // Receipt ka HTML banao (hidden div mein)
   let rowsHtml = '';
