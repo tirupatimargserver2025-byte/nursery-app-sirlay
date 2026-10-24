@@ -1695,6 +1695,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
         <div><label>📅 To Date</label><input type="date" id="brTo"></div>
       </div>
       <div class="g2">
+        <div><label>🚚 Delivery From</label><input type="date" id="brDFrom"></div>
+        <div><label>🚚 Delivery To</label><input type="date" id="brDTo"></div>
+      </div>
+      <div class="g2">
         <div><label>🥬 Crop</label>
           <input type="text" id="brCrop" list="cropList" placeholder="🔍 Search..." style="width:100%;padding:8px;border:1px solid var(--g2);border-radius:6px;" onchange="loadBrVariety()"></div>
         <div><label>🌱 Variety</label>
@@ -1964,7 +1968,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261024-1545';
+const APP_VERSION = '20261024-1610';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -4859,6 +4863,8 @@ function openBookingReport(){
   document.getElementById('brVariety').innerHTML = '<option value="">-- Sab Varieties --</option>';
   document.getElementById('brFarmer').value = '';
   document.getElementById('brVillage').value = '';
+  document.getElementById('brDFrom').value = '';
+  document.getElementById('brDTo').value = '';
   populateCropVarietyLists();
   show('bookingReportScreen');
 }
@@ -4873,6 +4879,10 @@ function loadBookingReport(){
   const farmerF = document.getElementById('brFarmer').value.trim().toLowerCase();
   const villF = document.getElementById('brVillage').value.trim().toLowerCase();
   const statusF = document.getElementById('brStatus').value;
+  // Delivery date range: bhari ho to Booking date ka filter nahi lagega
+  const dFrom = document.getElementById('brDFrom').value;
+  const dTo = document.getElementById('brDTo').value;
+  const useDel = !!(dFrom || dTo);
   const con = document.getElementById('bookingReportContent');
   con.innerHTML = '<div class="card" style="text-align:center;padding:20px;"><div style="font-size:30px;">\u23F3</div><div style="font-weight:700;color:var(--gd);">Loading...</div></div>';
 
@@ -4888,8 +4898,16 @@ function loadBookingReport(){
         };
         let rows = json.table.rows.filter(r => r.c && r.c[0] && r.c[0].v && r.c[0].v !== 'Booking Date');
         rows = rows.map(r => { r._date = fixD(r.c[0]?.v); return r; });
+        const allRows = rows;
         rows = rows.filter(r => {
-          if(r._date < from || r._date > to) return false;
+          if(useDel){
+            const dd = fixD(r.c[10]?.v);
+            if(!dd) return false;
+            if(dFrom && dd < dFrom) return false;
+            if(dTo && dd > dTo) return false;
+          } else {
+            if(r._date < from || r._date > to) return false;
+          }
           if(cropF && (r.c[6]?.v||'').toString() !== cropF) return false;
           if(varF && (r.c[7]?.v||'').toString() !== varF) return false;
           if(farmerF && !(r.c[1]?.v||'').toString().toLowerCase().includes(farmerF)) return false;
@@ -4905,7 +4923,9 @@ function loadBookingReport(){
 
         // pdBookings global bhi bhar do (taaki card ke buttons se modals chalein)
         const rawGroups = {};
-        rows.forEach(r => {
+        const shownBids = {};
+        rows.forEach(r => { shownBids[(r.c[23]?.v||'').toString()] = 1; });
+        allRows.filter(r => shownBids[(r.c[23]?.v||'').toString()]).forEach(r => {
           const rbid = (r.c[23]?.v||'').toString();
           if(!rbid) return;
           if(!rawGroups[rbid]) rawGroups[rbid] = [];
@@ -4917,9 +4937,11 @@ function loadBookingReport(){
         const groups = {};
         rows.forEach(r => {
           const bid = (r.c[23]?.v||'').toString() || ('row'+Math.random());
+          // Payment booking ki pehli line par hota hai — wo line filter me chhup jaye to bhi sahi rakam dikhe
+          const f0 = (rawGroups[bid] && rawGroups[bid][0]) || r;
           if(!groups[bid]) groups[bid] = { bid:bid, date:r._date, farmer:(r.c[1]?.v||''), village:(r.c[2]?.v||''),
-            mobile:(r.c[5]?.v||''), firstPay:parseFloat(r.c[11]?.v)||0, secondPay:parseFloat(r.c[15]?.v)||0,
-            totalRec:parseFloat(r.c[19]?.v)||0, lines:[] };
+            mobile:(f0.c[5]?.v||''), firstPay:parseFloat(f0.c[11]?.v)||0, secondPay:parseFloat(f0.c[15]?.v)||0,
+            totalRec:parseFloat(f0.c[19]?.v)||0, lines:[] };
           groups[bid].lines.push({
             crop:(r.c[6]?.v||''), variety:(r.c[7]?.v||''), plant:parseInt(r.c[8]?.v)||0,
             rate:parseFloat(r.c[9]?.v)||0, deliv:fixD(r.c[10]?.v), delivered:parseFloat(r.c[25]?.v)||0,
@@ -4933,6 +4955,7 @@ function loadBookingReport(){
 
         // Summary
         let html = '<div class="rep-card"><div class="rep-title"><i class="ti ti-clipboard-list" style="color:var(--gm);"></i> '+glist.length+' Booking \u2022 '+totalPlant.toLocaleString('en-IN')+' Plants \u2022 \u20B9'+totalRec.toLocaleString('en-IN')+' Received</div></div>';
+        if(useDel) html = '<div class="rep-card" style="padding:10px 14px;background:#fff3e0;border:1px solid #ffcc80;font-weight:700;color:#bf360c;">🚚 Delivery date: '+(dFrom?fmtDate(dFrom):'shuru')+' se '+(dTo?fmtDate(dTo):'aage')+' — sirf in dino ki delivery wali varieties</div>' + html;
 
         // ══ Crop-wise (nested) summary — har crop expandable, uski varieties andar ══
         const cropSum = {};
