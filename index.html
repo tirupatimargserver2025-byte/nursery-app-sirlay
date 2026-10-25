@@ -669,6 +669,38 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   body.has-side #dashScreen .db-row{grid-template-columns:repeat(4,minmax(0,1fr));align-items:end;}
   body.has-side .dbt{font-size:13px;}
 }
+
+/* ══ REPORT EXPORT ══ */
+.exp-bar{display:flex;gap:8px;justify-content:flex-end;margin:10px 10px 0;}
+.exp-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;border:none;font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;color:white;box-shadow:0 2px 8px rgba(0,0,0,0.18);}
+.exp-btn i{font-size:17px;}
+.exp-pdf{background:linear-gradient(135deg,#c62828,#e53935);}
+.exp-xls{background:linear-gradient(135deg,#1b5e20,#2e7d32);}
+.exp-btn:hover{filter:brightness(1.08);}
+@media (min-width:1024px){ body.has-side .exp-bar{margin:12px 0 0;} }
+.ep-page{background:#fff;padding:30px 34px 26px;box-sizing:border-box;display:flex;flex-direction:column;font-family:'Segoe UI',Roboto,'Noto Sans Devanagari',Arial,sans-serif;color:#1d2b25;}
+.ep-hd{display:flex;align-items:center;gap:14px;border-bottom:2px solid #1a4731;padding-bottom:10px;}
+.ep-logo{height:52px;width:104px;object-fit:contain;}
+.ep-nn{font-size:20px;font-weight:800;color:#1a4731;}
+.ep-ad{font-size:12px;color:#55665e;}
+.ep-tt{font-size:17px;font-weight:800;margin-top:10px;color:#1d2b25;}
+.ep-fl{font-size:11.5px;color:#55665e;margin-top:3px;line-height:1.4;}
+.ep-hd2{font-size:12px;font-weight:700;color:#55665e;border-bottom:1px solid #c9d6cf;padding-bottom:6px;}
+.ep-body{flex:1;overflow:hidden;margin-top:10px;}
+.ep-ft{font-size:10.5px;color:#7a8a83;text-align:right;border-top:1px solid #dfe7e2;padding-top:5px;margin-top:6px;}
+.ep-st{font-size:13px;font-weight:800;color:#1a4731;margin:8px 0 4px;}
+.ep-st.ep-sub{font-size:11.5px;color:#3d5449;font-weight:700;margin-left:10px;}
+.ep-st.ep-cont{color:#7a8a83;font-size:11.5px;}
+.ep-t{width:100%;border-collapse:collapse;font-size:11px;}
+.ep-t th{background:#e6f1ea;color:#1a4731;font-weight:800;text-align:left;padding:5px 6px;border:1px solid #c9d6cf;}
+.ep-t td{padding:4px 6px;border:1px solid #d9e3dd;vertical-align:top;}
+.ep-t td.n{text-align:right;}
+.ep-t th,.ep-t td{word-break:break-word;overflow-wrap:anywhere;}
+.ep-t.ep-sm{font-size:9.5px;}.ep-t.ep-sm th,.ep-t.ep-sm td{padding:3px 4px;}
+.ep-t.ep-xs{font-size:8.2px;table-layout:fixed;}.ep-t.ep-xs th,.ep-t.ep-xs td{padding:3px 3px;}
+.ep-t tbody tr:nth-child(even) td{background:#f7faf8;}
+.ep-t tr.ep-tot td{background:#e3f1e8;font-weight:800;}
+.ep-kv{width:auto;min-width:300px;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -1977,7 +2009,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261024-1640';
+const APP_VERSION = '20261025-1215';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -4994,6 +5026,7 @@ function loadBookingReport(){
         });
 
         if(rows.length === 0){
+          window.BR_LAST = null;
           con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--g5);">Koi booking nahi mili is filter mein</div>';
           return;
         }
@@ -5009,6 +5042,7 @@ function loadBookingReport(){
           rawGroups[rbid].push(r);
         });
         pdBookings = rawGroups;
+        window.BR_LAST = {lines: rows};
 
         // Booking ID se group karo (display ke liye)
         const groups = {};
@@ -5430,11 +5464,13 @@ function loadPayDeliv(){
         });
 
         if(matched.length === 0){
+          window.PD_LAST = null;
           con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--g5);">Koi booking nahi mili</div>';
           return;
         }
 
         matched.sort((a,b)=> b.bd.localeCompare(a.bd));
+        window.PD_LAST = matched;
 
         let html = '<div class="rep-card"><div class="rep-title">💰 '+matched.length+' Bookings</div></div>';
         matched.forEach(m => {
@@ -6690,6 +6726,7 @@ function dbRender(){
     if(dbNum(f,15) && inR(d2)) pays.push({d:d2, bid:bid, f:f, amt:dbNum(f,15), mode:dbS(f,16)||'Cash', bank:dbS(f,17), which:'2nd'});
   });
 
+  window.DB_LAST = {seed:seed, shf:shf, dsp:dsp, bk:bk, pays:pays, att:att, wat:wat, chem:chem, ma:ma};
   const T = {
     sow: dbSum(seed, function(r){ return dbNum(r,11); }),
     sowPkt: dbSum(seed, function(r){ return dbNum(r,7); }),
@@ -6964,6 +7001,329 @@ function dbSlip(bid){
   pdBookings[bid] = DB_RAW.bk.filter(function(x){ return dbS(x,23) === bid; });
   redownloadSlip(bid);
 }
+
+
+// ════════════════════════════════════════════════════════════════
+// REPORT EXPORT — har report ki PDF (saaf table) aur Excel
+// ════════════════════════════════════════════════════════════════
+const EXP_MAP = {
+  reportScreen:'reportContent', seedReportScreen:'seedReportContent', labourReportScreen:'labourReportContent',
+  myReportScreen:'myReportContent', shiftingReportScreen:'shiftingReportContent', dispatchReportScreen:'dispatchReportContent',
+  bookingReportScreen:'bookingReportContent', varietyReportScreen:'varietyReportContent', supActivityScreen:'supActivityContent',
+  payDelivScreen:'payDelivContent', fzReportScreen:'fzReportContent', dashScreen:'dashContent'
+};
+let EXP_BUSY = false;
+function expInit(){
+  Object.keys(EXP_MAP).forEach(function(id){
+    const s = document.getElementById(id); if(!s || s.querySelector('.exp-bar')) return;
+    const card = s.querySelector('.wrap > .card'); if(!card) return;
+    const bar = document.createElement('div');
+    bar.className = 'exp-bar';
+    bar.innerHTML = '<button type="button" class="exp-btn exp-pdf" onclick="expRun(\'pdf\',\''+id+'\')"><i class="ti ti-file-type-pdf"></i> PDF</button>'+
+                    '<button type="button" class="exp-btn exp-xls" onclick="expRun(\'xls\',\''+id+'\')"><i class="ti ti-file-spreadsheet"></i> Excel</button>';
+    card.parentNode.insertBefore(bar, card.nextSibling);
+  });
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', expInit); else expInit();
+
+// ── text saaf karo (emoji hatao, Hindi rehne do) ──
+function expClean(s){
+  return String(s==null?'':s)
+    .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}\u{FE0F}\u{200D}\u{25B2}-\u{25BF}\u{2300}-\u{23FF}]/gu, '')
+    .replace(/\s+/g, ' ').trim();
+}
+function expCellText(el){
+  const html = el.innerHTML.replace(/<br\s*\/?>/gi, '; ').replace(/<\/(div|p|li)>/gi, ' ').replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+  return expClean(html).replace(/^;\s*|;\s*$/g,'');
+}
+// "1,960" / "₹3,000" -> number (Excel me jodne layak). Mobile (10 ank) text hi rahe.
+function expNum(t){
+  const s = String(t).replace(/[₹,\s]/g,'');
+  if(!/^-?\d+(\.\d+)?$/.test(s)) return null;
+  if(s.replace(/\D/g,'').length >= 10) return null;
+  return parseFloat(s);
+}
+function expTitleFor(tb){
+  const er = tb.closest('tr');
+  if(er && er.parentElement && er.parentElement.closest('table')){
+    const prev = er.previousElementSibling;
+    if(prev) return '↳ ' + [...prev.cells].map(expCellText).filter(Boolean).slice(0,4).join(' • ');
+  }
+  const box = tb.closest('.crop-card, .dash-card, .dbn, .rep-card, .dj-sec, .card');
+  if(box){
+    const h = box.querySelector(':scope > .crop-head, :scope > .dash-head, :scope > .dbn-h, .rep-title, :scope > .ctitle, :scope > .dj-h');
+    if(h) return expCellText(h).replace(/\s*[—-]\s*(row|kisi) pe click karo.*$/i,'').replace(/\(click karo\)/i,'').trim().slice(0, 110);
+  }
+  return '';
+}
+// Report ke DOM se sections nikalo (table + total wale dabbe), document ke kram me
+function expFromDom(root){
+  const secs = [];
+  root.querySelectorAll('table, .stat-grid, .sg3, .sg4, .db-tiles').forEach(function(el){
+    if(el.closest('.dash-hidden')) return;
+    if(el.tagName !== 'TABLE'){
+      const items = el.querySelectorAll('.stat-item, .si, .db-tile');
+      const rows = [];
+      items.forEach(function(it){
+        const l = it.querySelector('.sl, .lbl, .db-tl'), v = it.querySelector('.sv, .val, .db-tv');
+        if(l && v) rows.push([{t:expCellText(l)}, {t:expCellText(v)}]);
+      });
+      if(rows.length){
+        const box = el.closest('.rep-card, .sumcard, .card');
+        const ht = box ? box.querySelector('.rep-title, .sumtitle') : null;
+        secs.push({title:(ht?expCellText(ht):'Summary'), head:[[{t:'Kya',th:1},{t:'Kitna',th:1}]], rows:rows, kv:true});
+      }
+      return;
+    }
+    const head = [], rows = [];
+    [...el.rows].forEach(function(tr){
+      if(tr.classList.contains('dash-hidden')) return;
+      if(tr.querySelector('table')) return;              // khulne wali detail row (andar ki table alag aayegi)
+      const cells = [...tr.cells].map(function(td){ return {t:expCellText(td), span:td.colSpan||1, th:td.tagName==='TH'}; });
+      if(!cells.length || cells.every(function(c){ return !c.t; })) return;
+      if(cells.every(function(c){ return c.th; }) && !rows.length) head.push(cells); else rows.push(cells);
+    });
+    if(rows.length) secs.push(expDropEmpty({title:expTitleFor(el), head:head, rows:rows}));
+  });
+  return secs;
+}
+// Jo column poora khaali ho (jaise ▶ wala) use hata do
+function expDropEmpty(s){
+  const all = s.head.concat(s.rows);
+  if(!all.length || all.some(function(r){ return r.some(function(c){ return (c.span||1) > 1; }); })) return s;
+  const n = Math.max.apply(null, all.map(function(r){ return r.length; }));
+  if(all.some(function(r){ return r.length !== n; })) return s;
+  const keep = [];
+  for(let i=0;i<n;i++){ if(all.some(function(r){ return String(r[i].t).trim() !== ''; })) keep.push(i); }
+  if(keep.length === n) return s;
+  const f = function(r){ return keep.map(function(i){ return r[i]; }); };
+  return {title:s.title, head:s.head.map(f), rows:s.rows.map(f)};
+}
+function expS(r,i){ const c = r.c && r.c[i]; return c && c.v!=null ? String(c.v).trim() : ''; }
+function expN(r,i){ const n = parseFloat(expS(r,i)); return isNaN(n) ? 0 : n; }
+function expD(v){ return (typeof djISO==='function') ? djISO(v) : String(v||''); }
+function expDF(v){ const d = expD(v); return d ? ((typeof fmtDate==='function') ? fmtDate(d) : d) : ''; }
+// Booking: har variety ki ek line (payment booking ki pehli line par hi)
+function expBookingSection(lines, title){
+  const seen = {};
+  const rows = lines.slice().sort(function(a,b){ const x=expD(a.c[0]&&a.c[0].v), y=expD(b.c[0]&&b.c[0].v); return x<y?-1:x>y?1:(expS(a,23)<expS(b,23)?-1:1); }).map(function(r){
+    const bid = expS(r,23), first = !seen[bid]; seen[bid] = 1;
+    const all = (typeof pdBookings!=='undefined' && pdBookings && pdBookings[bid]) ? pdBookings[bid] : [r];
+    const f = all[0] || r;
+    const pl = expN(r,8), rt = expN(r,9);
+    return [expDF(r.c[0]&&r.c[0].v), bid, expS(r,1).toUpperCase(), expS(r,2).toUpperCase(), expS(r,3).toUpperCase(), expS(r,4).toUpperCase(), (expS(f,5).replace(/\D/g,'').slice(-10) || expS(f,5)),
+      expClean(expS(r,6)).toUpperCase(), expS(r,7).toUpperCase(), pl, rt, Math.round(pl*rt*100)/100, expDF(r.c[10]&&r.c[10].v), expN(r,25), expS(r,21)||'Pending',
+      first?expN(f,11):'', first?expS(f,12):'', first?expN(f,15):'', first?expN(f,19):'', expS(f,24)].map(function(v){ return {t:v}; });
+  });
+  const head = ['Booking Date','Booking ID','Kisan','Gaon','Tehsil','Zila','Mobile','Crop','Variety','Plant','Rate','Amount','Delivery Date','Diya','Status','1st Payment','1st Mode','2nd Payment','Total Received','Marketing'];
+  return {title:title||'Booking — har variety ki line', head:[head.map(function(h){ return {t:h, th:1}; })], rows:rows, flat:true, sheet:'Booking'};
+}
+function expFlat(title, sheet, head, rows){
+  return {title:title, sheet:sheet, flat:true, head:[head.map(function(h){ return {t:h, th:1}; })], rows:rows.map(function(r){ return r.map(function(v){ return {t:v}; }); })};
+}
+// Card wali reports ke liye khaas data
+function expCustom(screenId){
+  const out = [];
+  if(screenId==='bookingReportScreen' && window.BR_LAST && BR_LAST.lines && BR_LAST.lines.length) out.push(expBookingSection(BR_LAST.lines));
+  if(screenId==='payDelivScreen' && window.PD_LAST && PD_LAST.length){
+    const lines = []; PD_LAST.forEach(function(m){ (m.g||[]).forEach(function(r){ lines.push(r); }); });
+    out.push(expBookingSection(lines, 'Payment & Delivery — har variety ki line'));
+  }
+  if(screenId==='dashScreen' && window.DB_LAST){
+    const L = DB_LAST, d = function(r){ return expDF(r.c[0]&&r.c[0].v); };
+    if(L.seed.length) out.push(expFlat('Seed Sowing','Sowing',['Date','Supervisor','Area','Crop','Variety','Lot','PKT','Tray','Plants'], L.seed.map(function(r){ return [d(r),expS(r,1),expS(r,2),expClean(expS(r,4)),expS(r,5),expS(r,6),expN(r,7),expN(r,8),expN(r,11)]; })));
+    if(L.shf.length) out.push(expFlat('Shifting','Shifting',['Date','Supervisor','Area','Crop','Variety','Labour','Tray'], L.shf.map(function(r){ return [d(r),expS(r,1),expS(r,2),expClean(expS(r,3)),expS(r,4),expS(r,5),expN(r,6)]; })));
+    if(L.dsp.length) out.push(expFlat('Dispatch','Dispatch',['Date','Gaadi','Driver','Supervisor','Area','Crop','Variety','Carret','Plant/Carret','Direct','Total','Sowing Match'], L.dsp.map(function(r){ return [d(r),expS(r,3),expS(r,4),expS(r,2),expS(r,1),expClean(expS(r,6)),expS(r,7),expN(r,9),expN(r,10),expN(r,11),expN(r,12),expS(r,13)]; })));
+    if(L.bk.length) out.push(expBookingSection(L.bk));
+    if(L.pays.length) out.push(expFlat('Payment Aaya','Payment',['Date','Booking ID','Kisan','Gaon','Kaunsa','Mode','Bank','Rakam'], L.pays.map(function(p){ return [expDF(p.d),p.bid,expS(p.f,1).toUpperCase(),expS(p.f,2).toUpperCase(),p.which,p.mode,p.bank,p.amt]; })));
+    if(L.att.length) out.push(expFlat('Attendance','Attendance',['Date','Labour','Status','Kaam','Wage','OT Ghante','OT Wage','Entry by'], L.att.map(function(r){ return [d(r),expS(r,4),expS(r,5),expS(r,3),expN(r,7),expN(r,8),expN(r,9),expS(r,1)]; })));
+    if(L.wat.length) out.push(expFlat('Pani','Pani',['Date','Supervisor','Area','Method','Litre','Plants'], L.wat.map(function(r){ return [d(r),expS(r,1),expS(r,2),expS(r,6),expN(r,7),expS(r,8)]; })));
+    if(L.chem.length) out.push(expFlat('Dawai / Khaad','Dawai',['Date','Supervisor','Area','Dawai','Kya kiya','Matra','Unit','Crop','Variety'], L.chem.map(function(r){ return [d(r),expS(r,1),expS(r,2),expS(r,5),expS(r,6)||'Spray',expN(r,7),expS(r,8),expClean(expS(r,3)),expS(r,4)]; })));
+    if(L.ma.length) out.push(expFlat('Morning Assignment','Assignment',['Date','Supervisor','Area','Kaam','Labour','Kitne'], L.ma.map(function(r){ return [d(r),expS(r,1),expS(r,2),expS(r,3),expS(r,4),expN(r,5)]; })));
+  }
+  return out;
+}
+function expMeta(screenId){
+  const s = document.getElementById(screenId);
+  const h1 = s.querySelector('.hdr h1');
+  let title = h1 ? expClean((h1.childNodes[0] && h1.childNodes[0].textContent) || h1.textContent) : 'Report';
+  if(!title) title = expClean(h1 ? h1.textContent : 'Report');
+  const card = s.querySelector('.wrap > .card');
+  const parts = [];
+  if(card) card.querySelectorAll('input, select').forEach(function(el){
+    if(el.type==='hidden' || el.type==='button' || !el.offsetParent && el.type!=='date') return;
+    let val = el.tagName==='SELECT' ? (el.options[el.selectedIndex]||{}).text : el.value;
+    val = expClean(val);
+    if(!val || /^--|^sab\b|^sab \(/i.test(val)) return;
+    if(el.type==='date' && typeof fmtDate==='function') val = fmtDate(val);
+    const lw = el.closest('div'); const lb = lw ? lw.querySelector('label') : null;
+    parts.push((lb ? expClean(lb.textContent).replace(/\s*\*$/,'') : '') + ': ' + val);
+  });
+  return {title:title, filters:parts.join('   •   ')};
+}
+function expFile(title, ext){
+  const d = new Date(), dd = String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
+  return (title.replace(/[^\wऀ-ॿ]+/g,'-').replace(/^-|-$/g,'') || 'Report') + '_' + dd + '.' + ext;
+}
+function expLoad(src, ok){
+  return new Promise(function(res, rej){
+    if(ok()) return res();
+    const s = document.createElement('script'); s.src = src;
+    s.onload = function(){ ok() ? res() : rej(); }; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+function expRun(kind, screenId){
+  if(EXP_BUSY) return;
+  const root = document.getElementById(EXP_MAP[screenId]);
+  let secs = expCustom(screenId).concat(root ? expFromDom(root) : []);
+  if(screenId==='dashScreen' && window.DB_LAST) secs = secs.filter(function(x){ return x.flat || x.kv; });
+  if(!secs.some(function(x){ return x.rows && x.rows.length; })){
+    toast('❗ Pehle report dekho — "Report Dekho" dabao, phir export karo','error'); return;
+  }
+  const meta = expMeta(screenId);
+  EXP_BUSY = true;
+  const done = function(){ EXP_BUSY = false; };
+  if(kind === 'xls'){
+    toast('⏳ Excel ban rahi hai...');
+    expLoad('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', function(){ return !!window.XLSX; })
+      .then(function(){ expXls(meta, secs); done(); })
+      .catch(function(){ done(); toast('⚠️ Excel tool load nahi hua — internet check karo','error'); });
+  } else {
+    toast('⏳ PDF ban rahi hai...');
+    expLoad('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', function(){ return !!(window.jspdf && window.jspdf.jsPDF); })
+      .then(function(){ return expPdf(meta, secs); })
+      .then(done)
+      .catch(function(e){ done(); toast('⚠️ PDF nahi bani — internet check karo','error'); });
+  }
+}
+// ── EXCEL ──
+function expRowVals(cells){
+  const out = [];
+  cells.forEach(function(c){
+    const n = (typeof c.t === 'number') ? c.t : expNum(c.t);
+    out.push(n!==null && c.t!=='' ? n : (c.t==null?'':c.t));
+    for(let i=1;i<(c.span||1);i++) out.push('');
+  });
+  return out;
+}
+function expXls(meta, secs){
+  const wb = XLSX.utils.book_new();
+  const used = {};
+  const addSheet = function(name, aoa){
+    let n = (name||'Sheet').replace(/[\\\/\?\*\[\]:]/g,'').slice(0,28) || 'Sheet', k = n, i = 2;
+    while(used[k.toLowerCase()]) k = n.slice(0,25)+' '+(i++);
+    used[k.toLowerCase()] = 1;
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    const w = [];
+    aoa.forEach(function(r){ r.forEach(function(v,ci){ const l = String(v==null?'':v).length; if(!w[ci] || w[ci] < l) w[ci] = l; }); });
+    ws['!cols'] = w.map(function(l){ return {wch: Math.min(Math.max(l+2, 8), 45)}; });
+    XLSX.utils.book_append_sheet(wb, ws, k);
+  };
+  const top = [[NURSERY_NAME], [meta.title], meta.filters ? [meta.filters] : [], ['Bana: '+new Date().toLocaleString('en-IN')], []];
+  // Flat (khaas) sections — har ek apni sheet
+  secs.filter(function(s){ return s.flat; }).forEach(function(s){
+    addSheet(s.sheet||s.title, top.concat(s.head.map(expRowVals), s.rows.map(expRowVals)));
+  });
+  // Baaki sab — "Report" sheet me ek ke neeche ek
+  const rest = secs.filter(function(s){ return !s.flat; });
+  if(rest.length){
+    let aoa = top.slice();
+    rest.forEach(function(s){
+      if(s.title) aoa.push([s.title]);
+      s.head.forEach(function(h){ aoa.push(expRowVals(h)); });
+      s.rows.forEach(function(r){ aoa.push(expRowVals(r)); });
+      aoa.push([]);
+    });
+    addSheet(secs.some(function(s){ return s.flat; }) ? 'Summary' : 'Report', aoa);
+  }
+  XLSX.writeFile(wb, expFile(meta.title, 'xlsx'));
+  toast('✅ Excel download ho gayi');
+}
+// ── PDF (saaf table, A4) ──
+function expPdf(meta, secs){
+  const maxCols = Math.max.apply(null, secs.map(function(s){ return Math.max.apply(null, s.head.concat(s.rows).map(function(r){ return r.reduce(function(a,c){ return a+(c.span||1); },0); }).concat([0])); }));
+  const land = maxCols > 7;
+  const PW = land ? 1123 : 794, PH = land ? 794 : 1123;
+  const stage = document.createElement('div');
+  stage.style.cssText = 'position:absolute;left:-12000px;top:0;';
+  document.body.appendChild(stage);
+  const pages = [];
+  let body = null;
+  const newPage = function(){
+    const pg = document.createElement('div'); pg.className = 'ep-page'; pg.style.width = PW+'px'; pg.style.height = PH+'px';
+    let hd = '';
+    if(!pages.length){
+      hd = '<div class="ep-hd"><img src="'+TGH_LOGO+'" class="ep-logo"><div><div class="ep-nn">'+expEsc(NURSERY_NAME)+'</div><div class="ep-ad">'+expEsc(NURSERY_ADDR)+'</div></div></div>'+
+           '<div class="ep-tt">'+expEsc(meta.title)+'</div>'+(meta.filters?'<div class="ep-fl">'+expEsc(meta.filters)+'</div>':'');
+    } else {
+      hd = '<div class="ep-hd2">'+expEsc(NURSERY_NAME)+' — '+expEsc(meta.title)+'</div>';
+    }
+    pg.innerHTML = hd + '<div class="ep-body"></div><div class="ep-ft"></div>';
+    stage.appendChild(pg); pages.push(pg);
+    body = pg.querySelector('.ep-body');
+  };
+  const over = function(){ return body.scrollHeight > body.clientHeight + 1; };
+  const mkTable = function(s){
+    const t = document.createElement('table'); t.className = 'ep-t' + (s.kv?' ep-kv':'');
+    const nc = (s.head[0]||s.rows[0]||[]).reduce(function(a,c){ return a+(c.span||1); },0);
+    if(nc >= 15) t.classList.add('ep-xs'); else if(nc >= 11) t.classList.add('ep-sm');
+    if(s.head.length) t.innerHTML = '<thead>'+s.head.map(function(r){ return '<tr>'+r.map(function(c){ return '<th'+(c.span>1?' colspan="'+c.span+'"':'')+'>'+expEsc(c.t)+'</th>'; }).join('')+'</tr>'; }).join('')+'</thead>';
+    t.appendChild(document.createElement('tbody'));
+    return t;
+  };
+  const mkRow = function(r){
+    const tr = document.createElement('tr');
+    const first = String(r[0] && r[0].t || '');
+    if(/\btotal\b/i.test(first)) tr.className = 'ep-tot';
+    tr.innerHTML = r.map(function(c){ const isN = (typeof c.t==='number') || expNum(c.t)!==null;
+      return '<td'+(c.span>1?' colspan="'+c.span+'"':'')+(isN?' class="n"':'')+'>'+expEsc(typeof c.t==='number'?c.t.toLocaleString('en-IN'):c.t)+'</td>'; }).join('');
+    return tr;
+  };
+  newPage();
+  secs.forEach(function(s){
+    if(!s.rows.length) return;
+    let ttl = null;
+    if(s.title){ ttl = document.createElement('div'); ttl.className = 'ep-st'+(String(s.title).indexOf('↳')===0?' ep-sub':''); ttl.textContent = s.title; body.appendChild(ttl); }
+    let t = mkTable(s); body.appendChild(t);
+    if(over()){                              // sirf heading + table header bhi nahi aata -> nayi page
+      if(ttl) body.removeChild(ttl); body.removeChild(t); newPage();
+      if(ttl) body.appendChild(ttl); body.appendChild(t);
+    }
+    let tb = t.querySelector('tbody'), cnt = 0;
+    s.rows.forEach(function(r){
+      const tr = mkRow(r); tb.appendChild(tr); cnt++;
+      if(over()){
+        tb.removeChild(tr);
+        if(cnt === 1){ body.removeChild(t); if(ttl && ttl.parentNode===body) body.removeChild(ttl); }
+        newPage();
+        if(s.title){ const t2 = document.createElement('div'); t2.className = 'ep-st ep-cont'; t2.textContent = s.title + ' (aage)'; body.appendChild(t2); }
+        t = mkTable(s); body.appendChild(t); tb = t.querySelector('tbody'); tb.appendChild(tr); cnt = 1;
+      }
+    });
+    const gap = document.createElement('div'); gap.style.height = '10px'; body.appendChild(gap);
+  });
+  const now = new Date().toLocaleString('en-IN');
+  pages.forEach(function(pg, i){ pg.querySelector('.ep-ft').textContent = 'Page '+(i+1)+' / '+pages.length+'   •   Bana: '+now; });
+  const pdf = new window.jspdf.jsPDF({orientation: land?'landscape':'portrait', unit:'mm', format:'a4', compress:true});
+  const W = land ? 297 : 210, H = land ? 210 : 297;
+  let chain = Promise.resolve();
+  pages.forEach(function(pg, i){
+    chain = chain.then(function(){
+      return html2canvas(pg, {scale:2, backgroundColor:'#ffffff', logging:false, useCORS:true}).then(function(cv){
+        if(i>0) pdf.addPage();
+        pdf.addImage(cv.toDataURL('image/jpeg', 0.9), 'JPEG', 0, 0, W, H);
+      });
+    });
+  });
+  return chain.then(function(){
+    pdf.save(expFile(meta.title, 'pdf'));
+    document.body.removeChild(stage);
+    toast('✅ PDF download ho gayi ('+pages.length+' page)');
+  }).catch(function(e){ if(stage.parentNode) document.body.removeChild(stage); throw e; });
+}
+function expEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 </script>
 
