@@ -229,6 +229,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .rep-title{font-size:15px;font-weight:800;color:#1a2e26;margin-bottom:4px;letter-spacing:-0.2px;}
 .rep-sub{font-size:12px;color:var(--g5);margin-bottom:12px;}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+.bk-sum td{font-size:13px;}
+.bk-sum tr.bks-crop td{background:#e8f5ee;font-weight:800;color:#14402b;border-top:2px solid #b8d9c5;}
+.bk-sum td.bks-arrow{color:#8aa397;}
+.bk-sum tr.bks-tot td{background:var(--gd);color:white;font-weight:800;}
 .sd-flat th,.sd-flat td{font-size:12px;padding:6px 6px;}
 .sd-flat tr.sd-b td{background:#f3f8f5;}
 .sd-flat tr.sd-a td{background:#ffffff;}
@@ -683,28 +687,29 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .exp-xls{background:linear-gradient(135deg,#1b5e20,#2e7d32);}
 .exp-btn:hover{filter:brightness(1.08);}
 @media (min-width:1024px){ body.has-side .exp-bar{margin:12px 0 0;} }
-.ep-page{background:#fff;padding:30px 34px 26px;box-sizing:border-box;display:flex;flex-direction:column;font-family:'Segoe UI',Roboto,'Noto Sans Devanagari',Arial,sans-serif;color:#1d2b25;}
-.ep-hd{display:flex;align-items:center;gap:14px;border-bottom:2px solid #1a4731;padding-bottom:10px;}
+.ep-page{background:#fff;padding:30px 34px 26px;box-sizing:border-box;display:flex;flex-direction:column;font-family:'Segoe UI',Roboto,'Noto Sans Devanagari',Arial,sans-serif;color:#000;}
+.ep-hd{display:flex;align-items:center;gap:14px;border-bottom:2px solid #000;padding-bottom:10px;}
 .ep-logo{height:52px;width:104px;object-fit:contain;}
-.ep-nn{font-size:20px;font-weight:800;color:#1a4731;}
-.ep-ad{font-size:12px;color:#55665e;}
-.ep-tt{font-size:17px;font-weight:800;margin-top:10px;color:#1d2b25;}
-.ep-fl{font-size:11.5px;color:#55665e;margin-top:3px;line-height:1.4;}
-.ep-hd2{font-size:12px;font-weight:700;color:#55665e;border-bottom:1px solid #c9d6cf;padding-bottom:6px;}
-.ep-body{flex:1;overflow:hidden;margin-top:10px;}
-.ep-ft{font-size:10.5px;color:#7a8a83;text-align:right;border-top:1px solid #dfe7e2;padding-top:5px;margin-top:6px;}
-.ep-st{font-size:13px;font-weight:800;color:#1a4731;margin:8px 0 4px;}
-.ep-st.ep-sub{font-size:11.5px;color:#3d5449;font-weight:700;margin-left:10px;}
-.ep-st.ep-cont{color:#7a8a83;font-size:11.5px;}
-.ep-t{width:100%;border-collapse:collapse;font-size:11px;}
-.ep-t th{background:#e6f1ea;color:#1a4731;font-weight:800;text-align:left;padding:5px 6px;border:1px solid #c9d6cf;}
-.ep-t td{padding:4px 6px;border:1px solid #d9e3dd;vertical-align:top;}
+.ep-nn{font-size:20px;font-weight:800;color:#000;}
+.ep-ad{font-size:12.5px;color:#111;font-weight:600;}
+.ep-tt{font-size:18px;font-weight:800;margin-top:10px;color:#000;}
+.ep-fl{font-size:12px;color:#000;font-weight:600;margin-top:3px;line-height:1.4;}
+.ep-hd2{font-size:12px;font-weight:700;color:#000;border-bottom:1px solid #000;padding-bottom:6px;}
+.ep-body{flex:1;overflow:hidden;margin-top:10px;position:relative;}
+.ep-ft{font-size:11px;color:#000;text-align:right;border-top:1px solid #000;padding-top:5px;margin-top:6px;}
+.ep-st{font-size:13.5px;font-weight:800;color:#000;margin:8px 0 4px;}
+.ep-st.ep-sub{font-size:12px;color:#000;font-weight:700;margin-left:10px;}
+.ep-st.ep-cont{color:#222;font-size:11.5px;}
+.ep-t{width:100%;border-collapse:collapse;font-size:11.5px;color:#000;}
+.ep-t th{background:#d6e6dc;color:#000;font-weight:800;text-align:left;padding:5px 6px;border:1px solid #444;}
+.ep-t td{padding:4px 6px;border:1px solid #666;vertical-align:top;color:#000;font-weight:500;}
 .ep-t td.n{text-align:right;}
 .ep-t th,.ep-t td{word-break:break-word;overflow-wrap:anywhere;}
 .ep-t.ep-sm{font-size:9.5px;}.ep-t.ep-sm th,.ep-t.ep-sm td{padding:3px 4px;}
 .ep-t.ep-xs{font-size:8.2px;table-layout:fixed;}.ep-t.ep-xs th,.ep-t.ep-xs td{padding:3px 3px;}
-.ep-t tbody tr:nth-child(even) td{background:#f7faf8;}
-.ep-t tr.ep-tot td{background:#e3f1e8;font-weight:800;}
+.ep-t tbody tr:nth-child(even) td{background:#f4f4f4;}
+.ep-t tr.ep-tot td{background:#d6e6dc;font-weight:800;}
+.ep-t tr.ep-bold td{font-weight:800;background:#ebebeb;border-top:1.5px solid #000;}
 .ep-kv{width:auto;min-width:300px;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -2014,7 +2019,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261025-1230';
+const APP_VERSION = '20261025-1330';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -5077,54 +5082,40 @@ function loadBookingReport(){
         let html = '<div class="rep-card"><div class="rep-title"><i class="ti ti-clipboard-list" style="color:var(--gm);"></i> '+glist.length+' Booking \u2022 '+totalPlant.toLocaleString('en-IN')+' Plants \u2022 \u20B9'+totalRec.toLocaleString('en-IN')+' Received</div></div>';
         if(useDel) html = '<div class="rep-card" style="padding:10px 14px;background:#fff3e0;border:1px solid #ffcc80;font-weight:700;color:#bf360c;">🚚 Delivery date: '+(dFrom?fmtDate(dFrom):'shuru')+' se '+(dTo?fmtDate(dTo):'aage')+' — sirf in dino ki delivery wali varieties</div>' + html;
 
-        // ══ Crop-wise (nested) summary — har crop expandable, uski varieties andar ══
+        // ══ Crop / Variety Summary — ek hi table (print ke liye saaf) ══
         const cropSum = {};
         glist.forEach(g => {
-          g.lines.forEach(l => {
-            const crop = l.crop || '?';
-            const variety = l.variety || '?';
-            if(!cropSum[crop]) cropSum[crop] = { crop:crop, plants:0, count:0, vars:{} };
-            cropSum[crop].plants += l.plant;
-            cropSum[crop].count++;
-            if(!cropSum[crop].vars[variety]) cropSum[crop].vars[variety] = { variety:variety, plants:0, count:0 };
-            cropSum[crop].vars[variety].plants += l.plant;
-            cropSum[crop].vars[variety].count++;
+          const amts = g.lines.map(l => l.plant * l.rate);
+          const amtTot = amts.reduce((a,b)=>a+b, 0);
+          g.lines.forEach((l, li) => {
+            const crop = l.crop || '?', variety = l.variety || '?';
+            // Payment booking par aata hai — variety me uski rakam ke hisaab se baanto
+            const pay = amtTot > 0 ? g.totalRec * amts[li] / amtTot : g.totalRec / g.lines.length;
+            if(!cropSum[crop]) cropSum[crop] = { crop:crop, plants:0, amt:0, pay:0, bids:{}, vars:{} };
+            const c = cropSum[crop];
+            c.plants += l.plant; c.amt += amts[li]; c.pay += pay; c.bids[g.bid] = 1;
+            if(!c.vars[variety]) c.vars[variety] = { variety:variety, plants:0, amt:0, pay:0, bids:{} };
+            const v = c.vars[variety];
+            v.plants += l.plant; v.amt += amts[li]; v.pay += pay; v.bids[g.bid] = 1;
           });
         });
         const cropList = Object.values(cropSum).sort((a,b)=> b.plants - a.plants);
-
-        let sumHtml = '<div class="rep-card" style="padding:12px 14px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;"><i class="ti ti-chart-bar" style="color:var(--gm);font-size:19px;"></i><span style="font-weight:800;font-size:14.5px;color:#1a2e26;">Crop / Variety Summary</span></div></div>';
-
+        const rs = n => '₹' + Math.round(n).toLocaleString('en-IN');
+        let gAmt = 0, gPay = 0, gBk = 0;
+        let sumHtml = '<div class="rep-card"><div class="rep-title">📊 Crop / Variety Summary</div>'+
+          '<div style="overflow-x:auto;"><table class="att-table bk-sum">'+
+          '<thead><tr><th>Vegetable</th><th>Variety</th><th>Booking</th><th>Booked Plant</th><th>Booking Amount</th></tr></thead><tbody>';
         cropList.forEach(cp => {
           const vlist = Object.values(cp.vars).sort((a,b)=> b.plants - a.plants);
-          sumHtml += '<div class="crop-card" data-open="0">'+
-            '<div class="crop-head" onclick="togCrop(this)">'+
-              '<div style="flex:1;"><div style="font-weight:800;font-size:14px;color:#1a2e26;">'+cp.crop+'</div>'+
-              '<div style="font-size:12px;color:#5a6a63;font-weight:500;margin-top:2px;">'+Object.keys(cp.vars).length+' variety \u2022 '+cp.count+' booking</div></div>'+
-              '<div style="text-align:right;margin-left:10px;"><div style="font-weight:800;font-size:15px;color:var(--gd);">'+cp.plants.toLocaleString('en-IN')+'</div>'+
-              '<div style="font-size:10.5px;color:#7a8a83;">plants</div></div>'+
-              '<i class="ti ti-chevron-down crop-chev" style="color:#2d7a4f;font-size:18px;margin-left:10px;"></i>'+
-            '</div>'+
-            '<div class="crop-body"><table class="cvsum-tbl"><thead><tr>'+
-              '<th style="text-align:left;">Variety</th><th style="text-align:right;">Booking</th><th style="text-align:right;">Plants</th></tr></thead><tbody>';
+          const nb = Object.keys(cp.bids).length;
+          gAmt += cp.amt; gPay += cp.pay; gBk += nb;
+          sumHtml += '<tr class="bks-crop"><td>'+cp.crop+'</td><td>'+vlist.length+' variety</td><td>'+nb+'</td><td>'+cp.plants.toLocaleString('en-IN')+'</td><td>'+rs(cp.amt)+'</td></tr>';
           vlist.forEach(v => {
-            sumHtml += '<tr><td style="text-align:left;font-weight:600;">'+v.variety+'</td>'+
-              '<td style="text-align:right;">'+v.count+'</td>'+
-              '<td style="text-align:right;font-weight:700;color:var(--gd);">'+v.plants.toLocaleString('en-IN')+'</td></tr>';
+            sumHtml += '<tr><td class="bks-arrow">↳</td><td style="text-align:left;">'+v.variety+'</td><td>'+Object.keys(v.bids).length+'</td><td>'+v.plants.toLocaleString('en-IN')+'</td><td>'+rs(v.amt)+'</td></tr>';
           });
-          // Crop ka apna total (halka green, data saaf dikhe)
-          sumHtml += '<tr style="background:#e3f5ea;font-weight:800;"><td style="text-align:left;color:#1a5c34;">'+cp.crop+' Total</td>'+
-            '<td style="text-align:right;color:#1a5c34;">'+cp.count+'</td>'+
-            '<td style="text-align:right;color:#1a5c34;">'+cp.plants.toLocaleString('en-IN')+'</td></tr>';
-          sumHtml += '</tbody></table></div></div>';
         });
-
-        // Grand total (halka green background, dark green text — data saaf dikhe)
-        sumHtml += '<div class="rep-card" style="padding:13px 16px;background:#e3f5ea;border:1px solid #b8e0c8;">'+
-          '<div style="display:flex;justify-content:space-between;align-items:center;">'+
-          '<span style="font-weight:800;font-size:14px;color:#1a5c34;">GRAND TOTAL</span>'+
-          '<span style="font-weight:800;font-size:15px;color:#1a5c34;">'+glist.length+' booking \u2022 '+totalPlant.toLocaleString('en-IN')+' plants</span>'+
-          '</div></div>';
+        sumHtml += '<tr class="bks-tot"><td colspan="2">GRAND TOTAL</td><td>'+glist.length+'</td><td>'+totalPlant.toLocaleString('en-IN')+'</td><td>'+rs(gAmt)+'</td></tr>';
+        sumHtml += '</tbody></table></div></div>';
         html += sumHtml;
 
         // Har booking = expandable card
@@ -7091,6 +7082,10 @@ function expFromDom(root){
       if(tr.querySelector('table')) return;              // khulne wali detail row (andar ki table alag aayegi)
       const cells = [...tr.cells].map(function(td){ return {t:expCellText(td), span:td.colSpan||1, th:td.tagName==='TH'}; });
       if(!cells.length || cells.every(function(c){ return !c.t; })) return;
+      if(!cells.every(function(c){ return c.th; })){
+        const fc = tr.cells[0];
+        cells.bold = tr.classList.contains('bks-crop') || (fc && parseInt(getComputedStyle(fc).fontWeight||'400',10) >= 700) || (fc && parseInt(getComputedStyle(tr).fontWeight||'400',10) >= 700);
+      }
       if(cells.every(function(c){ return c.th; }) && !rows.length) head.push(cells); else rows.push(cells);
     });
     if(rows.length) secs.push(expDropEmpty({title:expTitleFor(el), head:head, rows:rows}));
@@ -7106,7 +7101,7 @@ function expDropEmpty(s){
   const keep = [];
   for(let i=0;i<n;i++){ if(all.some(function(r){ return String(r[i].t).trim() !== ''; })) keep.push(i); }
   if(keep.length === n) return s;
-  const f = function(r){ return keep.map(function(i){ return r[i]; }); };
+  const f = function(r){ const o = keep.map(function(i){ return r[i]; }); o.bold = r.bold; return o; };
   return {title:s.title, head:s.head.map(f), rows:s.rows.map(f)};
 }
 function expS(r,i){ const c = r.c && r.c[i]; return c && c.v!=null ? String(c.v).trim() : ''; }
@@ -7273,7 +7268,11 @@ function expPdf(meta, secs){
     stage.appendChild(pg); pages.push(pg);
     body = pg.querySelector('.ep-body');
   };
-  const over = function(){ return body.scrollHeight > body.clientHeight + 1; };
+  // Thodi jagah chhod kar naapo (render me 1-2 px ka fark hota hai) — aakhri line kate nahi
+  const over = function(){
+    const last = body.lastElementChild; if(!last) return false;
+    return (last.offsetTop + last.offsetHeight) > (body.clientHeight - 18);
+  };
   const mkTable = function(s){
     const t = document.createElement('table'); t.className = 'ep-t' + (s.kv?' ep-kv':'');
     const nc = (s.head[0]||s.rows[0]||[]).reduce(function(a,c){ return a+(c.span||1); },0);
@@ -7286,6 +7285,7 @@ function expPdf(meta, secs){
     const tr = document.createElement('tr');
     const first = String(r[0] && r[0].t || '');
     if(/\btotal\b/i.test(first)) tr.className = 'ep-tot';
+    else if(r.bold) tr.className = 'ep-bold';
     tr.innerHTML = r.map(function(c){ const isN = (typeof c.t==='number') || expNum(c.t)!==null;
       return '<td'+(c.span>1?' colspan="'+c.span+'"':'')+(isN?' class="n"':'')+'>'+expEsc(typeof c.t==='number'?c.t.toLocaleString('en-IN'):c.t)+'</td>'; }).join('');
     return tr;
