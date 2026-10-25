@@ -2044,7 +2044,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261025-2000';
+const APP_VERSION = '20261025-2115';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -7456,6 +7456,12 @@ function mrFetch(sheet){
     .catch(function(){ return {cols:[], rows:[], err:true}; });
 }
 
+// naam number jaisa ho (Plant, Qty) par data text ho (Faldar me "Plant" = paudhe ka naam) to text hi maano
+function mrMostlyNum(raw, i){
+  let n = 0, k = 0;
+  (raw.rows||[]).forEach(function(c){ const x = c[i]; if(!x || x.v==null || String(x.v).trim()==='') return; n++; if(!isNaN(Number(String(x.v).replace(/,/g,'')))) k++; });
+  return n===0 || k >= n*0.8;
+}
 // Sheet ke column → hamare column (naam, type)
 function mrColsFor(raw){
   const used = {};
@@ -7466,7 +7472,7 @@ function mrColsFor(raw){
     let type = 'text';
     const numName = /^(plant|plants|rate|pkt|trays?|tray count|cup|seeds|total plants|qty|hours|wage|ot hours|ot wage|pumps?|pump count|water\/pump|litre|dose|carret|direct plants|plant per carret|total labour|total received|first payment|second payment|delivered plant|amount)$/i;
     if(c.type==='date' || c.type==='datetime' || /date|tarikh/i.test(label) && !/range/i.test(label)) type = 'date';
-    else if((c.type==='number' || numName.test(label)) && !/mobile|phone|\bid\b|^no$|lot|gaadi|meter|pin|bank|mode/i.test(label)) type = 'num';
+    else if((c.type==='number' || (numName.test(label) && mrMostlyNum(raw, i))) && !/mobile|phone|\bid\b|^no$|lot|gaadi|meter|pin|bank|mode/i.test(label)) type = 'num';
     return {id:'c'+i, i:i, label:k, type:type};
   });
 }
@@ -7489,6 +7495,8 @@ function mrShow(v, col){
 function mrBuildOne(src, raw){
   const cols = mrColsFor(raw);
   let rows = raw.rows.map(function(c){ const o = {}; cols.forEach(function(col){ o[col.id] = mrCell(c[col.i], col); }); return o; });
+  // sheet ke khaali column (bina naam, bina data — 'Column K') hata do
+  for(let k = cols.length-1; k >= 0; k--){ const c = cols[k]; if(!raw.cols[c.i].label && !rows.some(function(r){ return r[c.id]!=='' && r[c.id]!=null; })){ cols.splice(k, 1); rows.forEach(function(r){ delete r[c.id]; }); } }
   if(src.k==='booking'){
     const pl = cols.filter(function(c){ return /^plant$/i.test(c.label); })[0] || cols[8];
     const rt = cols.filter(function(c){ return /^rate$/i.test(c.label); })[0] || cols[9];
@@ -7813,9 +7821,8 @@ function mrBoot(){
   if(lastSrc && list.some(function(s){ return s.k===lastSrc; })) MR.src = lastSrc;
   root.innerHTML =
     '<div class="mr-top"><div class="mr-h1"><img src="'+TGH_LOGO+'" alt=""><div><div class="t">📊 मास्टर रिपोर्ट / Master Report</div>'+
-    '<div class="s">'+mrEsc(NURSERY_NAME)+' • Report chuno, column chuno, har column ke neeche filter</div></div>'+
+    '<div class="s">'+mrEsc(NURSERY_NAME)+' • Reports milao, Rows / Values chuno, formula, subtotal</div></div>'+
     '<div class="u">'+mrEsc(u.name)+' ('+mrEsc(u.role)+')</div></div>'+
-    '<div class="mr-tabs"><button class="mr-tab on" data-m="tbl" onclick="mrSetMode(\'tbl\')">📋 Table</button><button class="mr-tab" data-m="pv" onclick="mrSetMode(\'pv\')">🔗 Pivot / Milao</button></div>'+
     '<div class="mr-bar"><div class="mr-f mr-src" id="mrSrcBox"><label>रिपोर्ट / Report</label><select id="mrSrcSel" onchange="MR.src=this.value;mrLS(\'mrSrc\',this.value);mrLoad()">'+
       list.map(function(s){ return '<option value="'+s.k+'"'+(s.k===MR.src?' selected':'')+'>'+mrEsc(s.n)+'</option>'; }).join('')+'</select></div>'+
     '<div class="mr-f"><label>तिथि से / From</label><input type="date" id="mrxFrom" onchange="mrDateIn()"></div>'+
@@ -7830,7 +7837,7 @@ function mrBoot(){
     '</div><div class="mr-bar" id="mrBar2"></div></div>'+
     '<div class="mr-cols" id="mrCols"></div><div id="mrBody"></div><div id="pvBox" style="display:none"><div class="pv-b" id="pvBuild"></div><div id="pvOut"></div></div>';
   mrPreset('month');
-  mrSetMode(mrLS('mrMode')==='pv' ? 'pv' : 'tbl');
+  mrSetMode('pv');   // sirf Pivot / Milao (Table wala tab hata diya)
 }
 (function(){
   if(!/[?&]mr=1(&|$)/.test(location.search)) return;
@@ -8053,7 +8060,7 @@ function pvCompile(src){
 function pvOut(v){ if(typeof v==='number' && !isFinite(v)) return ''; if(v===true) return 'TRUE'; if(v===false) return 'FALSE'; return v==null ? '' : v; }
 
 // ════════ DATA: chuni hui reports ek saath ════════
-function pvVeg(s){ return String(s==null?'':s).replace(/[^\p{L}\p{N}\s\-\.\/]/gu, '').replace(/\s+/g,' ').trim().toUpperCase(); }
+function pvVeg(s){ return String(s==null?'':s).replace(/[^\p{L}\p{M}\p{N}\s\-\.\/]/gu, '').replace(/\s+/g,' ').trim().toUpperCase(); }
 function pvMonth(iso){ const m = String(iso||'').match(/^(\d{4})-(\d{2})/); if(!m) return ''; return m[1]+'-'+m[2]+' ('+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[2]-1]+')'; }
 function pvWeek(iso){ const m = String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})/); if(!m) return ''; const d = new Date(+m[1], +m[2]-1, +m[3]); d.setDate(d.getDate() - (d.getDay()+6)%7); return localISO(d)+' se'; }
 const PV_COMMON = [
@@ -8076,7 +8083,8 @@ function pvData(cfg){
       const cd = one.cols.filter(function(c){ return c.type==='date'; })[0];
       const cs = src.k==='booking' ? find(/marketing/i) : find(/^supervisor$/i);
       const ca = src.k==='booking' ? null : find(/^area|^zone/i);
-      const cc = find(/^crop$|^vegetable$/i), cv = find(/^variety$/i), cl = find(/^lot/i);
+      // Faldar sheets: Category = Vegetable ki jagah, Plant (naam) = Variety ki jagah
+      const cc = find(/^crop$|^vegetable$/i) || (src.fz ? find(/^category$/i) : null), cv = find(/^variety$/i) || (src.fz ? find(/^plant$/i) : null), cl = find(/^lot/i);
       const pre = multi ? PV_SHORT[src.k]+': ' : '';
       one.cols.forEach(function(c){ fields.push({id:src.k+'|'+c.label, label:pre+c.label, type:c.type, src:src.k}); });
       let list = one.rows;
