@@ -2035,7 +2035,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261025-1830';
+const APP_VERSION = '20261025-1915';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -7919,6 +7919,7 @@ function mrBoot(){
 .pv-b .pv-line select{flex:0 1 auto;max-width:100%;}
 .pv-b input[type=checkbox]{width:16px;height:16px;-webkit-appearance:checkbox;appearance:checkbox;padding:0;}
 .pv-b input.err{border-color:#d93025;background:#fff4f3;}
+.pv-b label.pv-sub{flex-shrink:0;gap:4px;font-weight:800;color:#1f5a3d;background:#eef6f1;border:1px solid #c5d6cb;border-radius:7px;padding:3px 7px;cursor:pointer;}
 .pv-ins{display:flex;gap:6px;align-items:center;margin:-2px 0 8px;flex-wrap:wrap;}
 .pv-b .pv-ins select{font-size:12.5px;padding:4px 6px;border:1px dashed #2d7a4f;color:#1f5a3d;background:#f6fbf8;max-width:100%;}
 .pv-ins .fn{font-family:inherit;font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px;border:1px solid #c5d6cb;background:#fff;color:#1f5a3d;cursor:pointer;}
@@ -8245,7 +8246,9 @@ function pvCalc(cfg, data){
     sortKids(L, pk).forEach(function(k){
       const npk = pk ? pk+SEP+k : k, leaf = L+1===rowF.length;
       const line = {L:L, pk:npk, label:k, parts:npk.split(SEP), leaf:leaf, cells:colKeys.map(function(c){ return cell(L+1, npk, c); }), total:cell(L+1, npk, ALL)};
-      if(leaf || cfg.sub!==false) out.push(line);
+      // Subtotal band ho tab bhi group ki line rakho (Tree me naam dikhe) — sirf ank khaali
+      if(!leaf && (cfg.sub===false || (cfg.subLv && cfg.subLv[L]===false))) line.hdrOnly = true;
+      out.push(line);
       if(!leaf) walk(L+1, npk);
     });
   };
@@ -8291,9 +8294,10 @@ function pvBuilder(res){
   h += '<div class="pv-box"><div class="pv-h">2. Rows (line) <span class="hint">upar wala bada group</span></div>';
   cfg.rows.forEach(function(id, i){
     h += '<div class="pv-line"><select class="grow" onchange="pvSet(\'rows\','+i+',this.value)">'+pvOpts(fields, id)+'</select>'+
+      (i < cfg.rows.length-1 ? '<label class="pv-sub" title="Is level ka subtotal"><input type="checkbox" '+(cfg.sub!==false && !(cfg.subLv && cfg.subLv[i]===false)?'checked':'')+' onchange="pvSubLv('+i+',this.checked)"> Σ</label>' : '')+
       (i>0?'<button class="pv-up" title="Upar" onclick="pvMove(\'rows\','+i+')">↑</button>':'')+'<button class="pv-x" onclick="pvDel(\'rows\','+i+')">✕</button></div>';
   });
-  h += '<button class="pv-add" onclick="pvAdd(\'rows\')">+ Row jodo</button>';
+  h += '<button class="pv-add" onclick="pvAdd(\'rows\')">+ Row jodo</button>'+(cfg.rows.length>1?'<div class="pv-help">Σ = us level ka subtotal (Flat aur Tree dono me)</div>':'');
   h += '<div class="pv-h" style="margin-top:10px;">3. Columns (aadi) <span class="hint">optional</span></div><div class="pv-line"><select class="grow" onchange="MR.pv.col=this.value;pvRun()">'+
     pvOpts(fields, cfg.col, '— Column nahi —', function(f){ return f.type!=='num'; })+'</select></div></div>';
   // values
@@ -8319,7 +8323,7 @@ function pvBuilder(res){
   });
   h += '<button class="pv-add" onclick="pvAdd(\'filters\')">+ Filter jodo</button>';
   h += '<div class="pv-h" style="margin-top:10px;">Dikhawat</div><div class="pv-opt">'+
-    '<label><input type="checkbox" '+(cfg.sub!==false?'checked':'')+' onchange="MR.pv.sub=this.checked;pvRun()"> Subtotal</label>'+
+    '<label><input type="checkbox" '+(cfg.sub!==false?'checked':'')+' onchange="MR.pv.sub=this.checked;MR.pv.subLv=[];pvRun()"> Subtotal (sab)</label>'+
     '<label>Layout <select onchange="MR.pv.layout=this.value;pvRun()"><option value="tree"'+(cfg.layout!=='flat'?' selected':'')+'>🌳 Tree (khulne wala)</option><option value="flat"'+(cfg.layout==='flat'?' selected':'')+'>📄 Flat (table jaisa)</option></select></label>'+
     '<label>Kram <select onchange="MR.pv.sort=this.value;pvRun()"><option value="label"'+(cfg.sort==='label'?' selected':'')+'>Naam A→Z</option>'+
     '<option value="val"'+(cfg.sort==='val'?' selected':'')+'>Pehli value badi→chhoti</option><option value="valasc"'+(cfg.sort==='valasc'?' selected':'')+'>Pehli value chhoti→badi</option></select></label></div></div>';
@@ -8357,12 +8361,15 @@ function pvBuilder(res){
   document.getElementById('pvBuild').innerHTML = h;
   pvAcBind();
 }
+// Σ — kis level ka subtotal chahiye
+function pvSubLv(i, on){ const c = MR.pv; if(!c.subLv) c.subLv = []; if(on && c.sub===false){ c.sub = true; c.subLv = c.rows.map(function(_, k){ return k===i; }); } c.subLv[i] = on; pvRun(); }
 function pvSet(k, i, v){ MR.pv[k][i] = v; pvRun(); }
 function pvSetV(i, k, v){ const x = MR.pv.vals[i]; x[k] = v; if(k==='f' && v!=='#' && !x.agg) x.agg = 'sum'; pvRun(); }
 function pvSetF(i, k, v){ MR.pv.filters[i][k] = v; pvRun(); }
 function pvSetX(list, i, k, v){ MR.pv[list][i][k] = v; pvRun(); }
-function pvDel(k, i){ MR.pv[k].splice(i, 1); pvRun(); }
-function pvMove(k, i){ const a = MR.pv[k]; const t = a[i-1]; a[i-1] = a[i]; a[i] = t; pvRun(); }
+function pvDel(k, i){ MR.pv[k].splice(i, 1); if(k==='rows' && MR.pv.subLv) MR.pv.subLv.splice(i, 1); pvRun(); }
+function pvMove(k, i){ const a = MR.pv[k]; const t = a[i-1]; a[i-1] = a[i]; a[i] = t;
+  if(k==='rows' && MR.pv.subLv){ const s = MR.pv.subLv; const x = s[i-1]; s[i-1] = s[i]; s[i] = x; } pvRun(); }
 function pvAdd(k){
   const c = MR.pv;
   if(k==='rows') c.rows.push('f|Vegetable');
@@ -8453,6 +8460,7 @@ function pvRender(res){
   const tds = function(line){
     let s = '';
     const put = function(arr){ arr.forEach(function(v, i){ s += '<td class="n'+pvColor(vn[i], v)+'">'+mrEsc(pvF(v))+'</td>'; }); };
+    if(line.hdrOnly){ const n = vn.length * ((multiCol ? line.cells.length : 0) + 1); for(let i = 0; i < n; i++) s += '<td></td>'; return s; }
     if(multiCol){ line.cells.forEach(put); }
     put(line.total);
     return s;
@@ -8497,6 +8505,7 @@ function pvRenderFlat(res){
     return s;
   };
   pvFlatOrder(res.lines).forEach(function(line){
+    if(line.hdrOnly) return;
     const cls = line.leaf ? '' : (line.L===0 ? 'l0' : 'l1');
     h += '<tr class="'+cls+'">'+pvFlatCells(line, nL).map(function(x){ return '<td class="lbl">'+mrEsc(x)+'</td>'; }).join('')+tds(line)+'</tr>';
   });
@@ -8525,11 +8534,12 @@ function pvExport(kind){
   const num = function(arr){ return arr.map(function(v){ return {t: v==='' || v==null ? '' : v}; }); };
   const vals = function(line){ let a = []; if(res.colF) line.cells.forEach(function(c){ a = a.concat(num(c)); }); return a.concat(num(line.total)); };
   const flat = MR.pv.layout==='flat' && res.rowF.length;
-  const rows = (flat ? pvFlatOrder(res.lines) : res.lines).map(function(line){
+  const rows = (flat ? pvFlatOrder(res.lines).filter(function(l){ return !l.hdrOnly; }) : res.lines).map(function(line){
     let lab = [];
     if(flat) lab = pvFlatCells(line, nL).map(function(x){ return {t:x}; });
     else for(let i = 0; i < nL; i++){ lab.push({t: i < line.parts.length ? line.parts[i] : (i===line.parts.length ? 'Total' : '')}); }
-    const r = lab.concat(vals(line)); if(!line.leaf) r.bold = true; return r;
+    if(!flat && line.hdrOnly){ lab = []; for(let i = 0; i < nL; i++) lab.push({t: i < line.parts.length ? line.parts[i] : ''}); }
+    const r = lab.concat(line.hdrOnly ? vals(line).map(function(){ return {t:''}; }) : vals(line)); if(!line.leaf) r.bold = true; return r;
   });
   const gt = [{t:'GRAND TOTAL'}]; for(let i = 1; i < nL; i++) gt.push({t:''});
   rows.push(gt.concat(vals(res.grand)));
