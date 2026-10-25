@@ -2035,7 +2035,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261025-1800';
+const APP_VERSION = '20261025-1830';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -7434,8 +7434,6 @@ const MR_SOURCES = [
   {k:'booking', n:'📋 Booking (har variety ki line)', s:'Booking Data', noSup:true,
      def:['booking date','booking id','farmer','village','mobile','crop','variety','plant','rate','amount','delivery date','total received','status','marketing']},
   {k:'seed',    n:'🌱 Seed Sowing',                   s:'Seed Sowing Data'},
-  {k:'seedfull',n:'🌱 Seed Sowing + Labour (detail)', full:true,
-     def:['date','supervisor','zone','vegetable','variety','lot no.','packet','cup','tray','total plant','total labour','labour naam','labour tray','labour packet']},
   {k:'seedlab', n:'👷 Seed Sowing — Labour',          s:'Seed Labour Data'},
   {k:'water',   n:'💧 Watering',                      s:'Watering Records'},
   {k:'spray',   n:'🌫️ Spraying',                      s:'Spraying Records'},
@@ -7556,37 +7554,6 @@ function mrBuildAll(list){
   return {cols:cols, rows:rows};
 }
 
-// ── Seed Sowing + Labour — PDF wali "Seed Sowing Detail" jaisi: har labour ki ek line
-// Sowing ke Packet/Cup/Tray/Plant sirf pehli line par (jod do baar na ho); naam, date, variety har line par (filter ke liye)
-function mrBuildSeedFull(sow, lab){
-  const S = function(c, i){ const x = c[i]; return x && x.v!=null ? (typeof x.v==='string' ? x.v.trim() : x.v) : ''; };
-  const N = function(c, i){ const n = parseFloat(S(c, i)); return isNaN(n) ? '' : n; };
-  const key = function(d, a, v, va, l){ return [d, a, v, va, l].map(function(x){ return String(x==null?'':x).trim().toLowerCase(); }).join('|'); };
-  const labMap = {};
-  (lab.rows||[]).forEach(function(c){
-    const k = key(djISO(S(c,0)), S(c,2), S(c,3), S(c,4), S(c,5));
-    (labMap[k] = labMap[k] || []).push({name:String(S(c,6)), pkt:N(c,7), tray:N(c,8)});
-  });
-  const L = function(id, label, type){ return {id:id, label:label, type:type}; };
-  const cols = [L('d','Date','date'), L('s','Supervisor','text'), L('a','Zone','text'), L('sh','Shift','text'), L('v','Vegetable','text'), L('va','Variety','text'),
-    L('lot','Lot No.','text'), L('pk','Packet','num'), L('cup','Cup','num'), L('tr','Tray','num'), L('se','Seeds','num'), L('tp','Total Plant','num'),
-    L('tl','Total Labour','num'), L('ln','Labour Naam','text'), L('lt','Labour Tray','num'), L('lp','Labour Packet','num'), L('rm','Remarks','text')];
-  const rows = [];
-  (sow.rows||[]).forEach(function(c){
-    const d = djISO(S(c,0));
-    const base = {d:d, s:String(S(c,1)), a:String(S(c,2)), sh:String(S(c,3)), v:String(S(c,4)), va:String(S(c,5)), lot:String(S(c,6))};
-    const labs = labMap[key(d, S(c,2), S(c,4), S(c,5), S(c,6))] || [];
-    const n = Math.max(labs.length, 1);
-    for(let i = 0; i < n; i++){
-      const l = labs[i] || {name:'', pkt:'', tray:''};
-      const r = Object.assign({}, base, {ln:l.name, lt:l.tray, lp:l.pkt});
-      if(i===0){ Object.assign(r, {pk:N(c,7), tr:N(c,8), cup:N(c,9), se:N(c,10), tp:N(c,11), tl:labs.length, rm:String(S(c,12)), _first:1}); }
-      else { r.pk = r.tr = r.cup = r.se = r.tp = r.tl = ''; r.rm = ''; }
-      rows.push(r);
-    }
-  });
-  return {cols:cols, rows:rows};
-}
 function mrAllowed(){ return MR_SOURCES.filter(function(s){ return !(s.noSup && MR.user && MR.user.role==='Supervisor'); }); }
 
 function mrLoad(){
@@ -7598,11 +7565,6 @@ function mrLoad(){
     const list = mrAllowed().filter(function(s){ return s.s; });
     p = Promise.all(list.map(function(s){ return mrFetch(s.s).then(function(raw){ return {src:s, raw:raw}; }); }))
       .then(function(arr){ return mrBuildAll(arr.filter(function(x){ return x.raw.cols.length; })); });
-  } else if(src.full){
-    p = Promise.all([mrFetch('Seed Sowing Data'), mrFetch('Seed Labour Data')]).then(function(a){
-      if(!a[0].cols.length) throw new Error('sheet');
-      return mrBuildSeedFull(a[0], a[1]);
-    });
   } else {
     p = mrFetch(src.s).then(function(raw){
       if(raw.err && !raw.cols.length) throw new Error('sheet');
@@ -7631,7 +7593,7 @@ function mrLoad(){
   });
 }
 function mrDefVis(src, c, i){
-  if(src.def) return src.def.some(function(d){ return src.full ? c.label.toLowerCase()===d : c.label.toLowerCase().indexOf(d)===0; });
+  if(src.def) return src.def.some(function(d){ return c.label.toLowerCase().indexOf(d)===0; });
   return i < 12;
 }
 
@@ -8122,7 +8084,7 @@ const PV_COMMON = [
   {id:'f|Report', label:'Report', type:'text'}, {id:'f|Date', label:'Date', type:'date'},
   {id:'f|Mahina', label:'Mahina', type:'text'}, {id:'f|Hafta', label:'Hafta', type:'text'}, {id:'f|Saal', label:'Saal', type:'text'},
   {id:'f|Vegetable', label:'Vegetable', type:'text'}, {id:'f|Variety', label:'Variety', type:'text'},
-  {id:'f|Supervisor', label:'Supervisor / Marketing', type:'text'}, {id:'f|Area', label:'Area / Zone', type:'text'}
+  {id:'f|Supervisor', label:'Supervisor / Marketing', type:'text'}, {id:'f|Area', label:'Area / Zone', type:'text'}, {id:'f|Lot', label:'Lot No.', type:'text'}
 ];
 function pvSrcList(){ return mrAllowed().filter(function(s){ return s.s; }); }
 function pvData(cfg){
@@ -8138,7 +8100,7 @@ function pvData(cfg){
       const cd = one.cols.filter(function(c){ return c.type==='date'; })[0];
       const cs = src.k==='booking' ? find(/marketing/i) : find(/^supervisor$/i);
       const ca = src.k==='booking' ? null : find(/^area|^zone/i);
-      const cc = find(/^crop$|^vegetable$/i), cv = find(/^variety$/i);
+      const cc = find(/^crop$|^vegetable$/i), cv = find(/^variety$/i), cl = find(/^lot/i);
       const pre = multi ? PV_SHORT[src.k]+': ' : '';
       one.cols.forEach(function(c){ fields.push({id:src.k+'|'+c.label, label:pre+c.label, type:c.type, src:src.k}); });
       let list = one.rows;
@@ -8148,7 +8110,7 @@ function pvData(cfg){
         if((MR.from || MR.to) && (!d || (MR.from && d<MR.from) || (MR.to && d>MR.to))) return;
         const o = {'f|Report':PV_SHORT[src.k], 'f|Date':d, 'f|Mahina':pvMonth(d), 'f|Hafta':pvWeek(d), 'f|Saal':d ? d.slice(0,4) : '',
           'f|Vegetable':cc ? pvVeg(r[cc.id]) : '', 'f|Variety':cv ? bkNorm(r[cv.id]) : '',
-          'f|Supervisor':cs ? String(r[cs.id]).trim() : '', 'f|Area':ca ? String(r[ca.id]).trim() : ''};
+          'f|Supervisor':cs ? String(r[cs.id]).trim() : '', 'f|Area':ca ? String(r[ca.id]).trim() : '', 'f|Lot':cl ? String(r[cl.id]).trim() : ''};
         one.cols.forEach(function(c){ o[src.k+'|'+c.label] = r[c.id]; });
         rows.push(o);
       });
@@ -8201,7 +8163,7 @@ function pvCalc(cfg, data){
     const agg = v.f==='#' ? 'count' : (v.agg||'sum');
     return {f:f, agg:agg, name:(v.name||'').trim() || (v.f==='#' ? 'Entries' : PV_AGG_SHORT[agg]+' '+f.label)};
   });
-  const disp = function(f, v){ if(v==='' || v==null) return '(khaali)'; return f.type==='date' ? fmtDate(v) : String(v).trim() || '(khaali)'; };
+  const disp = function(f, v){ if(v==='' || v==null) return '—'; return f.type==='date' ? fmtDate(v) : String(v).trim() || '—'; };
   const SEP = '\u0001', ALL = '\u0003';
   const acc = {};
   const getA = function(k){ return acc[k] || (acc[k] = vals.map(function(){ return {s:0, n:0, mn:Infinity, mx:-Infinity, u:{}}; })); };
@@ -8260,7 +8222,9 @@ function pvCalc(cfg, data){
   const vnames = vals.map(function(v){ return v.name; }).concat(posts.map(function(p){ return p.name; }));
   // row ka tree
   const natural = function(a, b){ const x = parseFloat(a), y = parseFloat(b); if(!isNaN(x) && !isNaN(y) && String(x)===a.replace(/,/g,'') && String(y)===b.replace(/,/g,'')) return x-y;
-    if(a==='(khaali)') return 1; if(b==='(khaali)') return -1; return a.toLowerCase()<b.toLowerCase()?-1:a.toLowerCase()>b.toLowerCase()?1:0; };
+    if(a==='—') return -1; if(b==='—') return 1;
+    const da = a.match(/^(\d{2})\/(\d{2})\/(\d{4})$/), db = b.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);   // tarikh ko tarikh ki tarah
+    if(da && db){ const x = da[3]+da[2]+da[1], y = db[3]+db[2]+db[1]; return x<y?-1:x>y?1:0; } return a.toLowerCase()<b.toLowerCase()?-1:a.toLowerCase()>b.toLowerCase()?1:0; };
   const kids = {};
   rows.forEach(function(r){
     const keys = rowF.map(function(f){ return disp(f, r[f.id]); });
