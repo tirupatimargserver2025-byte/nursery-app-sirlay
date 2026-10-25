@@ -2035,7 +2035,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261025-1700';
+const APP_VERSION = '20261025-1800';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -7300,7 +7300,7 @@ function expPdf(meta, secs){
   const mkRow = function(r, s){
     const tr = document.createElement('tr');
     const hd = (s && s.head && s.head[s.head.length-1]) || [];
-    const txtCol = hd.map(function(c){ return /variety|naam|name|kisan|farmer|gaon|village|lot|mobile|booking id|gaadi|driver|labour|zone|area|supervisor|crop|vegetable|paudha/i.test(String(c.t||'')); });
+    const txtCol = hd.map(function(c){ const s = String(c.t||''); return /variety|naam|name|kisan|farmer|gaon|village|lot|mobile|booking id|gaadi|driver|labour|zone|area|supervisor|crop|vegetable|paudha/i.test(s) && !/tray|packet|pkt|total labour|qty|count|hours|wage/i.test(s); });
     const first = String(r[0] && r[0].t || '');
     if(/\btotal\b/i.test(first)) tr.className = 'ep-tot';
     else if(r.bold) tr.className = 'ep-bold';
@@ -7406,6 +7406,7 @@ body.mr-mode #mrRoot{display:block;}
 .mr-t td{padding:6px 9px;border-bottom:1px solid #edf2ee;color:#111;white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis;}
 .mr-t td.n{text-align:right;font-variant-numeric:tabular-nums;}
 .mr-t tbody tr:nth-child(even){background:#f8fbf9;}
+.mr-t tbody tr.mr-first td{border-top:2px solid #b8d9c5;}
 .mr-t tbody tr:hover{background:#eef7f1;}
 .mr-t tfoot td{position:sticky;bottom:0;background:#dcebe1;font-weight:800;color:#0f2e20;border-top:2px solid #b9d3c2;}
 .mr-t.g td{white-space:normal;}
@@ -7433,6 +7434,8 @@ const MR_SOURCES = [
   {k:'booking', n:'📋 Booking (har variety ki line)', s:'Booking Data', noSup:true,
      def:['booking date','booking id','farmer','village','mobile','crop','variety','plant','rate','amount','delivery date','total received','status','marketing']},
   {k:'seed',    n:'🌱 Seed Sowing',                   s:'Seed Sowing Data'},
+  {k:'seedfull',n:'🌱 Seed Sowing + Labour (detail)', full:true,
+     def:['date','supervisor','zone','vegetable','variety','lot no.','packet','cup','tray','total plant','total labour','labour naam','labour tray','labour packet']},
   {k:'seedlab', n:'👷 Seed Sowing — Labour',          s:'Seed Labour Data'},
   {k:'water',   n:'💧 Watering',                      s:'Watering Records'},
   {k:'spray',   n:'🌫️ Spraying',                      s:'Spraying Records'},
@@ -7553,6 +7556,37 @@ function mrBuildAll(list){
   return {cols:cols, rows:rows};
 }
 
+// ── Seed Sowing + Labour — PDF wali "Seed Sowing Detail" jaisi: har labour ki ek line
+// Sowing ke Packet/Cup/Tray/Plant sirf pehli line par (jod do baar na ho); naam, date, variety har line par (filter ke liye)
+function mrBuildSeedFull(sow, lab){
+  const S = function(c, i){ const x = c[i]; return x && x.v!=null ? (typeof x.v==='string' ? x.v.trim() : x.v) : ''; };
+  const N = function(c, i){ const n = parseFloat(S(c, i)); return isNaN(n) ? '' : n; };
+  const key = function(d, a, v, va, l){ return [d, a, v, va, l].map(function(x){ return String(x==null?'':x).trim().toLowerCase(); }).join('|'); };
+  const labMap = {};
+  (lab.rows||[]).forEach(function(c){
+    const k = key(djISO(S(c,0)), S(c,2), S(c,3), S(c,4), S(c,5));
+    (labMap[k] = labMap[k] || []).push({name:String(S(c,6)), pkt:N(c,7), tray:N(c,8)});
+  });
+  const L = function(id, label, type){ return {id:id, label:label, type:type}; };
+  const cols = [L('d','Date','date'), L('s','Supervisor','text'), L('a','Zone','text'), L('sh','Shift','text'), L('v','Vegetable','text'), L('va','Variety','text'),
+    L('lot','Lot No.','text'), L('pk','Packet','num'), L('cup','Cup','num'), L('tr','Tray','num'), L('se','Seeds','num'), L('tp','Total Plant','num'),
+    L('tl','Total Labour','num'), L('ln','Labour Naam','text'), L('lt','Labour Tray','num'), L('lp','Labour Packet','num'), L('rm','Remarks','text')];
+  const rows = [];
+  (sow.rows||[]).forEach(function(c){
+    const d = djISO(S(c,0));
+    const base = {d:d, s:String(S(c,1)), a:String(S(c,2)), sh:String(S(c,3)), v:String(S(c,4)), va:String(S(c,5)), lot:String(S(c,6))};
+    const labs = labMap[key(d, S(c,2), S(c,4), S(c,5), S(c,6))] || [];
+    const n = Math.max(labs.length, 1);
+    for(let i = 0; i < n; i++){
+      const l = labs[i] || {name:'', pkt:'', tray:''};
+      const r = Object.assign({}, base, {ln:l.name, lt:l.tray, lp:l.pkt});
+      if(i===0){ Object.assign(r, {pk:N(c,7), tr:N(c,8), cup:N(c,9), se:N(c,10), tp:N(c,11), tl:labs.length, rm:String(S(c,12)), _first:1}); }
+      else { r.pk = r.tr = r.cup = r.se = r.tp = r.tl = ''; r.rm = ''; }
+      rows.push(r);
+    }
+  });
+  return {cols:cols, rows:rows};
+}
 function mrAllowed(){ return MR_SOURCES.filter(function(s){ return !(s.noSup && MR.user && MR.user.role==='Supervisor'); }); }
 
 function mrLoad(){
@@ -7564,6 +7598,11 @@ function mrLoad(){
     const list = mrAllowed().filter(function(s){ return s.s; });
     p = Promise.all(list.map(function(s){ return mrFetch(s.s).then(function(raw){ return {src:s, raw:raw}; }); }))
       .then(function(arr){ return mrBuildAll(arr.filter(function(x){ return x.raw.cols.length; })); });
+  } else if(src.full){
+    p = Promise.all([mrFetch('Seed Sowing Data'), mrFetch('Seed Labour Data')]).then(function(a){
+      if(!a[0].cols.length) throw new Error('sheet');
+      return mrBuildSeedFull(a[0], a[1]);
+    });
   } else {
     p = mrFetch(src.s).then(function(raw){
       if(raw.err && !raw.cols.length) throw new Error('sheet');
@@ -7592,7 +7631,7 @@ function mrLoad(){
   });
 }
 function mrDefVis(src, c, i){
-  if(src.def) return src.def.some(function(d){ return c.label.toLowerCase().indexOf(d)===0; });
+  if(src.def) return src.def.some(function(d){ return src.full ? c.label.toLowerCase()===d : c.label.toLowerCase().indexOf(d)===0; });
   return i < 12;
 }
 
@@ -7748,7 +7787,7 @@ function mrRender(keepFocus, focusId){
   h += '</tr></thead><tbody>';
   if(!rows.length) h += '<tr><td colspan="'+vc.length+'" style="text-align:center;padding:24px;color:#5a6a63;">Is filter me koi entry nahi mili</td></tr>';
   rows.slice(0, MR.limit).forEach(function(r){
-    h += '<tr>'+vc.map(function(c){ const s = mrShow(r[c.id], c); return '<td'+(c.type==='num'?' class="n"':'')+' title="'+mrEsc(s)+'">'+mrEsc(s)+'</td>'; }).join('')+'</tr>';
+    h += '<tr'+(r._first?' class="mr-first"':'')+'>'+vc.map(function(c){ const s = mrShow(r[c.id], c); return '<td'+(c.type==='num'?' class="n"':'')+' title="'+mrEsc(s)+'">'+mrEsc(s)+'</td>'; }).join('')+'</tr>';
   });
   h += '</tbody>';
   if(rows.length && Object.keys(sums).length){
@@ -7897,6 +7936,8 @@ function mrBoot(){
 .pv-opt label{display:flex;gap:6px;align-items:center;cursor:pointer;}
 .pv-opt select{font-family:inherit;font-size:13px;padding:5px 8px;border:1px solid #c5d6cb;border-radius:8px;}
 .pv-t td.lbl{white-space:nowrap;font-weight:600;}
+.pv-flat td.lbl{font-weight:500;border-right:1px solid #edf2ee;}
+.pv-flat tr.l0 td.lbl,.pv-flat tr.l1 td.lbl{font-weight:800;}
 .pv-t tr.l0 td{background:#e3efe7;font-weight:800;}
 .pv-t tr.l1 td{background:#f0f6f2;font-weight:700;}
 .pv-t tr.gt td{background:#cfe3d6;font-weight:800;border-top:2px solid #9fc2ad;}
@@ -8315,6 +8356,7 @@ function pvBuilder(res){
   h += '<button class="pv-add" onclick="pvAdd(\'filters\')">+ Filter jodo</button>';
   h += '<div class="pv-h" style="margin-top:10px;">Dikhawat</div><div class="pv-opt">'+
     '<label><input type="checkbox" '+(cfg.sub!==false?'checked':'')+' onchange="MR.pv.sub=this.checked;pvRun()"> Subtotal</label>'+
+    '<label>Layout <select onchange="MR.pv.layout=this.value;pvRun()"><option value="tree"'+(cfg.layout!=='flat'?' selected':'')+'>🌳 Tree (khulne wala)</option><option value="flat"'+(cfg.layout==='flat'?' selected':'')+'>📄 Flat (table jaisa)</option></select></label>'+
     '<label>Kram <select onchange="MR.pv.sort=this.value;pvRun()"><option value="label"'+(cfg.sort==='label'?' selected':'')+'>Naam A→Z</option>'+
     '<option value="val"'+(cfg.sort==='val'?' selected':'')+'>Pehli value badi→chhoti</option><option value="valasc"'+(cfg.sort==='valasc'?' selected':'')+'>Pehli value chhoti→badi</option></select></label></div></div>';
   h += '</div>';
@@ -8405,7 +8447,27 @@ function pvColor(name, v){
   return cls;
 }
 function pvF(v){ if(v==='' || v==null) return ''; if(typeof v==='number') return mrFmtN(v); return String(v); }
+// Flat layout: subtotal apne group ke NEECHE (Excel tabular jaisa)
+function pvFlatOrder(lines){
+  const out = [], stack = [];
+  lines.forEach(function(line){
+    while(stack.length && stack[stack.length-1].L >= line.L) out.push(stack.pop());
+    if(line.leaf) out.push(line); else stack.push(line);
+  });
+  while(stack.length) out.push(stack.pop());
+  return out;
+}
+// Flat: har row field ka apna khana — naam har line par; subtotal = "TOMATO Total"
+function pvFlatCells(line, nL){
+  const a = [];
+  for(let i = 0; i < nL; i++){
+    if(line.leaf) a.push(line.parts[i]||'');
+    else a.push(i < line.L ? line.parts[i] : (i===line.L ? line.parts[i]+' Total' : ''));
+  }
+  return a;
+}
 function pvRender(res){
+  if(MR.pv && MR.pv.layout==='flat' && res.rowF.length) return pvRenderFlat(res);
   const out = document.getElementById('pvOut');
   if(!res.rowF.length && !res.colF){ out.innerHTML = '<div class="mr-msg">Rows me kam se kam ek field chuno</div>'; return; }
   if(!res.vnames.length){ out.innerHTML = '<div class="mr-msg">Values me kam se kam ek hisaab jodo</div>'; return; }
@@ -8446,6 +8508,38 @@ function pvRender(res){
   if(res.nrows===0) h = '<div class="mr-msg">Is tarikh / filter me koi data nahi mila</div>' + h;
   out.innerHTML = h;
 }
+function pvRenderFlat(res){
+  const out = document.getElementById('pvOut');
+  if(!res.vnames.length){ out.innerHTML = '<div class="mr-msg">Values me kam se kam ek hisaab jodo</div>'; return; }
+  const vn = res.vnames, multiCol = !!res.colF, nL = res.rowF.length;
+  let h = '<div class="mr-sum"><div class="mr-k"><div class="l">Kul line (data)</div><div class="v">'+res.nrows.toLocaleString('en-IN')+'</div></div>';
+  vn.slice(0, 6).forEach(function(n, i){ h += '<div class="mr-k"><div class="l">'+mrEsc(n)+'</div><div class="v">'+mrEsc(pvF(res.grand.total[i]))+'</div></div>'; });
+  h += '</div><div class="mr-wrap"><table class="mr-t pv-t pv-flat"><thead>';
+  if(multiCol){
+    h += '<tr>'+res.rowF.map(function(f){ return '<th rowspan="2" style="cursor:default">'+mrEsc(f.label)+'</th>'; }).join('')+
+      res.colKeys.map(function(c){ return '<th class="cg" colspan="'+vn.length+'">'+mrEsc(res.colF.label)+': '+mrEsc(c)+'</th>'; }).join('')+
+      '<th class="cg" colspan="'+vn.length+'">TOTAL</th></tr><tr>';
+    res.colKeys.concat(['T']).forEach(function(){ vn.forEach(function(n){ h += '<th class="r" style="cursor:default;top:30px">'+mrEsc(n)+'</th>'; }); });
+    h += '</tr>';
+  } else {
+    h += '<tr>'+res.rowF.map(function(f){ return '<th style="cursor:default">'+mrEsc(f.label)+'</th>'; }).join('')+vn.map(function(n){ return '<th class="r" style="cursor:default">'+mrEsc(n)+'</th>'; }).join('')+'</tr>';
+  }
+  h += '</thead><tbody>';
+  const tds = function(line){
+    let s = '';
+    const put = function(arr){ arr.forEach(function(v, i){ s += '<td class="n'+pvColor(vn[i], v)+'">'+mrEsc(pvF(v))+'</td>'; }); };
+    if(multiCol) line.cells.forEach(put);
+    put(line.total);
+    return s;
+  };
+  pvFlatOrder(res.lines).forEach(function(line){
+    const cls = line.leaf ? '' : (line.L===0 ? 'l0' : 'l1');
+    h += '<tr class="'+cls+'">'+pvFlatCells(line, nL).map(function(x){ return '<td class="lbl">'+mrEsc(x)+'</td>'; }).join('')+tds(line)+'</tr>';
+  });
+  h += '<tr class="gt"><td class="lbl" colspan="'+nL+'">GRAND TOTAL</td>'+tds(res.grand)+'</tr></tbody></table></div>';
+  if(res.nrows===0) h = '<div class="mr-msg">Is tarikh / filter me koi data nahi mila</div>' + h;
+  out.innerHTML = h;
+}
 function pvTog(td){ const pk = td.getAttribute('data-pk'); MR.pvClosed[pk] = !MR.pvClosed[pk]; pvRender(PV_LAST); }
 
 // ── Excel / PDF (pivot) — har row field ka alag column, subtotal bold
@@ -8466,9 +8560,11 @@ function pvExport(kind){
   head.push(h2);
   const num = function(arr){ return arr.map(function(v){ return {t: v==='' || v==null ? '' : v}; }); };
   const vals = function(line){ let a = []; if(res.colF) line.cells.forEach(function(c){ a = a.concat(num(c)); }); return a.concat(num(line.total)); };
-  const rows = res.lines.map(function(line){
-    const lab = [];
-    for(let i = 0; i < nL; i++){ lab.push({t: i < line.parts.length ? line.parts[i] : (i===line.parts.length ? 'Total' : '')}); }
+  const flat = MR.pv.layout==='flat' && res.rowF.length;
+  const rows = (flat ? pvFlatOrder(res.lines) : res.lines).map(function(line){
+    let lab = [];
+    if(flat) lab = pvFlatCells(line, nL).map(function(x){ return {t:x}; });
+    else for(let i = 0; i < nL; i++){ lab.push({t: i < line.parts.length ? line.parts[i] : (i===line.parts.length ? 'Total' : '')}); }
     const r = lab.concat(vals(line)); if(!line.leaf) r.bold = true; return r;
   });
   const gt = [{t:'GRAND TOTAL'}]; for(let i = 1; i < nL; i++) gt.push({t:''});
