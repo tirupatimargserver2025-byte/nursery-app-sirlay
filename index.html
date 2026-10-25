@@ -2035,7 +2035,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261025-1600';
+const APP_VERSION = '20261025-1700';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -7916,6 +7916,14 @@ function mrBoot(){
 .pv-b .pv-line select{flex:0 1 auto;max-width:100%;}
 .pv-b input[type=checkbox]{width:16px;height:16px;-webkit-appearance:checkbox;appearance:checkbox;padding:0;}
 .pv-b input.err{border-color:#d93025;background:#fff4f3;}
+.pv-ins{display:flex;gap:6px;align-items:center;margin:-2px 0 8px;flex-wrap:wrap;}
+.pv-b .pv-ins select{font-size:12.5px;padding:4px 6px;border:1px dashed #2d7a4f;color:#1f5a3d;background:#f6fbf8;max-width:100%;}
+.pv-ins .fn{font-family:inherit;font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px;border:1px solid #c5d6cb;background:#fff;color:#1f5a3d;cursor:pointer;}
+#pvAc{position:fixed;z-index:9999;background:#fff;border:1px solid #9fc2ad;border-radius:10px;box-shadow:0 8px 28px rgba(10,35,24,0.22);max-height:260px;overflow:auto;min-width:240px;display:none;font-size:13px;}
+#pvAc .it{padding:7px 11px;cursor:pointer;display:flex;justify-content:space-between;gap:12px;white-space:nowrap;}
+#pvAc .it small{color:#6b7f74;font-size:11px;}
+#pvAc .it.on,#pvAc .it:hover{background:#e6f3eb;}
+#pvAc .gh{padding:5px 11px 3px;font-size:10.5px;font-weight:800;color:#2d7a4f;text-transform:uppercase;letter-spacing:0.6px;background:#f6faf7;}
 @media (max-width:900px){ .pv-grid{grid-template-columns:1fr;} .pv-b{padding:10px 10px 12px;} }
 </style>
 <script>
@@ -8256,6 +8264,9 @@ function pvGroups(fields){
   return order.map(function(k){ return [k, g[k]]; });
 }
 function pvBuilder(res){
+  // jis formula box me likh rahe the, dobara banne ke baad wahi cursor wapas
+  const ae = document.activeElement;
+  if(!PV_AC.refocus && ae && ae.id && ae.id.indexOf('pvfx_')===0) PV_AC.refocus = {id:ae.id, pos:ae.selectionStart, val:ae.value};
   const cfg = MR.pv, fields = res ? res.fields : PV_FIELDS, er = res ? res.errs : {forms:{}, post:{}, filters:{}};
   const srcs = pvSrcList();
   const notDate = function(f){ return true; };
@@ -8312,16 +8323,16 @@ function pvBuilder(res){
   h += '<div class="pv-box" style="grid-column:span 1;"><div class="pv-h">6. Formula column <span class="hint">har line par (pivot se pehle)</span></div>';
   cfg.forms.forEach(function(fm, i){
     h += '<div class="pv-line"><input style="width:120px" placeholder="Naam" value="'+mrEsc(fm.name||'')+'" onchange="pvSetX(\'forms\','+i+',\'name\',this.value)">'+
-      '<input class="grow'+(er.forms[i]?' err':'')+'" placeholder=\'IF([Status]="Pending", [Plant], 0)\' value="'+mrEsc(fm.expr||'')+'" onchange="pvSetX(\'forms\','+i+',\'expr\',this.value)">'+
-      '<button class="pv-x" onclick="pvDel(\'forms\','+i+')">✕</button></div>'+(er.forms[i]?'<div class="pv-em">⚠️ '+mrEsc(er.forms[i])+'</div>':'');
+      '<input class="grow pv-fx'+(er.forms[i]?' err':'')+'" id="pvfx_forms_'+i+'" data-ac="forms" data-i="'+i+'" autocomplete="off" placeholder=\'[ likho — column ki list khulegi\' value="'+mrEsc(fm.expr||'')+'" onchange="pvSetX(\'forms\','+i+',\'expr\',this.value)">'+
+      '<button class="pv-x" onclick="pvDel(\'forms\','+i+')">✕</button></div>'+pvInsSel('forms', i)+(er.forms[i]?'<div class="pv-em">⚠️ '+mrEsc(er.forms[i])+'</div>':'');
   });
   h += '<button class="pv-add" onclick="pvAdd(\'forms\')">+ Formula column</button>'+
     '<div class="pv-help">Column ka naam <code>[ ]</code> me. Jaise <code>[Plant] * [Rate]</code>, <code>IF([Total Received] &gt;= [Amount], "Poora", "Baaki")</code>, <code>DAYS([Delivery Date], [Booking Date])</code>. Banne ke baad yeh Rows/Values/Filter me milega.</div></div>';
   h += '<div class="pv-box"><div class="pv-h">7. Pivot ke baad formula <span class="hint">Values ke naam se</span></div>';
   cfg.post.forEach(function(pf, i){
     h += '<div class="pv-line"><input style="width:120px" placeholder="Naam" value="'+mrEsc(pf.name||'')+'" onchange="pvSetX(\'post\','+i+',\'name\',this.value)">'+
-      '<input class="grow'+(er.post[i]?' err':'')+'" placeholder="[Sowing Plant] - [Booking Plant]" value="'+mrEsc(pf.expr||'')+'" onchange="pvSetX(\'post\','+i+',\'expr\',this.value)">'+
-      '<button class="pv-x" onclick="pvDel(\'post\','+i+')">✕</button></div>'+(er.post[i]?'<div class="pv-em">⚠️ '+mrEsc(er.post[i])+'</div>':'');
+      '<input class="grow pv-fx'+(er.post[i]?' err':'')+'" id="pvfx_post_'+i+'" data-ac="post" data-i="'+i+'" autocomplete="off" placeholder="[ likho — value ki list khulegi" value="'+mrEsc(pf.expr||'')+'" onchange="pvSetX(\'post\','+i+',\'expr\',this.value)">'+
+      '<button class="pv-x" onclick="pvDel(\'post\','+i+')">✕</button></div>'+pvInsSel('post', i)+(er.post[i]?'<div class="pv-em">⚠️ '+mrEsc(er.post[i])+'</div>':'');
   });
   h += '<button class="pv-add" onclick="pvAdd(\'post\')">+ Formula</button>'+
     '<div class="pv-help">Jaise <code>[Sowing Plant] - [Booking Plant]</code>, <code>ROUND([Sowing Plant] / [Booking Plant] * 100, 1)</code>, <code>IF([Fark] &lt; 0, "Kam boya", "Theek")</code></div></div>';
@@ -8338,6 +8349,7 @@ function pvBuilder(res){
   h += '<button class="pv-add" onclick="pvAdd(\'colors\')">+ Rang ka niyam</button><div class="pv-help">Jaise: Fark &lt; 0 → Laal. Number ki jagah text bhi likh sakte ho (= Baaki).</div></div>';
   h += '</div>';
   document.getElementById('pvBuild').innerHTML = h;
+  pvAcBind();
 }
 function pvSet(k, i, v){ MR.pv[k][i] = v; pvRun(); }
 function pvSetV(i, k, v){ const x = MR.pv.vals[i]; x[k] = v; if(k==='f' && v!=='#' && !x.agg) x.agg = 'sum'; pvRun(); }
@@ -8378,7 +8390,7 @@ function pvRun(){
     let res;
     try{ res = pvCalc(cfg, data); }catch(e){ out.innerHTML = '<div class="mr-msg">⚠️ '+mrEsc(e.message)+'</div>'; return; }
     PV_LAST = res;
-    pvBuilder(res);
+    if(PV_AC.hold) PV_AC.dirty = true; else pvBuilder(res);
     pvRender(res);
   }).catch(function(){ out.innerHTML = '<div class="mr-msg">⚠️ Data nahi aaya — internet check karo, phir Refresh</div>'; });
 }
@@ -8562,6 +8574,146 @@ function pvDelete(){
     .catch(function(){ toast('⚠️ Internet nahi — dobara try karo','error'); })
     .then(function(){ setTimeout(pvLoadSaved, 1500); });
   pvLoadSaved();
+}
+
+// ════════ FORMULA me column / value ke naam ka sujhav ════════
+const PV_FN_LIST = [['IF','IF(shart, haan, na)'],['AND','AND(a, b)'],['OR','OR(a, b)'],['NOT','NOT(a)'],['IFERROR','IFERROR(x, agar galti)'],
+  ['ROUND','ROUND(x, 2)'],['ABS','ABS(x)'],['MIN','MIN(a, b)'],['MAX','MAX(a, b)'],['SUM','SUM(a, b)'],['AVERAGE','AVERAGE(a, b)'],
+  ['LEFT','LEFT(text, 3)'],['RIGHT','RIGHT(text, 3)'],['MID','MID(text, 2, 3)'],['LEN','LEN(text)'],['UPPER','UPPER(text)'],['LOWER','LOWER(text)'],
+  ['TRIM','TRIM(text)'],['CONCAT','CONCAT(a, b)'],['CONTAINS','CONTAINS(text, "khoj")'],['ISBLANK','ISBLANK(x)'],
+  ['YEAR','YEAR(date)'],['MONTH','MONTH(date)'],['DAY','DAY(date)'],['DAYS','DAYS(date1, date2)'],['TODAY','TODAY()']];
+// kis formula me kaun se naam chal sakte hain
+function pvAcNames(kind, i){
+  const res = PV_LAST; if(!res) return [];
+  if(kind==='post'){
+    const own = ((MR.pv.post[i]||{}).name||'').toLowerCase();
+    const nv = res.nv;
+    return res.vnames.map(function(n, k){ return {n:n, g:k < nv ? 'Values' : 'Pehle ke formula'}; })
+      .filter(function(x){ return x.n.toLowerCase()!==own; });
+  }
+  const own = ((MR.pv.forms[i]||{}).name||'').toLowerCase();
+  return res.fields.filter(function(f){ return f.label.toLowerCase()!==own; }).map(function(f){
+    const g = f.id.indexOf('f|')===0 ? 'Sabme common' : f.formula ? 'Formula column' : (PV_SHORT[f.src] || 'Other');
+    return {n:f.label, g:g, t:f.type==='num' ? 'number' : f.type==='date' ? 'date' : 'text'};
+  });
+}
+function pvInsSel(kind, i){
+  const names = pvAcNames(kind, i);
+  const grp = {}, order = [];
+  names.forEach(function(x){ if(!grp[x.g]){ grp[x.g] = []; order.push(x.g); } grp[x.g].push(x); });
+  return '<div class="pv-ins"><select onmousedown="pvAcRemember(\''+kind+'\','+i+')" onblur="pvAcRelease()" onchange="pvAcInsert(\''+kind+'\','+i+',\'[\'+this.value+\']\');this.value=\'\'">'+
+    '<option value="">+ '+(kind==='post'?'Value':'Column')+' daalo…</option>'+
+    order.map(function(g){ return '<optgroup label="'+mrEsc(g)+'">'+grp[g].map(function(x){ return '<option value="'+mrEsc(x.n)+'">'+mrEsc(x.n)+'</option>'; }).join('')+'</optgroup>'; }).join('')+
+    '</select><select onmousedown="pvAcRemember(\''+kind+'\','+i+')" onblur="pvAcRelease()" onchange="pvAcInsert(\''+kind+'\','+i+',this.value+\'(\');this.value=\'\'"><option value="">+ Function…</option>'+
+    PV_FN_LIST.map(function(f){ return '<option value="'+f[0]+'">'+mrEsc(f[1])+'</option>'; }).join('')+'</select></div>';
+}
+const PV_AC = {el:null, inp:null, items:[], sel:0, start:0, end:0, kind:'', i:0};
+const PV_CARET = {};
+// dropdown khulte waqt builder dobara na bane (warna dropdown gayab ho jaata)
+function pvAcRelease(){ if(!PV_AC.hold) return; PV_AC.hold = false; if(PV_AC.dirty){ PV_AC.dirty = false; if(PV_LAST) pvBuilder(PV_LAST); } }
+function pvAcRemember(kind, i){ PV_AC.hold = true; const el = document.getElementById('pvfx_'+kind+'_'+i); if(el && document.activeElement===el) PV_CARET[kind+i] = [el.selectionStart, el.selectionEnd]; }
+// cursor ki jagah text daalo, phir formula chalao
+function pvAcInsert(kind, i, txt){
+  if(!txt || txt==='[]' || txt==='(') return;
+  const el = document.getElementById('pvfx_'+kind+'_'+i); if(!el) return;
+  const v = el.value, c = PV_CARET[kind+i] || [v.length, v.length];
+  const nv = v.slice(0, c[0]) + txt + v.slice(c[1]);
+  const pos = c[0] + txt.length;
+  PV_AC.hold = false; PV_AC.dirty = false;
+  if(/\($/.test(txt)){   // function: aage likhna hai — abhi formula mat chalao
+    MR.pv[kind][i].expr = nv; el.value = nv; PV_CARET[kind+i] = [pos, pos];
+    if(PV_LAST) pvBuilder(PV_LAST);
+    const e2 = document.getElementById('pvfx_'+kind+'_'+i); if(e2){ e2.focus(); try{ e2.setSelectionRange(pos, pos); }catch(e){} }
+    return;
+  }
+  pvAcApply(kind, i, nv, pos);
+}
+function pvAcApply(kind, i, nv, pos){
+  MR.pv[kind][i].expr = nv;
+  PV_CARET[kind+i] = [pos, pos];
+  PV_AC.refocus = {id:'pvfx_'+kind+'_'+i, pos:pos};
+  pvRun();
+}
+function pvAcBind(){
+  if(!PV_AC.el){ PV_AC.el = document.createElement('div'); PV_AC.el.id = 'pvAc'; document.body.appendChild(PV_AC.el);
+    PV_AC.el.addEventListener('mousedown', function(e){ e.preventDefault(); const it = e.target.closest('.it'); if(it) pvAcPick(+it.getAttribute('data-k')); });
+    window.addEventListener('scroll', function(e){ if(e.target && e.target.tagName==='INPUT') return; pvAcHide(); }, true); window.addEventListener('resize', pvAcHide); }
+  pvAcHide();
+  document.querySelectorAll('#pvBuild input.pv-fx').forEach(function(el){
+    const kind = el.getAttribute('data-ac'), i = +el.getAttribute('data-i');
+    const keep = function(){ PV_CARET[kind+i] = [el.selectionStart, el.selectionEnd]; };
+    el.addEventListener('input', function(){ keep(); pvAcShow(el, kind, i); });
+    el.addEventListener('click', function(){ keep(); pvAcShow(el, kind, i); });
+    el.addEventListener('keyup', function(e){ keep(); if(e.key==='ArrowLeft' || e.key==='ArrowRight' || e.key==='Home' || e.key==='End') pvAcShow(el, kind, i); });
+    el.addEventListener('keydown', function(e){
+      if(PV_AC.inp!==el || PV_AC.el.style.display==='none') return;
+      if(e.key==='ArrowDown'){ e.preventDefault(); PV_AC.sel = Math.min(PV_AC.items.length-1, PV_AC.sel+1); pvAcDraw(); }
+      else if(e.key==='ArrowUp'){ e.preventDefault(); PV_AC.sel = Math.max(0, PV_AC.sel-1); pvAcDraw(); }
+      else if(e.key==='Enter' || e.key==='Tab'){ e.preventDefault(); pvAcPick(PV_AC.sel); }
+      else if(e.key==='Escape'){ pvAcHide(); }
+    });
+    el.addEventListener('blur', function(){ keep(); setTimeout(function(){ if(PV_AC.inp===el) pvAcHide(); }, 150); });
+  });
+  // dobara banne ke baad wahi box me cursor wapas
+  if(PV_AC.refocus){ const r = PV_AC.refocus; PV_AC.refocus = null; const el = document.getElementById(r.id);
+    if(el){ if(r.val!=null) el.value = r.val; el.focus(); try{ el.setSelectionRange(r.pos, r.pos); }catch(e){} } }
+}
+function pvAcHide(){ if(PV_AC.el) PV_AC.el.style.display = 'none'; PV_AC.inp = null; }
+// cursor se pehle kya likha hai: "[Boo" → column list, "IF" → function list
+function pvAcShow(el, kind, i){
+  const v = el.value, c = el.selectionStart==null ? v.length : el.selectionStart;
+  const before = v.slice(0, c);
+  const ob = before.lastIndexOf('['), cb = before.lastIndexOf(']');
+  let items = [], start, end = c;
+  if(ob > cb){
+    const q = before.slice(ob+1).toLowerCase().trim();
+    start = ob;
+    const after = v.slice(c), close = after.match(/^[^\[\]]*\]/);
+    if(close) end = c + close[0].length;
+    const all = pvAcNames(kind, i);
+    const starts = all.filter(function(x){ return x.n.toLowerCase().indexOf(q)===0; });
+    const has = all.filter(function(x){ return x.n.toLowerCase().indexOf(q)>0 || (q && x.n.toLowerCase().replace(/^[^:]+:\s*/,'').indexOf(q)===0 && x.n.toLowerCase().indexOf(q)!==0); });
+    const seen = {};
+    starts.concat(has).forEach(function(x){ if(seen[x.n]) return; seen[x.n] = 1; items.push({ins:'['+x.n+']', label:x.n, g:x.g, t:x.t||''}); });
+  } else {
+    const m = before.match(/([A-Za-z]{1,})$/);
+    const inStr = (before.match(/"/g)||[]).length % 2 === 1;   // "..." ke andar sujhav nahi
+    if(m && !inStr){
+      const q = m[1].toUpperCase();
+      start = c - m[1].length;
+      PV_FN_LIST.forEach(function(f){ if(f[0].indexOf(q)===0 && f[0]!==q) items.push({ins:f[0]+'(', label:f[1], g:'Function', t:''}); });
+      if(v.charAt(c)==='(') items = [];
+    }
+  }
+  if(!items.length){ pvAcHide(); return; }
+  PV_AC.inp = el; PV_AC.items = items.slice(0, 80); PV_AC.sel = 0; PV_AC.start = start; PV_AC.end = end; PV_AC.kind = kind; PV_AC.i = i;
+  pvAcDraw();
+  const r = el.getBoundingClientRect();
+  const s = PV_AC.el.style;
+  s.display = 'block'; s.left = Math.max(4, Math.min(r.left, window.innerWidth - 260)) + 'px'; s.minWidth = Math.min(r.width, 420) + 'px';
+  const below = window.innerHeight - r.bottom;
+  if(below < 200 && r.top > below){ s.top = ''; s.bottom = (window.innerHeight - r.top + 2) + 'px'; } else { s.bottom = ''; s.top = (r.bottom + 2) + 'px'; }
+}
+function pvAcDraw(){
+  let h = '', lastG = null;
+  PV_AC.items.forEach(function(it, k){
+    if(it.g!==lastG){ h += '<div class="gh">'+mrEsc(it.g)+'</div>'; lastG = it.g; }
+    h += '<div class="it'+(k===PV_AC.sel?' on':'')+'" data-k="'+k+'"><span>'+mrEsc(it.label)+'</span><small>'+mrEsc(it.t)+'</small></div>';
+  });
+  PV_AC.el.innerHTML = h;
+  const on = PV_AC.el.querySelector('.it.on'); if(on && on.scrollIntoView) on.scrollIntoView({block:'nearest'});
+}
+function pvAcPick(k){
+  const it = PV_AC.items[k], el = PV_AC.inp; if(!it || !el) return;
+  const v = el.value, nv = v.slice(0, PV_AC.start) + it.ins + v.slice(PV_AC.end);
+  const pos = PV_AC.start + it.ins.length;
+  const kind = PV_AC.kind, i = PV_AC.i;
+  pvAcHide();
+  el.value = nv; try{ el.setSelectionRange(pos, pos); }catch(e){}
+  PV_CARET[kind+i] = [pos, pos];
+  // function ke baad aur likhna hai — abhi mat chalao; column ke baad chala do
+  if(it.g==='Function'){ MR.pv[kind][i].expr = nv; return; }
+  pvAcApply(kind, i, nv, pos);
 }
 </script>
 </body>
