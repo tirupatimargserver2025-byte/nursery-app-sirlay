@@ -229,6 +229,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .rep-title{font-size:15px;font-weight:800;color:#1a2e26;margin-bottom:4px;letter-spacing:-0.2px;}
 .rep-sub{font-size:12px;color:var(--g5);margin-bottom:12px;}
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+.sd-flat th,.sd-flat td{font-size:12px;padding:6px 6px;}
+.sd-flat tr.sd-b td{background:#f3f8f5;}
+.sd-flat tr.sd-a td{background:#ffffff;}
+.sd-flat tr.sd-first td{border-top:2px solid #b8d9c5;}
+.sd-flat tr.sd-tot td{background:#e3f5ea;color:#1a5c34;font-weight:800;border-top:2px solid #1a4731;}
 #reportContent .crop-card[data-open="1"] .crop-body{max-height:none;}
 #reportContent .rep-card:has(> .crop-card){display:block!important;}
 #reportContent .rep-card > .crop-card{margin:0 0 10px!important;}
@@ -2009,7 +2014,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261025-1215';
+const APP_VERSION = '20261025-1230';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -3156,37 +3161,41 @@ function loadSeedReport(){
         '<td>TOTAL</td><td>'+totalPkt+'</td><td>'+totalPlants.toLocaleString()+'</td></tr>';
       html+='</tbody></table></div></div>';
 
-      // Detail table (expandable rows — click se labour breakdown khulta hai)
-      html+='<div class="rep-card"><div class="rep-title">📋 Detail Records ('+filtered.length+') <span style="font-size:11px;color:var(--g5);font-weight:600;">— row pe click karo</span></div>'+
-        '<div style="overflow-x:auto;"><table class="att-table">'+
-        '<thead><tr><th></th><th>Date</th><th>Supervisor</th><th>Vegetable</th><th>Variety</th><th>Lot</th><th>PKT</th><th>Trays</th><th>Plants</th></tr></thead><tbody>';
+      // Detail table — ek hi table me sab (sheet jaisi): har labour ki ek line
+      let tLab=0, tLabTray=0, tLabPkt=0;
+      html+='<div class="rep-card"><div class="rep-title">📋 Seed Sowing Detail ('+filtered.length+' entry)</div>'+
+        '<div style="overflow-x:auto;"><table class="att-table sd-flat">'+
+        '<thead><tr><th>Date</th><th>Supervisor</th><th>Zone</th><th>Vegetable</th><th>Variety</th><th>Lot No.</th><th>Packet</th><th>Cup</th><th>Tray</th><th>Total Plant</th><th>Total Labour</th><th>Labour Naam</th><th>Labour Tray</th><th>Labour Packet</th></tr></thead><tbody>';
       filtered.forEach((r,idx)=>{
         const key=r._date+'|'+(r.c[2]?.v||'')+'|'+(r.c[4]?.v||'')+'|'+(r.c[5]?.v||'')+'|'+(r.c[6]?.v||'');
         const labs=labMap[key]||[];
-        const rid='sr_exp_'+idx;
-        html+='<tr class="exp-toggle" onclick="toggleRow(\''+rid+'\')">'+
-          '<td><span class="exp-arrow">▶</span></td>'+
-          '<td>'+formatDate(r._date)+'</td>'+
-          '<td>'+(r.c[1]?.v||'')+'</td>'+
-          '<td>'+(r.c[4]?.v||'')+'</td>'+
-          '<td>'+(r.c[5]?.v||'')+'</td>'+
-          '<td>'+(r.c[6]?.v||'')+'</td>'+
-          '<td>'+(r.c[7]?.v||0)+'</td>'+
-          '<td>'+(r.c[8]?.v||0)+'</td>'+
-          '<td>'+(parseFloat(r.c[11]?.v)||0).toLocaleString()+'</td>'+
-          '</tr>';
-        html+='<tr class="exp-row" id="'+rid+'"><td colspan="9" class="exp-inner">';
-        if(labs.length>0){
-          html+='<table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">👤 Labour</th><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">PKT</th><th style="padding:10px;background:var(--gd);color:white;font-weight:700;text-align:left;">Tray</th></tr></thead><tbody>';
-          labs.forEach(l=>{ html+='<tr><td>'+l.name+'</td><td>'+l.pkt+'</td><td>'+l.tray+'</td></tr>'; });
-          html+='</tbody></table>';
-        } else {
-          html+='<div style="color:var(--g5);font-size:12px;">Labour breakdown nahi mila.</div>';
+        const n=Math.max(labs.length,1);
+        tLab+=labs.length;
+        for(let i=0;i<n;i++){
+          const l=labs[i]||{name:'',pkt:'',tray:''};
+          if(l.tray!=='') tLabTray+=parseFloat(l.tray)||0;
+          if(l.pkt!=='') tLabPkt+=parseFloat(l.pkt)||0;
+          const first=(i===0);
+          html+='<tr class="'+(idx%2?'sd-b':'sd-a')+(first?' sd-first':'')+'">'+
+            '<td style="white-space:nowrap;">'+formatDate(r._date)+'</td>'+
+            '<td>'+(r.c[1]?.v||'')+'</td>'+
+            '<td>'+(r.c[2]?.v||'')+'</td>'+
+            '<td>'+(r.c[4]?.v||'')+'</td>'+
+            '<td>'+(r.c[5]?.v||'')+'</td>'+
+            '<td>'+(first?(r.c[6]?.v||''):'')+'</td>'+
+            '<td>'+(first?(r.c[7]?.v||0):'')+'</td>'+
+            '<td>'+(first?(r.c[9]?.v||0):'')+'</td>'+
+            '<td>'+(first?(r.c[8]?.v||0):'')+'</td>'+
+            '<td><b>'+(first?(parseFloat(r.c[11]?.v)||0).toLocaleString('en-IN'):'')+'</b></td>'+
+            '<td>'+(first?labs.length:'')+'</td>'+
+            '<td style="text-align:left;">'+(l.name||(first&&!labs.length?'<span style="color:var(--g5);">—</span>':''))+'</td>'+
+            '<td>'+(l.tray===''?'':l.tray)+'</td>'+
+            '<td>'+(l.pkt===''?'':l.pkt)+'</td>'+
+            '</tr>';
         }
-        html+='</td></tr>';
       });
-      html+='<tr style="background:var(--gd);color:white;font-weight:800;">'+
-        '<td colspan="6">TOTAL</td><td>'+totalPkt+'</td><td>'+totalTrays+'</td><td>'+totalPlants.toLocaleString()+'</td></tr>';
+      html+='<tr class="sd-tot">'+
+        '<td colspan="6">TOTAL</td><td>'+totalPkt.toLocaleString('en-IN')+'</td><td></td><td>'+totalTrays.toLocaleString('en-IN')+'</td><td>'+totalPlants.toLocaleString('en-IN')+'</td><td>'+tLab+'</td><td></td><td>'+tLabTray.toLocaleString('en-IN')+'</td><td>'+tLabPkt.toLocaleString('en-IN')+'</td></tr>';
       html+='</tbody></table></div></div>';
 
       con.innerHTML=html;
