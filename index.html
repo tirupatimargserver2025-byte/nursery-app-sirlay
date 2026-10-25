@@ -2035,7 +2035,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261025-1500';
+const APP_VERSION = '20261025-1600';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -7447,6 +7447,7 @@ const MR = {user:null, src:'all', cache:{}, cols:[], rows:[], vis:{}, f:{}, sort
 function mrEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function mrLS(k, v){ try{ if(v===undefined){ return localStorage.getItem(k); } localStorage.setItem(k, v); }catch(e){ return null; } }
 function mrFmtN(n){ return Number(Math.round(n*100)/100).toLocaleString('en-IN'); }
+function mrReload(){ MR.cache = {}; PV_LAST = null; if(MR.mode==='pv'){ pvLoadSaved(); pvRun(); } else mrLoad(); }
 function mrSrc(){ return MR_SOURCES.filter(function(x){ return x.k===MR.src; })[0] || MR_SOURCES[0]; }
 
 // App se kholo
@@ -7608,10 +7609,10 @@ function mrPreset(p){
   if(f) f.value = MR.from; if(to) to.value = MR.to;
   document.querySelectorAll('[data-mrp]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-mrp')===p); });
   MR.limit = 300;
-  if(document.getElementById('mrBody')) mrRender();
+  if(document.getElementById('mrBody')) mrRefresh();
 }
 function mrDateIn(){ MR.from = document.getElementById('mrxFrom').value; MR.to = document.getElementById('mrxTo').value; MR.preset = '';
-  document.querySelectorAll('[data-mrp]').forEach(function(b){ b.classList.remove('on'); }); MR.limit = 300; mrRender(); }
+  document.querySelectorAll('[data-mrp]').forEach(function(b){ b.classList.remove('on'); }); MR.limit = 300; mrRefresh(); }
 
 // ── Column filter ka matlab
 function mrNumOk(v, q){
@@ -7838,7 +7839,8 @@ function mrBoot(){
     '<div class="mr-top"><div class="mr-h1"><img src="'+TGH_LOGO+'" alt=""><div><div class="t">📊 मास्टर रिपोर्ट / Master Report</div>'+
     '<div class="s">'+mrEsc(NURSERY_NAME)+' • Report chuno, column chuno, har column ke neeche filter</div></div>'+
     '<div class="u">'+mrEsc(u.name)+' ('+mrEsc(u.role)+')</div></div>'+
-    '<div class="mr-bar"><div class="mr-f mr-src"><label>रिपोर्ट / Report</label><select id="mrSrcSel" onchange="MR.src=this.value;mrLS(\'mrSrc\',this.value);mrLoad()">'+
+    '<div class="mr-tabs"><button class="mr-tab on" data-m="tbl" onclick="mrSetMode(\'tbl\')">📋 Table</button><button class="mr-tab" data-m="pv" onclick="mrSetMode(\'pv\')">🔗 Pivot / Milao</button></div>'+
+    '<div class="mr-bar"><div class="mr-f mr-src" id="mrSrcBox"><label>रिपोर्ट / Report</label><select id="mrSrcSel" onchange="MR.src=this.value;mrLS(\'mrSrc\',this.value);mrLoad()">'+
       list.map(function(s){ return '<option value="'+s.k+'"'+(s.k===MR.src?' selected':'')+'>'+mrEsc(s.n)+'</option>'; }).join('')+'</select></div>'+
     '<div class="mr-f"><label>तिथि से / From</label><input type="date" id="mrxFrom" onchange="mrDateIn()"></div>'+
     '<div class="mr-f"><label>तिथि तक / To</label><input type="date" id="mrxTo" onchange="mrDateIn()"></div>'+
@@ -7847,16 +7849,720 @@ function mrBoot(){
     '<button class="mr-btn" data-mrp="month" onclick="mrPreset(\'month\')">इस महीने<small>This month</small></button>'+
     '<button class="mr-btn" data-mrp="last" onclick="mrPreset(\'last\')">पिछला महीना<small>Last month</small></button>'+
     '<button class="mr-btn" data-mrp="all" onclick="mrPreset(\'all\')">सभी तिथि<small>All dates</small></button>'+
-    '<button class="mr-btn" onclick="MR.cache={};mrLoad()">🔄<small>Refresh</small></button>'+
+    '<button class="mr-btn" onclick="mrReload()">🔄<small>Refresh</small></button>'+
+    '<span class="mr-sp"></span><span id="pvExp" style="display:none;gap:8px;"><button class="mr-btn w" onclick="pvExport(\'xls\')">Excel<small>Download</small></button> <button class="mr-btn w" onclick="pvExport(\'pdf\')">PDF<small>Print / save</small></button></span>'+
     '</div><div class="mr-bar" id="mrBar2"></div></div>'+
-    '<div class="mr-cols" id="mrCols"></div><div id="mrBody"></div>';
+    '<div class="mr-cols" id="mrCols"></div><div id="mrBody"></div><div id="pvBox" style="display:none"><div class="pv-b" id="pvBuild"></div><div id="pvOut"></div></div>';
   mrPreset('month');
-  mrLoad();
+  mrSetMode(mrLS('mrMode')==='pv' ? 'pv' : 'tbl');
 }
 (function(){
   if(!/[?&]mr=1(&|$)/.test(location.search)) return;
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mrBoot); else mrBoot();
 })();
+</script>
+
+<!-- ══════════ MASTER REPORT — PIVOT / MILAO / FORMULA ══════════ -->
+<style>
+.mr-tabs{display:flex;gap:6px;margin-top:12px;}
+.mr-tab{font-family:inherit;font-size:14px;font-weight:800;padding:8px 16px;border-radius:10px 10px 0 0;border:none;background:rgba(255,255,255,0.12);color:#d7efe1;cursor:pointer;}
+.mr-tab.on{background:#fff;color:#14402b;}
+.pv-b{background:#fff;border-bottom:1px solid #d5e3da;padding:12px 18px 14px;}
+.pv-sec{margin-top:10px;}
+.pv-sec:first-child{margin-top:0;}
+.pv-h{font-size:12px;font-weight:800;color:#1f5a3d;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px;display:flex;align-items:center;gap:8px;}
+.pv-h .hint{font-weight:500;text-transform:none;letter-spacing:0;color:#5a6a63;font-size:11.5px;}
+.pv-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 18px;}
+.pv-box{border:1px solid #dbe7df;border-radius:11px;padding:9px 10px;background:#fbfdfc;}
+.pv-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.pv-chip{font-family:inherit;font-size:13px;font-weight:700;padding:5px 11px;border-radius:18px;border:1.5px solid #b9d3c2;background:#fff;color:#2a4a38;cursor:pointer;}
+.pv-chip.on{background:#1f5a3d;border-color:#1f5a3d;color:#fff;}
+.pv-line{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap;}
+.pv-line select,.pv-line input{font-family:inherit;font-size:13px;padding:6px 8px;border:1px solid #c5d6cb;border-radius:8px;background:#fff;min-width:0;}
+.pv-line select{max-width:100%;}
+.pv-line .grow{flex:1 1 140px;}
+.pv-line input.err{border-color:#d93025;background:#fff4f3;}
+.pv-x{font-family:inherit;border:none;background:#f3e1df;color:#a3261c;border-radius:7px;width:28px;height:28px;cursor:pointer;font-weight:800;flex-shrink:0;}
+.pv-up{font-family:inherit;border:none;background:#e6f0ea;color:#1f5a3d;border-radius:7px;width:28px;height:28px;cursor:pointer;font-weight:800;flex-shrink:0;}
+.pv-add{font-family:inherit;font-size:12.5px;font-weight:700;padding:5px 10px;border-radius:8px;border:1px dashed #2d7a4f;background:#fff;color:#1f5a3d;cursor:pointer;}
+.pv-em{font-size:11.5px;color:#a3261c;margin:-3px 0 6px;}
+.pv-help{font-size:11.5px;color:#5a6a63;line-height:1.45;margin-top:4px;}
+.pv-help code{background:#eef4f0;padding:0 4px;border-radius:4px;font-size:11.5px;color:#14402b;}
+.pv-save{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;background:#f2f8f4;border:1px solid #d5e3da;border-radius:11px;padding:9px 10px;margin-bottom:10px;}
+.pv-save select,.pv-save input{font-family:inherit;font-size:13.5px;padding:7px 9px;border:1px solid #c5d6cb;border-radius:8px;background:#fff;}
+.pv-save button{font-family:inherit;font-size:13px;font-weight:700;padding:7px 12px;border-radius:8px;border:1px solid #1f5a3d;background:#1f5a3d;color:#fff;cursor:pointer;}
+.pv-save button.o{background:#fff;color:#1f5a3d;}
+.pv-save button.d{background:#fff;color:#a3261c;border-color:#e2b4ae;}
+.pv-opt{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;align-items:center;}
+.pv-opt label{display:flex;gap:6px;align-items:center;cursor:pointer;}
+.pv-opt select{font-family:inherit;font-size:13px;padding:5px 8px;border:1px solid #c5d6cb;border-radius:8px;}
+.pv-t td.lbl{white-space:nowrap;font-weight:600;}
+.pv-t tr.l0 td{background:#e3efe7;font-weight:800;}
+.pv-t tr.l1 td{background:#f0f6f2;font-weight:700;}
+.pv-t tr.gt td{background:#cfe3d6;font-weight:800;border-top:2px solid #9fc2ad;}
+.pv-t td.tg{cursor:pointer;}
+.pv-t td.tg::before{content:'▾ ';color:#2d7a4f;}
+.pv-t td.tg.cl::before{content:'▸ ';}
+.pv-t th.cg{text-align:center;background:#d7e8dd;border-left:2px solid #fff;}
+.pv-t th.r,.pv-t td.n{text-align:right;}
+.pv-t td.c-red{background:#fde2df!important;color:#a3261c;font-weight:800;}
+.pv-t td.c-green{background:#dcf3e2!important;color:#14632f;font-weight:800;}
+.pv-t td.c-orange{background:#ffe9cf!important;color:#8a4b00;font-weight:800;}
+.pv-t td.c-yellow{background:#fff6c2!important;color:#6b5600;font-weight:800;}
+.pv-b label,.pv-opt label{display:flex;text-transform:none;letter-spacing:0;font-size:13px;font-weight:600;color:#22352b;margin:0;}
+.pv-b .pv-save label{display:block;font-size:11.5px;font-weight:700;color:#1f5a3d;}
+.pv-b input,.pv-b select{width:auto;border-width:1px;border-color:#c5d6cb;background:#fff;padding:6px 8px;font-size:13px;border-radius:8px;}
+.pv-b .pv-line select.grow,.pv-b .pv-line input.grow{flex:1 1 140px;width:auto;}
+.pv-b .pv-line select{flex:0 1 auto;max-width:100%;}
+.pv-b input[type=checkbox]{width:16px;height:16px;-webkit-appearance:checkbox;appearance:checkbox;padding:0;}
+.pv-b input.err{border-color:#d93025;background:#fff4f3;}
+@media (max-width:900px){ .pv-grid{grid-template-columns:1fr;} .pv-b{padding:10px 10px 12px;} }
+</style>
+<script>
+// ════════════════════════════════════════════════════════════════
+// PIVOT — kai report milao, Rows/Columns/Values, formula (IF, AND...), rang
+// ════════════════════════════════════════════════════════════════
+const PV_SHORT = {booking:'Booking', seed:'Sowing', seedlab:'Sowing Labour', water:'Watering', spray:'Spraying', chem:'Dawai',
+  wsl:'WS Labour', shift:'Shifting', disp:'Dispatch', ma:'Assignment'};
+const PV_AGG = [['sum','Jod (Sum)'],['count','Ginti (Count)'],['uniq','Alag-alag ginti'],['avg','Ausat (Avg)'],['min','Sabse kam (Min)'],['max','Sabse zyada (Max)'],['pct','% of total']];
+const PV_AGG_SHORT = {sum:'Sum', count:'Count', uniq:'Unique', avg:'Avg', min:'Min', max:'Max', pct:'%'};
+const PV_COLORS = [['red','🔴 Laal'],['green','🟢 Hara'],['orange','🟠 Narangi'],['yellow','🟡 Peela']];
+MR.mode = 'tbl';
+MR.pv = null;
+MR.pvSaved = [];        // [{name, by, upd, cfg}]
+MR.pvClosed = {};
+
+function pvDefault(){
+  return {srcs:['booking','seed'], rows:['f|Vegetable','f|Variety'], col:'',
+    vals:[{f:'booking|Plant', agg:'sum', name:'Booking Plant'}, {f:'seed|Total Plants', agg:'sum', name:'Sowing Plant'}],
+    filters:[], forms:[], post:[{name:'Fark', expr:'[Sowing Plant] - [Booking Plant]'}],
+    colors:[{t:'Fark', op:'<', n:0, c:'red'}], sub:true, sort:'label'};
+}
+function pvClone(o){ return JSON.parse(JSON.stringify(o)); }
+
+// ── Mode badlo (Table / Pivot)
+function mrSetMode(m){
+  MR.mode = m;
+  document.querySelectorAll('.mr-tab').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-m')===m); });
+  const tbl = m==='tbl';
+  ['mrSrcBox','mrBar2'].forEach(function(id){ const el = document.getElementById(id); if(el) el.style.display = tbl ? '' : 'none'; });
+  const cols = document.getElementById('mrCols'); if(cols && !tbl) cols.classList.remove('open');
+  document.getElementById('mrBody').style.display = tbl ? '' : 'none';
+  document.getElementById('pvBox').style.display = tbl ? 'none' : '';
+  const ex = document.getElementById('pvExp'); if(ex) ex.style.display = tbl ? 'none' : '';
+  mrLS('mrMode', m);
+  if(!tbl){
+    if(!MR.pv){ let c = null; try{ c = JSON.parse(mrLS('mrPvLast')||'null'); }catch(e){} MR.pv = c && c.srcs ? c : pvDefault(); }
+    pvLoadSaved();
+    pvRun();
+  } else if(!MR.cols.length) mrLoad();
+}
+function mrRefresh(){ if(MR.mode==='pv') pvRun(); else mrRender(); }
+
+// ════════ FORMULA ENGINE ════════
+// [Field] , "text", 12.5 , + - * / ^ & , = <> < > <= >= , IF AND OR NOT ROUND ...
+function pvTok(s){
+  const out = []; let i = 0, m;
+  while(i < s.length){
+    const r = s.slice(i);
+    if((m = r.match(/^\s+/))){ i += m[0].length; continue; }
+    if((m = r.match(/^\d+(\.\d+)?/))){ out.push({t:'num', v:parseFloat(m[0])}); i += m[0].length; continue; }
+    if((m = r.match(/^"([^"]*)"/) || r.match(/^'([^']*)'/) || r.match(/^“([^”]*)”/))){ out.push({t:'str', v:m[1]}); i += m[0].length; continue; }
+    if((m = r.match(/^\[([^\]]+)\]/))){ out.push({t:'ref', v:m[1].trim()}); i += m[0].length; continue; }
+    if((m = r.match(/^[A-Za-z_][A-Za-z0-9_]*/))){ out.push({t:'id', v:m[0].toUpperCase()}); i += m[0].length; continue; }
+    if((m = r.match(/^(<=|>=|<>|!=|==|[-+*\/&=<>(),;^%])/))){ out.push({t:'op', v:m[0]===';'?',':m[0]}); i += m[0].length; continue; }
+    throw new Error('Samajh nahi aaya: "'+r.charAt(0)+'"');
+  }
+  return out;
+}
+// number me galti (0 se bhaag) aage tak jaaye — IFERROR pakad sake; khaali/text = 0
+function pvNum(v){ if(typeof v==='number') return v; if(v===true) return 1; if(v===false || v==null || v==='') return 0; const n = parseFloat(String(v).replace(/,/g,'')); return isNaN(n) ? 0 : n; }
+function pvIsNum(v){ return typeof v==='number' || (typeof v==='string' && v.trim()!=='' && !isNaN(Number(v.replace(/,/g,'')))); }
+function pvTruth(v){ if(typeof v==='string') return v!=='' && v.toUpperCase()!=='FALSE'; return !!v && !(typeof v==='number' && isNaN(v)); }
+function pvCmp(a, b){
+  if((pvIsNum(a) || a==='' ) && (pvIsNum(b) || b==='') && !(a==='' && b==='')){ const x = pvNum(a), y = pvNum(b); return x<y?-1:x>y?1:0; }
+  const x = String(a==null?'':a).trim().toLowerCase(), y = String(b==null?'':b).trim().toLowerCase();
+  return x<y?-1:x>y?1:0;
+}
+function pvDays(iso){ const m = String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? Date.UTC(+m[1], +m[2]-1, +m[3])/86400000 : NaN; }
+const PV_FN = {
+  IF:1, IFERROR:1, AND:1, OR:1,
+  NOT:function(a){ return !pvTruth(a[0]); },
+  ROUND:function(a){ const p = Math.pow(10, pvNum(a[1])); return Math.round(pvNum(a[0])*p)/p; },
+  ABS:function(a){ return Math.abs(pvNum(a[0])); },
+  MIN:function(a){ return Math.min.apply(null, a.map(pvNum)); },
+  MAX:function(a){ return Math.max.apply(null, a.map(pvNum)); },
+  SUM:function(a){ return a.reduce(function(s, x){ return s + pvNum(x); }, 0); },
+  AVERAGE:function(a){ return a.length ? a.reduce(function(s, x){ return s + pvNum(x); }, 0)/a.length : 0; },
+  LEN:function(a){ return String(a[0]==null?'':a[0]).length; },
+  LEFT:function(a){ return String(a[0]==null?'':a[0]).slice(0, a.length>1 ? pvNum(a[1]) : 1); },
+  RIGHT:function(a){ const s = String(a[0]==null?'':a[0]); const n = a.length>1 ? pvNum(a[1]) : 1; return n<=0 ? '' : s.slice(-n); },
+  MID:function(a){ return String(a[0]==null?'':a[0]).substr(Math.max(0, pvNum(a[1])-1), pvNum(a[2])); },
+  UPPER:function(a){ return String(a[0]==null?'':a[0]).toUpperCase(); },
+  LOWER:function(a){ return String(a[0]==null?'':a[0]).toLowerCase(); },
+  TRIM:function(a){ return String(a[0]==null?'':a[0]).replace(/\s+/g,' ').trim(); },
+  CONCAT:function(a){ return a.map(function(x){ return x==null?'':String(x); }).join(''); },
+  CONTAINS:function(a){ return String(a[0]==null?'':a[0]).toLowerCase().indexOf(String(a[1]==null?'':a[1]).toLowerCase()) >= 0; },
+  ISBLANK:function(a){ return a[0]==null || String(a[0]).trim()===''; },
+  YEAR:function(a){ const m = String(a[0]||'').match(/^(\d{4})/); return m ? +m[1] : ''; },
+  MONTH:function(a){ const m = String(a[0]||'').match(/^\d{4}-(\d{2})/); return m ? +m[1] : ''; },
+  DAY:function(a){ const m = String(a[0]||'').match(/^\d{4}-\d{2}-(\d{2})/); return m ? +m[1] : ''; },
+  TODAY:function(){ return localISO(new Date()); },
+  DAYS:function(a){ const x = pvDays(a[0]), y = pvDays(a[1]); return isNaN(x) || isNaN(y) ? '' : x - y; }
+};
+// Formula ko ek function me badlo. refs = mile hue [naam] ki list
+function pvCompile(src){
+  const tk = pvTok(String(src||'')); let p = 0;
+  const refs = [];
+  const peek = function(){ return tk[p]; };
+  const isOp = function(v){ return tk[p] && tk[p].t==='op' && tk[p].v===v; };
+  const need = function(v){ if(!isOp(v)) throw new Error('"'+v+'" chahiye'); p++; };
+  function expr(){ return cmp(); }
+  function cmp(){
+    let a = cat();
+    while(tk[p] && tk[p].t==='op' && /^(=|==|<>|!=|<|>|<=|>=)$/.test(tk[p].v)){
+      const op = tk[p++].v, l = a, r = cat();
+      a = function(g){ const c = pvCmp(l(g), r(g));
+        return op==='<'?c<0 : op==='>'?c>0 : op==='<='?c<=0 : op==='>='?c>=0 : (op==='<>'||op==='!=')?c!==0 : c===0; };
+    }
+    return a;
+  }
+  function cat(){ let a = add(); while(isOp('&')){ p++; const l = a, r = add(); a = function(g){ const x = l(g), y = r(g); return (x==null?'':String(x)) + (y==null?'':String(y)); }; } return a; }
+  function add(){ let a = mul(); while(isOp('+') || isOp('-')){ const op = tk[p++].v, l = a, r = mul(); a = op==='+' ? function(g){ return pvNum(l(g)) + pvNum(r(g)); } : function(g){ return pvNum(l(g)) - pvNum(r(g)); }; } return a; }
+  function mul(){ let a = un(); while(isOp('*') || isOp('/')){ const op = tk[p++].v, l = a, r = un();
+      a = op==='*' ? function(g){ return pvNum(l(g)) * pvNum(r(g)); } : function(g){ const d = pvNum(r(g)); return d===0 ? NaN : pvNum(l(g)) / d; }; }
+    return a; }
+  function un(){ if(isOp('-')){ p++; const x = un(); return function(g){ return -pvNum(x(g)); }; } if(isOp('+')){ p++; return un(); } return pw(); }
+  function pw(){ let a = pc(); if(isOp('^')){ p++; const l = a, r = un(); a = function(g){ return Math.pow(pvNum(l(g)), pvNum(r(g))); }; } return a; }
+  function pc(){ let a = prim(); if(isOp('%')){ p++; const x = a; a = function(g){ return pvNum(x(g))/100; }; } return a; }
+  function prim(){
+    const t = peek(); if(!t) throw new Error('Formula adhoora hai');
+    if(t.t==='num'){ p++; return function(){ return t.v; }; }
+    if(t.t==='str'){ p++; return function(){ return t.v; }; }
+    if(t.t==='ref'){ p++; refs.push(t.v); return function(g){ return g(t.v); }; }
+    if(isOp('(')){ p++; const e = expr(); need(')'); return e; }
+    if(t.t==='id'){
+      p++;
+      if(t.v==='TRUE') return function(){ return true; };
+      if(t.v==='FALSE') return function(){ return false; };
+      if(!PV_FN[t.v]) throw new Error(t.v+' — aisa function nahi hai');
+      need('(');
+      const args = [];
+      if(!isOp(')')){ args.push(expr()); while(isOp(',')){ p++; args.push(expr()); } }
+      need(')');
+      if(t.v==='IF') return function(g){ return pvTruth(args[0](g)) ? (args[1] ? args[1](g) : true) : (args[2] ? args[2](g) : false); };
+      if(t.v==='IFERROR') return function(g){ let v; try{ v = args[0](g); }catch(e){ v = NaN; } return (typeof v==='number' && !isFinite(v)) ? (args[1] ? args[1](g) : '') : v; };
+      if(t.v==='AND') return function(g){ return args.every(function(a){ return pvTruth(a(g)); }); };
+      if(t.v==='OR') return function(g){ return args.some(function(a){ return pvTruth(a(g)); }); };
+      const fn = PV_FN[t.v];
+      return function(g){ return fn(args.map(function(a){ return a(g); })); };
+    }
+    throw new Error('"'+t.v+'" yahan nahi aa sakta');
+  }
+  const f = expr();
+  if(p < tk.length) throw new Error('"'+(tk[p].v)+'" ke paas galti hai');
+  return {fn:f, refs:refs};
+}
+function pvOut(v){ if(typeof v==='number' && !isFinite(v)) return ''; if(v===true) return 'TRUE'; if(v===false) return 'FALSE'; return v==null ? '' : v; }
+
+// ════════ DATA: chuni hui reports ek saath ════════
+function pvVeg(s){ return String(s==null?'':s).replace(/[^\p{L}\p{N}\s\-\.\/]/gu, '').replace(/\s+/g,' ').trim().toUpperCase(); }
+function pvMonth(iso){ const m = String(iso||'').match(/^(\d{4})-(\d{2})/); if(!m) return ''; return m[1]+'-'+m[2]+' ('+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[2]-1]+')'; }
+function pvWeek(iso){ const m = String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})/); if(!m) return ''; const d = new Date(+m[1], +m[2]-1, +m[3]); d.setDate(d.getDate() - (d.getDay()+6)%7); return localISO(d)+' se'; }
+const PV_COMMON = [
+  {id:'f|Report', label:'Report', type:'text'}, {id:'f|Date', label:'Date', type:'date'},
+  {id:'f|Mahina', label:'Mahina', type:'text'}, {id:'f|Hafta', label:'Hafta', type:'text'}, {id:'f|Saal', label:'Saal', type:'text'},
+  {id:'f|Vegetable', label:'Vegetable', type:'text'}, {id:'f|Variety', label:'Variety', type:'text'},
+  {id:'f|Supervisor', label:'Supervisor / Marketing', type:'text'}, {id:'f|Area', label:'Area / Zone', type:'text'}
+];
+function pvSrcList(){ return mrAllowed().filter(function(s){ return s.s; }); }
+function pvData(cfg){
+  const srcs = pvSrcList().filter(function(s){ return cfg.srcs.indexOf(s.k)>=0; });
+  return Promise.all(srcs.map(function(s){ return mrFetch(s.s).then(function(raw){ return {src:s, raw:raw}; }); })).then(function(arr){
+    const multi = srcs.length > 1;
+    const fields = PV_COMMON.map(function(f){ return Object.assign({}, f); });
+    const rows = [];
+    arr.forEach(function(it){
+      if(!it.raw.cols.length) return;
+      const src = it.src, one = mrBuildOne(src, it.raw);
+      const find = function(re, not){ return one.cols.filter(function(c){ return re.test(c.label) && !(not && not.test(c.label)); })[0]; };
+      const cd = one.cols.filter(function(c){ return c.type==='date'; })[0];
+      const cs = src.k==='booking' ? find(/marketing/i) : find(/^supervisor$/i);
+      const ca = src.k==='booking' ? null : find(/^area|^zone/i);
+      const cc = find(/^crop$|^vegetable$/i), cv = find(/^variety$/i);
+      const pre = multi ? PV_SHORT[src.k]+': ' : '';
+      one.cols.forEach(function(c){ fields.push({id:src.k+'|'+c.label, label:pre+c.label, type:c.type, src:src.k}); });
+      let list = one.rows;
+      if(MR.user.role==='Supervisor' && cs) list = list.filter(function(r){ return String(r[cs.id]).trim().toLowerCase() === MR.user.name.trim().toLowerCase(); });
+      list.forEach(function(r){
+        const d = cd ? r[cd.id] : '';
+        if((MR.from || MR.to) && (!d || (MR.from && d<MR.from) || (MR.to && d>MR.to))) return;
+        const o = {'f|Report':PV_SHORT[src.k], 'f|Date':d, 'f|Mahina':pvMonth(d), 'f|Hafta':pvWeek(d), 'f|Saal':d ? d.slice(0,4) : '',
+          'f|Vegetable':cc ? pvVeg(r[cc.id]) : '', 'f|Variety':cv ? bkNorm(r[cv.id]) : '',
+          'f|Supervisor':cs ? String(r[cs.id]).trim() : '', 'f|Area':ca ? String(r[ca.id]).trim() : ''};
+        one.cols.forEach(function(c){ o[src.k+'|'+c.label] = r[c.id]; });
+        rows.push(o);
+      });
+    });
+    return {fields:fields, rows:rows};
+  });
+}
+// naam se field dhoondo (formula ke [naam] ke liye) — chhote-bade akshar ka fark nahi
+function pvFieldBy(fields, name){
+  const n = String(name).trim().toLowerCase();
+  return fields.filter(function(f){ return f.label.toLowerCase()===n; })[0] ||
+         fields.filter(function(f){ return f.id.toLowerCase()===n; })[0] ||
+         fields.filter(function(f){ return f.label.toLowerCase().replace(/^[^:]+:\s*/,'')===n; })[0];
+}
+
+// ════════ PIVOT CALCULATION ════════
+function pvCalc(cfg, data){
+  const fields = data.fields.slice();
+  let rows = data.rows;
+  const errs = {forms:{}, post:{}, filters:{}};
+  // 1) formula column — har line par
+  (cfg.forms||[]).forEach(function(fm, i){
+    if(!fm.name || !fm.expr) return;
+    let c;
+    try{ c = pvCompile(fm.expr); }catch(e){ errs.forms[i] = e.message; return; }
+    const miss = c.refs.filter(function(r){ return !pvFieldBy(fields, r); });
+    if(miss.length){ errs.forms[i] = 'Ye column nahi mila: ['+miss.join('], [')+']'; return; }
+    const id = 'x|'+fm.name;
+    const map = {}; c.refs.forEach(function(r){ map[r] = pvFieldBy(fields, r).id; });
+    let allNum = true;
+    rows.forEach(function(r){ let v; try{ v = pvOut(c.fn(function(n){ return r[map[n]]; })); }catch(e){ v = ''; } r[id] = v; if(v!=='' && typeof v!=='number') allNum = false; });
+    fields.push({id:id, label:fm.name, type:allNum ? 'num' : 'text', formula:true});
+  });
+  // 2) filter
+  (cfg.filters||[]).forEach(function(fl, i){
+    if(!fl.f || !fl.q) return;
+    const f = fields.filter(function(x){ return x.id===fl.f; })[0];
+    if(!f){ errs.filters[i] = 'Column nahi mila'; return; }
+    const q = String(fl.q);
+    if(f.type==='num') rows = rows.filter(function(r){ return mrNumOk(r[f.id]===''||r[f.id]==null ? '' : pvNum(r[f.id]), q); });
+    else if(f.type==='date') rows = rows.filter(function(r){ return mrTxtOk(fmtDate(r[f.id]), q); });
+    else if(q.charAt(0)==='=') rows = rows.filter(function(r){ return String(r[f.id]==null?'':r[f.id]).trim().toLowerCase()===q.slice(1).trim().toLowerCase(); });
+    else rows = rows.filter(function(r){ return mrTxtOk(r[f.id], q); });
+  });
+  const F = function(id){ return fields.filter(function(x){ return x.id===id; })[0]; };
+  const rowF = (cfg.rows||[]).map(F).filter(Boolean);
+  const colF = cfg.col ? F(cfg.col) : null;
+  const vals = (cfg.vals||[]).filter(function(v){ return v.f==='#' || F(v.f); }).map(function(v){
+    const f = v.f==='#' ? {id:'#', label:'Entries', type:'num'} : F(v.f);
+    const agg = v.f==='#' ? 'count' : (v.agg||'sum');
+    return {f:f, agg:agg, name:(v.name||'').trim() || (v.f==='#' ? 'Entries' : PV_AGG_SHORT[agg]+' '+f.label)};
+  });
+  const disp = function(f, v){ if(v==='' || v==null) return '(khaali)'; return f.type==='date' ? fmtDate(v) : String(v).trim() || '(khaali)'; };
+  const SEP = '\u0001', ALL = '\u0003';
+  const acc = {};
+  const getA = function(k){ return acc[k] || (acc[k] = vals.map(function(){ return {s:0, n:0, mn:Infinity, mx:-Infinity, u:{}}; })); };
+  const colSet = {};
+  rows.forEach(function(r){
+    const keys = rowF.map(function(f){ return disp(f, r[f.id]); });
+    const ck = colF ? disp(colF, r[colF.id]) : ALL;
+    if(colF) colSet[ck] = 1;
+    for(let L = 0; L <= keys.length; L++){
+      const pk = keys.slice(0, L).join(SEP);
+      [ck, ALL].forEach(function(c, ci){
+        if(ci===1 && c===ck) return;
+        const a = getA(L+'\u0002'+pk+'\u0002'+c);
+        vals.forEach(function(v, vi){
+          const x = a[vi];
+          if(v.f.id==='#'){ x.n++; return; }
+          const raw = r[v.f.id];
+          if(raw==='' || raw==null) return;
+          x.n++; x.u[String(raw).trim().toLowerCase()] = 1;
+          if(pvIsNum(raw)){ const n = pvNum(raw); x.s += n; if(n<x.mn) x.mn = n; if(n>x.mx) x.mx = n; }
+        });
+      });
+    }
+  });
+  const val = function(L, pk, ck, vi){
+    const a = acc[L+'\u0002'+pk+'\u0002'+ck]; if(!a) return '';
+    const x = a[vi], agg = vals[vi].agg;
+    if(agg==='count') return x.n;
+    if(agg==='uniq') return Object.keys(x.u).length;
+    if(!x.n) return '';
+    if(agg==='avg') return Math.round(x.s/x.n*100)/100;
+    if(agg==='min') return x.mn===Infinity ? '' : x.mn;
+    if(agg==='max') return x.mx===-Infinity ? '' : x.mx;
+    if(agg==='pct'){ const t = acc['0\u0002\u0002'+ck]; const tot = t ? t[vi].s : 0; return tot ? Math.round(x.s/tot*10000)/100 : ''; }
+    return Math.round(x.s*100)/100;
+  };
+  // 3) pivot ke baad wala formula
+  const posts = [];
+  (cfg.post||[]).forEach(function(pf, i){
+    if(!pf.name || !pf.expr) return;
+    let c;
+    try{ c = pvCompile(pf.expr); }catch(e){ errs.post[i] = e.message; return; }
+    const names = vals.map(function(v){ return v.name.toLowerCase(); }).concat(posts.map(function(p){ return p.name.toLowerCase(); }));
+    const miss = c.refs.filter(function(r){ const n = r.toLowerCase(); return names.indexOf(n)<0 && !vals.some(function(v){ return v.f.label.toLowerCase()===n; }); });
+    if(miss.length){ errs.post[i] = 'Ye value nahi mili: ['+miss.join('], [')+'] — Values ke naam likho'; return; }
+    posts.push({name:pf.name, fn:c.fn});
+  });
+  const cell = function(L, pk, ck){
+    const out = vals.map(function(v, vi){ return val(L, pk, ck, vi); });
+    const ctx = {};
+    vals.forEach(function(v, vi){ ctx[v.name.toLowerCase()] = out[vi]; if(ctx[v.f.label.toLowerCase()]===undefined) ctx[v.f.label.toLowerCase()] = out[vi]; });
+    posts.forEach(function(p){ let r; try{ r = pvOut(p.fn(function(n){ const k = n.toLowerCase(); return ctx[k]===undefined ? '' : ctx[k]; })); }catch(e){ r = ''; }
+      if(typeof r==='number') r = Math.round(r*100)/100; ctx[p.name.toLowerCase()] = r; out.push(r); });
+    return out;
+  };
+  const vnames = vals.map(function(v){ return v.name; }).concat(posts.map(function(p){ return p.name; }));
+  // row ka tree
+  const natural = function(a, b){ const x = parseFloat(a), y = parseFloat(b); if(!isNaN(x) && !isNaN(y) && String(x)===a.replace(/,/g,'') && String(y)===b.replace(/,/g,'')) return x-y;
+    if(a==='(khaali)') return 1; if(b==='(khaali)') return -1; return a.toLowerCase()<b.toLowerCase()?-1:a.toLowerCase()>b.toLowerCase()?1:0; };
+  const kids = {};
+  rows.forEach(function(r){
+    const keys = rowF.map(function(f){ return disp(f, r[f.id]); });
+    for(let L = 0; L < keys.length; L++){ const pk = keys.slice(0, L).join(SEP); (kids[L+'|'+pk] = kids[L+'|'+pk] || {})[keys[L]] = 1; }
+  });
+  const sortKids = function(L, pk){
+    const ks = Object.keys(kids[L+'|'+pk] || {});
+    if(cfg.sort==='val' && vals.length) ks.sort(function(a, b){ const pa = pk ? pk+SEP+a : a, pb = pk ? pk+SEP+b : b;
+      return pvNum(val(L+1, pb, ALL, 0)) - pvNum(val(L+1, pa, ALL, 0)); });
+    else if(cfg.sort==='valasc' && vals.length) ks.sort(function(a, b){ const pa = pk ? pk+SEP+a : a, pb = pk ? pk+SEP+b : b;
+      return pvNum(val(L+1, pa, ALL, 0)) - pvNum(val(L+1, pb, ALL, 0)); });
+    else ks.sort(natural);
+    return ks;
+  };
+  const colKeys = colF ? Object.keys(colSet).sort(natural) : [];
+  const out = [];   // {L, pk, label, leaf, cells:[[...per col]], total:[...]}
+  const walk = function(L, pk){
+    sortKids(L, pk).forEach(function(k){
+      const npk = pk ? pk+SEP+k : k, leaf = L+1===rowF.length;
+      const line = {L:L, pk:npk, label:k, parts:npk.split(SEP), leaf:leaf, cells:colKeys.map(function(c){ return cell(L+1, npk, c); }), total:cell(L+1, npk, ALL)};
+      if(leaf || cfg.sub!==false) out.push(line);
+      if(!leaf) walk(L+1, npk);
+    });
+  };
+  if(rowF.length) walk(0, '');
+  const grand = {cells:colKeys.map(function(c){ return cell(0, '', c); }), total:cell(0, '', ALL)};
+  return {rowF:rowF, colF:colF, colKeys:colKeys, vnames:vnames, nv:vals.length, lines:out, grand:grand, fields:fields, nrows:rows.length, errs:errs, allRows:rows};
+}
+
+// ════════ BUILDER (Rows / Columns / Values ...) ════════
+let PV_LAST = null, PV_FIELDS = [];
+function pvOpts(fields, cur, blank, filt){
+  return (blank ? '<option value="">'+blank+'</option>' : '') +
+    pvGroups(fields.filter(filt || function(){ return true; })).map(function(g){
+      return '<optgroup label="'+mrEsc(g[0])+'">'+g[1].map(function(f){ return '<option value="'+mrEsc(f.id)+'"'+(f.id===cur?' selected':'')+'>'+mrEsc(f.label)+'</option>'; }).join('')+'</optgroup>';
+    }).join('');
+}
+function pvGroups(fields){
+  const g = {}, order = [];
+  fields.forEach(function(f){ const k = f.id.indexOf('f|')===0 ? '⭐ Sabme common' : f.formula ? '🧮 Formula column' : (PV_SHORT[f.src] || 'Other');
+    if(!g[k]){ g[k] = []; order.push(k); } g[k].push(f); });
+  return order.map(function(k){ return [k, g[k]]; });
+}
+function pvBuilder(res){
+  const cfg = MR.pv, fields = res ? res.fields : PV_FIELDS, er = res ? res.errs : {forms:{}, post:{}, filters:{}};
+  const srcs = pvSrcList();
+  const notDate = function(f){ return true; };
+  let h = '';
+  // saved
+  h += '<div class="pv-save"><div style="display:flex;flex-direction:column;gap:3px;"><label style="font-size:11.5px;font-weight:700;color:#1f5a3d;">💾 Saved report kholo</label>'+
+    '<select id="pvSavedSel" onchange="pvOpenSaved(this.value)"><option value="">— chuno —</option>'+
+    MR.pvSaved.map(function(s){ return '<option value="'+mrEsc(s.name)+'">'+mrEsc(s.name)+(s.by?' ('+mrEsc(s.by)+')':'')+'</option>'; }).join('')+'</select></div>'+
+    '<input id="pvSaveName" placeholder="Naam, jaise: Booking vs Sowing" value="'+mrEsc(cfg.name||'')+'" style="flex:1 1 200px;">'+
+    '<button onclick="pvSave()">💾 Save</button><button class="d" onclick="pvDelete()">🗑️ Delete</button>'+
+    '<button class="o" onclick="pvReset()">↺ Naya shuru</button></div>';
+  // 1. reports
+  h += '<div class="pv-sec"><div class="pv-h">1. Reports chuno <span class="hint">ek se zyada chuno to sab ek saath milegi (Vegetable, Variety, Date, Supervisor sabme common hain)</span></div><div class="pv-chips">'+
+    srcs.map(function(s){ return '<button class="pv-chip'+(cfg.srcs.indexOf(s.k)>=0?' on':'')+'" onclick="pvTogSrc(\''+s.k+'\')">'+mrEsc(s.n)+'</button>'; }).join('')+'</div></div>';
+  h += '<div class="pv-sec pv-grid">';
+  // rows
+  h += '<div class="pv-box"><div class="pv-h">2. Rows (line) <span class="hint">upar wala bada group</span></div>';
+  cfg.rows.forEach(function(id, i){
+    h += '<div class="pv-line"><select class="grow" onchange="pvSet(\'rows\','+i+',this.value)">'+pvOpts(fields, id)+'</select>'+
+      (i>0?'<button class="pv-up" title="Upar" onclick="pvMove(\'rows\','+i+')">↑</button>':'')+'<button class="pv-x" onclick="pvDel(\'rows\','+i+')">✕</button></div>';
+  });
+  h += '<button class="pv-add" onclick="pvAdd(\'rows\')">+ Row jodo</button>';
+  h += '<div class="pv-h" style="margin-top:10px;">3. Columns (aadi) <span class="hint">optional</span></div><div class="pv-line"><select class="grow" onchange="MR.pv.col=this.value;pvRun()">'+
+    pvOpts(fields, cfg.col, '— Column nahi —', function(f){ return f.type!=='num'; })+'</select></div></div>';
+  // values
+  h += '<div class="pv-box"><div class="pv-h">4. Values (hisaab)</div>';
+  cfg.vals.forEach(function(v, i){
+    h += '<div class="pv-line"><select class="grow" onchange="pvSetV('+i+',\'f\',this.value)"><option value="#"'+(v.f==='#'?' selected':'')+'>🔢 Entries (line ginti)</option>'+pvOpts(fields, v.f)+'</select>'+
+      (v.f==='#' ? '' : '<select onchange="pvSetV('+i+',\'agg\',this.value)">'+PV_AGG.map(function(a){ return '<option value="'+a[0]+'"'+(a[0]===(v.agg||'sum')?' selected':'')+'>'+a[1]+'</option>'; }).join('')+'</select>')+
+      '<button class="pv-x" onclick="pvDel(\'vals\','+i+')">✕</button>'+
+      '<input class="grow" placeholder="Naam (formula me kaam aayega)" value="'+mrEsc(v.name||'')+'" onchange="pvSetV('+i+',\'name\',this.value)"></div>';
+  });
+  h += '<button class="pv-add" onclick="pvAdd(\'vals\')">+ Value jodo</button></div>';
+  // filters + options
+  h += '<div class="pv-box"><div class="pv-h">5. Filter <span class="hint">Tarikh upar se lagti hai</span></div>';
+  cfg.filters.forEach(function(fl, i){
+    const f = fields.filter(function(x){ return x.id===fl.f; })[0];
+    const ph = !f ? '' : f.type==='num' ? '>0, <500, 100-500' : f.type==='date' ? '18/10, /10/2026' : 'खोजें, ya =TOMATO (ekdum yahi)';
+    let dl = '';
+    if(f && f.type==='text' && res){ const seen = {}; res.allRows.forEach(function(r){ const v = String(r[f.id]==null?'':r[f.id]).trim(); if(v) seen[v] = 1; });
+      const ks = Object.keys(seen).sort().slice(0, 200); dl = '<datalist id="pvdl'+i+'">'+ks.map(function(k){ return '<option value="='+mrEsc(k)+'">'; }).join('')+'</datalist>'; }
+    h += '<div class="pv-line"><select class="grow" onchange="pvSetF('+i+',\'f\',this.value)">'+pvOpts(fields, fl.f, '— column —')+'</select>'+
+      '<button class="pv-x" onclick="pvDel(\'filters\','+i+')">✕</button>'+
+      '<input class="grow'+(er.filters[i]?' err':'')+'" list="pvdl'+i+'" placeholder="'+ph+'" value="'+mrEsc(fl.q||'')+'" onchange="pvSetF('+i+',\'q\',this.value)">'+dl+'</div>';
+  });
+  h += '<button class="pv-add" onclick="pvAdd(\'filters\')">+ Filter jodo</button>';
+  h += '<div class="pv-h" style="margin-top:10px;">Dikhawat</div><div class="pv-opt">'+
+    '<label><input type="checkbox" '+(cfg.sub!==false?'checked':'')+' onchange="MR.pv.sub=this.checked;pvRun()"> Subtotal</label>'+
+    '<label>Kram <select onchange="MR.pv.sort=this.value;pvRun()"><option value="label"'+(cfg.sort==='label'?' selected':'')+'>Naam A→Z</option>'+
+    '<option value="val"'+(cfg.sort==='val'?' selected':'')+'>Pehli value badi→chhoti</option><option value="valasc"'+(cfg.sort==='valasc'?' selected':'')+'>Pehli value chhoti→badi</option></select></label></div></div>';
+  h += '</div>';
+  // formulas
+  h += '<div class="pv-sec pv-grid">';
+  h += '<div class="pv-box" style="grid-column:span 1;"><div class="pv-h">6. Formula column <span class="hint">har line par (pivot se pehle)</span></div>';
+  cfg.forms.forEach(function(fm, i){
+    h += '<div class="pv-line"><input style="width:120px" placeholder="Naam" value="'+mrEsc(fm.name||'')+'" onchange="pvSetX(\'forms\','+i+',\'name\',this.value)">'+
+      '<input class="grow'+(er.forms[i]?' err':'')+'" placeholder=\'IF([Status]="Pending", [Plant], 0)\' value="'+mrEsc(fm.expr||'')+'" onchange="pvSetX(\'forms\','+i+',\'expr\',this.value)">'+
+      '<button class="pv-x" onclick="pvDel(\'forms\','+i+')">✕</button></div>'+(er.forms[i]?'<div class="pv-em">⚠️ '+mrEsc(er.forms[i])+'</div>':'');
+  });
+  h += '<button class="pv-add" onclick="pvAdd(\'forms\')">+ Formula column</button>'+
+    '<div class="pv-help">Column ka naam <code>[ ]</code> me. Jaise <code>[Plant] * [Rate]</code>, <code>IF([Total Received] &gt;= [Amount], "Poora", "Baaki")</code>, <code>DAYS([Delivery Date], [Booking Date])</code>. Banne ke baad yeh Rows/Values/Filter me milega.</div></div>';
+  h += '<div class="pv-box"><div class="pv-h">7. Pivot ke baad formula <span class="hint">Values ke naam se</span></div>';
+  cfg.post.forEach(function(pf, i){
+    h += '<div class="pv-line"><input style="width:120px" placeholder="Naam" value="'+mrEsc(pf.name||'')+'" onchange="pvSetX(\'post\','+i+',\'name\',this.value)">'+
+      '<input class="grow'+(er.post[i]?' err':'')+'" placeholder="[Sowing Plant] - [Booking Plant]" value="'+mrEsc(pf.expr||'')+'" onchange="pvSetX(\'post\','+i+',\'expr\',this.value)">'+
+      '<button class="pv-x" onclick="pvDel(\'post\','+i+')">✕</button></div>'+(er.post[i]?'<div class="pv-em">⚠️ '+mrEsc(er.post[i])+'</div>':'');
+  });
+  h += '<button class="pv-add" onclick="pvAdd(\'post\')">+ Formula</button>'+
+    '<div class="pv-help">Jaise <code>[Sowing Plant] - [Booking Plant]</code>, <code>ROUND([Sowing Plant] / [Booking Plant] * 100, 1)</code>, <code>IF([Fark] &lt; 0, "Kam boya", "Theek")</code></div></div>';
+  // colors
+  const tg = res ? res.vnames : [];
+  h += '<div class="pv-box"><div class="pv-h">8. Rang (highlight)</div>';
+  cfg.colors.forEach(function(cl, i){
+    h += '<div class="pv-line"><select class="grow" onchange="pvSetX(\'colors\','+i+',\'t\',this.value)">'+tg.concat(tg.indexOf(cl.t)<0 && cl.t ? [cl.t] : []).map(function(n){ return '<option'+(n===cl.t?' selected':'')+'>'+mrEsc(n)+'</option>'; }).join('')+'</select>'+
+      '<select onchange="pvSetX(\'colors\','+i+',\'op\',this.value)">'+['<','<=','>','>=','=','<>'].map(function(o){ return '<option'+(o===cl.op?' selected':'')+'>'+mrEsc(o)+'</option>'; }).join('')+'</select>'+
+      '<input style="width:80px" value="'+mrEsc(cl.n==null?'':cl.n)+'" onchange="pvSetX(\'colors\','+i+',\'n\',this.value)">'+
+      '<select onchange="pvSetX(\'colors\','+i+',\'c\',this.value)">'+PV_COLORS.map(function(c){ return '<option value="'+c[0]+'"'+(c[0]===cl.c?' selected':'')+'>'+c[1]+'</option>'; }).join('')+'</select>'+
+      '<button class="pv-x" onclick="pvDel(\'colors\','+i+')">✕</button></div>';
+  });
+  h += '<button class="pv-add" onclick="pvAdd(\'colors\')">+ Rang ka niyam</button><div class="pv-help">Jaise: Fark &lt; 0 → Laal. Number ki jagah text bhi likh sakte ho (= Baaki).</div></div>';
+  h += '</div>';
+  document.getElementById('pvBuild').innerHTML = h;
+}
+function pvSet(k, i, v){ MR.pv[k][i] = v; pvRun(); }
+function pvSetV(i, k, v){ const x = MR.pv.vals[i]; x[k] = v; if(k==='f' && v!=='#' && !x.agg) x.agg = 'sum'; pvRun(); }
+function pvSetF(i, k, v){ MR.pv.filters[i][k] = v; pvRun(); }
+function pvSetX(list, i, k, v){ MR.pv[list][i][k] = v; pvRun(); }
+function pvDel(k, i){ MR.pv[k].splice(i, 1); pvRun(); }
+function pvMove(k, i){ const a = MR.pv[k]; const t = a[i-1]; a[i-1] = a[i]; a[i] = t; pvRun(); }
+function pvAdd(k){
+  const c = MR.pv;
+  if(k==='rows') c.rows.push('f|Vegetable');
+  else if(k==='vals') c.vals.push({f:'#', agg:'count', name:''});
+  else if(k==='filters') c.filters.push({f:'f|Vegetable', q:''});
+  else if(k==='forms') c.forms.push({name:'Formula '+(c.forms.length+1), expr:''});
+  else if(k==='post') c.post.push({name:'Formula '+(c.post.length+1), expr:''});
+  else if(k==='colors') c.colors.push({t:(PV_LAST && PV_LAST.vnames[0]) || '', op:'<', n:0, c:'red'});
+  pvRun();
+}
+function pvTogSrc(k){
+  const c = MR.pv, i = c.srcs.indexOf(k);
+  if(i>=0){ if(c.srcs.length===1){ toast('❗ Kam se kam ek report chuno','error'); return; } c.srcs.splice(i, 1); }
+  else c.srcs.push(k);
+  // field naam badal jaate hain (ek report = bina "Booking:" ke) — id wahi rehti hai, isliye kuch tootega nahi
+  pvRun();
+}
+function pvReset(){ if(!confirm('Naye sire se shuru karein?')) return; MR.pv = pvDefault(); MR.pvClosed = {}; pvRun(); }
+
+// ── Chalao
+let PV_RUN_N = 0;
+function pvRun(){
+  const cfg = MR.pv; if(!cfg) return;
+  mrLS('mrPvLast', JSON.stringify(cfg));
+  const n = ++PV_RUN_N;
+  const out = document.getElementById('pvOut');
+  if(!PV_LAST) out.innerHTML = '<div class="mr-msg">⏳ Data load ho raha hai...</div>';
+  pvData(cfg).then(function(data){
+    if(n !== PV_RUN_N) return;
+    PV_FIELDS = data.fields;
+    let res;
+    try{ res = pvCalc(cfg, data); }catch(e){ out.innerHTML = '<div class="mr-msg">⚠️ '+mrEsc(e.message)+'</div>'; return; }
+    PV_LAST = res;
+    pvBuilder(res);
+    pvRender(res);
+  }).catch(function(){ out.innerHTML = '<div class="mr-msg">⚠️ Data nahi aaya — internet check karo, phir Refresh</div>'; });
+}
+function pvColor(name, v){
+  let cls = '';
+  (MR.pv.colors||[]).forEach(function(cl){
+    if(cls || cl.t!==name || v==='' || v==null) return;
+    const c = pvCmp(v, cl.n==null?'':cl.n), op = cl.op;
+    const ok = op==='<'?c<0 : op==='>'?c>0 : op==='<='?c<=0 : op==='>='?c>=0 : op==='<>'?c!==0 : c===0;
+    if(ok) cls = ' c-'+cl.c;
+  });
+  return cls;
+}
+function pvF(v){ if(v==='' || v==null) return ''; if(typeof v==='number') return mrFmtN(v); return String(v); }
+function pvRender(res){
+  const out = document.getElementById('pvOut');
+  if(!res.rowF.length && !res.colF){ out.innerHTML = '<div class="mr-msg">Rows me kam se kam ek field chuno</div>'; return; }
+  if(!res.vnames.length){ out.innerHTML = '<div class="mr-msg">Values me kam se kam ek hisaab jodo</div>'; return; }
+  const vn = res.vnames, multiCol = !!res.colF;
+  const rowLabel = res.rowF.map(function(f){ return f.label; }).join(' / ') || ' ';
+  let h = '<div class="mr-sum"><div class="mr-k"><div class="l">Kul line (data)</div><div class="v">'+res.nrows.toLocaleString('en-IN')+'</div></div>';
+  vn.slice(0, 6).forEach(function(n, i){ h += '<div class="mr-k"><div class="l">'+mrEsc(n)+'</div><div class="v">'+mrEsc(pvF(res.grand.total[i]))+'</div></div>'; });
+  h += '</div><div class="mr-wrap"><table class="mr-t pv-t"><thead>';
+  if(multiCol){
+    h += '<tr><th rowspan="2" style="cursor:default">'+mrEsc(rowLabel)+'</th>'+res.colKeys.map(function(c){ return '<th class="cg" colspan="'+vn.length+'">'+mrEsc(res.colF.label)+': '+mrEsc(c)+'</th>'; }).join('')+
+      '<th class="cg" colspan="'+vn.length+'">TOTAL</th></tr><tr>';
+    res.colKeys.concat(['T']).forEach(function(){ vn.forEach(function(n){ h += '<th class="r" style="cursor:default;top:30px">'+mrEsc(n)+'</th>'; }); });
+    h += '</tr>';
+  } else {
+    h += '<tr><th style="cursor:default">'+mrEsc(rowLabel)+'</th>'+vn.map(function(n){ return '<th class="r" style="cursor:default">'+mrEsc(n)+'</th>'; }).join('')+'</tr>';
+  }
+  h += '</thead><tbody>';
+  const nL = res.rowF.length;
+  const tds = function(line){
+    let s = '';
+    const put = function(arr){ arr.forEach(function(v, i){ s += '<td class="n'+pvColor(vn[i], v)+'">'+mrEsc(pvF(v))+'</td>'; }); };
+    if(multiCol){ line.cells.forEach(put); }
+    put(line.total);
+    return s;
+  };
+  let hideUnder = null;
+  res.lines.forEach(function(line){
+    if(hideUnder && line.pk.indexOf(hideUnder)===0 && line.pk!==hideUnder.slice(0,-1)) return;
+    hideUnder = null;
+    const closed = !line.leaf && MR.pvClosed[line.pk];
+    if(closed) hideUnder = line.pk + '\u0001';
+    const cls = line.leaf ? '' : (line.L===0 ? 'l0' : 'l1');
+    h += '<tr class="'+cls+'"><td class="lbl'+(line.leaf?'':' tg'+(closed?' cl':''))+'" style="padding-left:'+(10+line.L*18)+'px"'+
+      (line.leaf?'':' onclick="pvTog(this)" data-pk="'+mrEsc(line.pk)+'"')+'>'+mrEsc(line.label)+'</td>'+tds(line)+'</tr>';
+  });
+  h += '<tr class="gt"><td class="lbl">GRAND TOTAL</td>'+tds(res.grand)+'</tr>';
+  h += '</tbody></table></div>';
+  if(res.nrows===0) h = '<div class="mr-msg">Is tarikh / filter me koi data nahi mila</div>' + h;
+  out.innerHTML = h;
+}
+function pvTog(td){ const pk = td.getAttribute('data-pk'); MR.pvClosed[pk] = !MR.pvClosed[pk]; pvRender(PV_LAST); }
+
+// ── Excel / PDF (pivot) — har row field ka alag column, subtotal bold
+function pvExport(kind){
+  const res = PV_LAST; if(!res || !res.vnames.length){ toast('❗ Pehle pivot banao','error'); return; }
+  if(EXP_BUSY) return;
+  const vn = res.vnames, nL = Math.max(1, res.rowF.length);
+  const head = [];
+  if(res.colF){
+    const h1 = res.rowF.map(function(){ return {t:'', th:1}; });
+    if(!h1.length) h1.push({t:'', th:1});
+    res.colKeys.forEach(function(c){ h1.push({t:res.colF.label+': '+c, th:1, span:vn.length}); });
+    h1.push({t:'TOTAL', th:1, span:vn.length});
+    head.push(h1);
+  }
+  const h2 = (res.rowF.length ? res.rowF.map(function(f){ return {t:f.label, th:1}; }) : [{t:'', th:1}]);
+  (res.colF ? res.colKeys.concat(['T']) : ['T']).forEach(function(){ vn.forEach(function(n){ h2.push({t:n, th:1}); }); });
+  head.push(h2);
+  const num = function(arr){ return arr.map(function(v){ return {t: v==='' || v==null ? '' : v}; }); };
+  const vals = function(line){ let a = []; if(res.colF) line.cells.forEach(function(c){ a = a.concat(num(c)); }); return a.concat(num(line.total)); };
+  const rows = res.lines.map(function(line){
+    const lab = [];
+    for(let i = 0; i < nL; i++){ lab.push({t: i < line.parts.length ? line.parts[i] : (i===line.parts.length ? 'Total' : '')}); }
+    const r = lab.concat(vals(line)); if(!line.leaf) r.bold = true; return r;
+  });
+  const gt = [{t:'GRAND TOTAL'}]; for(let i = 1; i < nL; i++) gt.push({t:''});
+  rows.push(gt.concat(vals(res.grand)));
+  const srcN = pvSrcList().filter(function(s){ return MR.pv.srcs.indexOf(s.k)>=0; }).map(function(s){ return PV_SHORT[s.k]; }).join(' + ');
+  const parts = [];
+  if(MR.from || MR.to) parts.push('Tarikh: '+(MR.from?fmtDate(MR.from):'shuru')+' se '+(MR.to?fmtDate(MR.to):'aaj')+' tak');
+  (MR.pv.filters||[]).forEach(function(fl){ if(!fl.q) return; const f = res.fields.filter(function(x){ return x.id===fl.f; })[0]; if(f) parts.push(f.label+': '+String(fl.q).replace(/^=/,'')); });
+  const title = (MR.pv.name ? MR.pv.name : 'Pivot — '+srcN);
+  const meta = {title:title, filters:parts.join('   •   ')};
+  const secs = [{title:srcN+' — '+res.rowF.map(function(f){ return f.label; }).join(' / ')+' ke hisaab se', sheet:'Pivot', flat:true, head:head, rows:rows}];
+  EXP_BUSY = true;
+  const done = function(){ EXP_BUSY = false; };
+  if(kind==='xls'){
+    toast('⏳ Excel ban rahi hai...');
+    expLoad('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', function(){ return !!window.XLSX; })
+      .then(function(){ expXls(meta, secs); done(); })
+      .catch(function(){ done(); toast('⚠️ Excel tool load nahi hua — internet check karo','error'); });
+  } else {
+    toast('⏳ PDF ban rahi hai...');
+    expLoad('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', function(){ return !!(window.jspdf && window.jspdf.jsPDF); })
+      .then(function(){ return expPdf(meta, secs); }).then(done)
+      .catch(function(){ done(); toast('⚠️ PDF nahi bani — dobara try karo','error'); });
+  }
+}
+
+// ════════ SAVE (Google Sheet: "Saved Reports") ════════
+function pvLocalSaved(){ try{ return JSON.parse(mrLS('mrPvSaved')||'{}') || {}; }catch(e){ return {}; } }
+function pvLoadSaved(){
+  return fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&headers=1&sheet='+encodeURIComponent('Saved Reports')+'&t='+Date.now())
+    .then(function(r){ return r.text(); })
+    .then(function(t){
+      let list = [];
+      try{
+        const j = JSON.parse(t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+        (j.table.rows||[]).forEach(function(r){
+          const c = r.c||[], v = function(i){ return c[i] && c[i].v!=null ? String(c[i].v) : ''; };
+          if(!v(0) || v(0)==='Name') return;
+          let cfg = null; try{ cfg = JSON.parse(v(3)); }catch(e){}
+          if(cfg && cfg.srcs) list.push({name:v(0), by:v(1), cfg:cfg});
+        });
+      }catch(e){}
+      return list;
+    }).catch(function(){ return []; })
+    .then(function(list){
+      // jo abhi abhi save/delete kiya (sheet me aane me 1-2 second lagte hain)
+      const loc = pvLocalSaved();
+      Object.keys(loc).forEach(function(n){
+        const x = loc[n], i = list.map(function(s){ return s.name.toLowerCase(); }).indexOf(n.toLowerCase());
+        if(Date.now() - x.t > 10*60*1000){ return; }
+        if(x.del){ if(i>=0) list.splice(i, 1); }
+        else if(i>=0) list[i] = {name:n, by:x.by, cfg:x.cfg}; else list.push({name:n, by:x.by, cfg:x.cfg});
+      });
+      list.sort(function(a, b){ return a.name.toLowerCase()<b.name.toLowerCase()?-1:1; });
+      MR.pvSaved = list;
+      if(MR.mode==='pv' && document.getElementById('pvBuild') && PV_LAST) pvBuilder(PV_LAST);
+      return list;
+    });
+}
+function pvPost(payload){
+  return fetch(API, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)});
+}
+function pvSave(){
+  const name = (document.getElementById('pvSaveName').value||'').trim();
+  if(!name){ toast('❗ Report ka naam likho','error'); return; }
+  const exists = MR.pvSaved.some(function(s){ return s.name.toLowerCase()===name.toLowerCase(); });
+  if(exists && !confirm('"'+name+'" pehle se hai — badal dein?')) return;
+  const cfg = pvClone(MR.pv); cfg.name = name;
+  // tarikh ka preset bhi saath me
+  cfg.preset = MR.preset || ''; if(!MR.preset){ cfg.from = MR.from; cfg.to = MR.to; } else { delete cfg.from; delete cfg.to; }
+  MR.pv.name = name;
+  const loc = pvLocalSaved(); loc[name] = {cfg:cfg, by:MR.user.name, t:Date.now()}; mrLS('mrPvSaved', JSON.stringify(loc));
+  toast('⏳ Save ho raha hai...');
+  pvPost({module:'saveReport', name:name, user:MR.user.name, config:JSON.stringify(cfg)})
+    .then(function(){ toast('✅ "'+name+'" save ho gaya — sab users ko dikhega'); })
+    .catch(function(){ toast('⚠️ Internet nahi — sirf is device par save hua','error'); })
+    .then(function(){ setTimeout(pvLoadSaved, 1500); });
+  pvLoadSaved();
+}
+function pvOpenSaved(name){
+  if(!name) return;
+  const s = MR.pvSaved.filter(function(x){ return x.name===name; })[0]; if(!s) return;
+  MR.pv = pvClone(s.cfg); MR.pv.name = s.name; MR.pvClosed = {};
+  ['srcs','rows','vals','filters','forms','post','colors'].forEach(function(k){ if(!Array.isArray(MR.pv[k])) MR.pv[k] = []; });
+  const allowed = pvSrcList().map(function(x){ return x.k; });
+  MR.pv.srcs = MR.pv.srcs.filter(function(k){ return allowed.indexOf(k)>=0; });
+  if(!MR.pv.srcs.length){ toast('❗ Is report ka data aapke login me nahi dikhta','error'); MR.pv = pvDefault(); }
+  if(s.cfg.preset) mrPreset(s.cfg.preset);
+  else if(s.cfg.from!==undefined){ MR.from = s.cfg.from||''; MR.to = s.cfg.to||''; MR.preset = '';
+    document.getElementById('mrxFrom').value = MR.from; document.getElementById('mrxTo').value = MR.to;
+    document.querySelectorAll('[data-mrp]').forEach(function(b){ b.classList.remove('on'); }); }
+  pvRun();
+}
+function pvDelete(){
+  const name = (document.getElementById('pvSaveName').value||'').trim() || (MR.pv && MR.pv.name) || '';
+  const s = MR.pvSaved.filter(function(x){ return x.name.toLowerCase()===name.toLowerCase(); })[0];
+  if(!s){ toast('❗ Pehle saved report kholo, phir Delete','error'); return; }
+  if(!confirm('"'+s.name+'" hamesha ke liye hata dein?')) return;
+  const loc = pvLocalSaved(); loc[s.name] = {del:1, t:Date.now()}; mrLS('mrPvSaved', JSON.stringify(loc));
+  delete MR.pv.name;
+  pvPost({module:'deleteReport', name:s.name, user:MR.user.name})
+    .then(function(){ toast('🗑️ "'+s.name+'" hata diya'); })
+    .catch(function(){ toast('⚠️ Internet nahi — dobara try karo','error'); })
+    .then(function(){ setTimeout(pvLoadSaved, 1500); });
+  pvLoadSaved();
+}
 </script>
 </body>
 </html>
