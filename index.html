@@ -666,6 +666,15 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .dbt td{padding:7px 9px;border-top:1px solid #eef3f0;vertical-align:top;}
 .dbt .r{text-align:right;}
 .dbt-tot td{background:#e3f5ea;color:#1a5c34;font-weight:800;}
+.dbn-sec > .dbn-b > .dbt-w{max-height:70vh;overflow:auto;border:1px solid #e3ece6;border-radius:10px;}
+.dbn-sec > .dbn-b > .dbt-w .dbt th{position:sticky;top:0;z-index:1;}
+.dbn-sec > .dbn-b > .dbt-w .dbt-tot td{position:sticky;bottom:0;}
+.dbt tbody tr:nth-child(even) td{background:#fafcfb;}
+.dbt tr.dbt-first td{border-top:2px solid #cfe3d6;}
+.dbt tr.dbt-sub td{background:#eef6f1;font-weight:700;}
+.dbt td{color:#1b2a22;}
+.dbt tbody tr.dbt-tot td{background:#e3f5ea;}
+.dbt tbody tr.dbt-sub td{background:#eef6f1;}
 .dbt-s{font-size:11px;color:#6b7c75;}
 .dbt-empty{color:#8a9a93;text-align:center;}
 .dbn-info{font-size:12.5px;color:#3d5449;margin-top:8px;}
@@ -2035,7 +2044,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261025-1915';
+const APP_VERSION = '20261025-2000';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -6769,7 +6778,13 @@ function dbRender(){
     tile('spr','🌿',dbN(T.spr),'Dawai Entry',wat.length+' pani','#6a1b9a')+
     '</div>';
 
-  // ── 1. VARIETY KA SAFAR ──
+  // ════ Har section me EK seedhi table (andar khulne-band wale dabbe nahi) ════
+  const td = function(v, cls){ return '<td'+(cls?' class="'+cls+'"':'')+'>'+v+'</td>'; };
+  const tdr = function(v){ return td(v, 'r'); };
+  const dt = function(d){ return '<span style="white-space:nowrap;">'+dbFD(d)+'</span>'; };
+  const byDate = function(a, b){ return a._d<b._d?1:a._d>b._d?-1:0; };
+
+  // ── 1. VARIETY KA SAFAR: Crop | Variety | Boya | Shift | Book | Deliver | Dispatch | Baaki ──
   const vj = {};
   const vAdd = function(crop, v, k, n){ crop = crop||'—'; v = v||'—'; if(!vj[crop]) vj[crop] = {}; if(!vj[crop][v]) vj[crop][v] = {sow:0, shf:0, bk:0, dsp:0, del:0}; vj[crop][v][k] += n; };
   seed.forEach(function(r){ vAdd(dbS(r,4), dbS(r,5), 'sow', dbNum(r,11)); });
@@ -6779,181 +6794,139 @@ function dbRender(){
   const vjCrops = Object.keys(vj);
   if(vjCrops.length){
     const cTot = function(c){ let s={sow:0,shf:0,bk:0,dsp:0,del:0}; Object.values(vj[c]).forEach(function(x){ for(const k in s) s[k]+=x[k]; }); return s; };
+    const G = {sow:0,shf:0,bk:0,dsp:0,del:0};
+    const nums = function(x, b){ const w = function(v){ return b ? '<b>'+v+'</b>' : v; };
+      return tdr(w(dbN(x.sow)))+tdr(w(dbN(x.shf)))+tdr(w(dbN(x.bk)))+tdr(w(dbN(x.del)))+tdr(w(dbN(x.dsp)))+tdr('<b>'+dbN(Math.max(0,x.bk-x.del))+'</b>'); };
     h += dbNode('Variety ka Safar', 'Boya → Shift → Book → Dispatch — har variety ka hisaab', vjCrops.length+' crop', function(){
-      return vjCrops.sort(function(a,b){ return cTot(b).sow - cTot(a).sow; }).map(function(c){
-        const t = cTot(c);
-        return dbNode(dbEsc(c), Object.keys(vj[c]).length+' variety', '<span class="dbn-mini">🌱'+dbN(t.sow)+' · 📝'+dbN(t.bk)+' · 🚚'+dbN(t.dsp)+'</span>', function(){
-          const rows = Object.keys(vj[c]).sort(function(a,b){ return vj[c][b].sow - vj[c][a].sow; }).map(function(v){
-            const x = vj[c][v];
-            return '<tr><td><b>'+dbEsc(v)+'</b></td><td class="r">'+dbN(x.sow)+'</td><td class="r">'+dbN(x.shf)+'</td><td class="r">'+dbN(x.bk)+'</td><td class="r">'+dbN(x.del)+'</td><td class="r">'+dbN(x.dsp)+'</td><td class="r"><b>'+dbN(Math.max(0,x.bk-x.del))+'</b></td></tr>';
-          });
-          return dbTbl(['Variety',{t:'Boya (plant)',r:1},{t:'Shift (tray)',r:1},{t:'Book',r:1},{t:'Deliver',r:1},{t:'Dispatch',r:1},{t:'Book baaki',r:1}], rows,
-            '<td>TOTAL</td><td class="r">'+dbN(t.sow)+'</td><td class="r">'+dbN(t.shf)+'</td><td class="r">'+dbN(t.bk)+'</td><td class="r">'+dbN(t.del)+'</td><td class="r">'+dbN(t.dsp)+'</td><td class="r">'+dbN(Math.max(0,t.bk-t.del))+'</td>');
-        });
-      }).join('');
+      const rows = [];
+      vjCrops.sort(function(a,b){ return cTot(b).sow - cTot(a).sow; }).forEach(function(c){
+        const vs = Object.keys(vj[c]).sort(function(a,b){ return vj[c][b].sow - vj[c][a].sow; });
+        vs.forEach(function(v){ rows.push('<tr>'+td(dbEsc(c))+td('<b>'+dbEsc(v)+'</b>')+nums(vj[c][v])+'</tr>'); });
+        const t = cTot(c); for(const k in G) G[k] += t[k];
+        if(vs.length > 1) rows.push('<tr class="dbt-sub">'+td('<b>'+dbEsc(c)+' Total</b>')+td('')+nums(t, 1)+'</tr>');
+      });
+      return dbTbl(['Crop','Variety',{t:'Boya (plant)',r:1},{t:'Shift (tray)',r:1},{t:'Book',r:1},{t:'Deliver',r:1},{t:'Dispatch',r:1},{t:'Book baaki',r:1}], rows,
+        td('GRAND TOTAL')+td('')+tdr(dbN(G.sow))+tdr(dbN(G.shf))+tdr(dbN(G.bk))+tdr(dbN(G.del))+tdr(dbN(G.dsp))+tdr(dbN(Math.max(0,G.bk-G.del))));
     }, {cls:'dbn-sec', sec:'vj', icon:'🌾', color:'#e8f5e9'});
   }
 
-  // ── 2. SEED SOWING: Crop → Variety → Entry → Labour ──
+  // ── 2. SEED SOWING: har entry ek line, labour ke naam saath me ──
   if(seed.length){
-    const byC = dbGrp(seed, function(r){ return dbS(r,4); });
     h += dbNode('Seed Sowing', seed.length+' entry • '+new Set(seed.map(function(r){ return dbS(r,5); })).size+' variety • '+dbN(T.sowPkt)+' PKT', dbN(T.sow)+' <small>plant</small>', function(){
-      return dbSorted(byC, function(a){ return dbSum(a,function(r){return dbNum(r,11);}); }).map(function(e){
-        const byV = dbGrp(e[1], function(r){ return dbS(r,5); });
-        return dbNode(dbEsc(e[0]), byV.size+' variety • '+e[1].length+' entry', dbN(dbSum(e[1],function(r){return dbNum(r,11);})), function(){
-          return dbSorted(byV, function(a){ return dbSum(a,function(r){return dbNum(r,11);}); }).map(function(v){
-            return dbNode(dbEsc(v[0]), v[1].length+' entry • '+dbN(dbSum(v[1],function(r){return dbNum(r,7);}))+' PKT • '+dbN(dbSum(v[1],function(r){return dbNum(r,8);}))+' tray', dbN(dbSum(v[1],function(r){return dbNum(r,11);})), function(){
-              return v[1].sort(function(a,b){ return a._d<b._d?1:-1; }).map(function(r){
-                const labs = seedLab.filter(function(l){ return l._d===r._d && dbS(l,1)===dbS(r,1) && dbS(l,2)===dbS(r,2) && dbS(l,3)===dbS(r,4) && dbS(l,4)===dbS(r,5) && dbS(l,5)===dbS(r,6); });
-                return dbNode('📅 '+dbFD(r._d)+' • '+dbEsc(dbS(r,2)), '👷 '+dbEsc(dbS(r,1))+(dbS(r,6)?' • Lot '+dbEsc(dbS(r,6)):'')+' • '+dbNum(r,7)+' PKT • '+dbNum(r,8)+' tray × '+dbNum(r,9)+' cup', dbN(dbNum(r,11)),
-                  dbTbl(['Labour',{t:'PKT',r:1},{t:'Tray',r:1},{t:'Plants',r:1}], labs.map(function(l){ return '<tr><td>'+dbEsc(dbS(l,6))+'</td><td class="r">'+dbNum(l,7)+'</td><td class="r">'+dbNum(l,8)+'</td><td class="r">'+dbN(dbNum(l,9))+'</td></tr>'; }).concat(labs.length?[]:['<tr><td colspan="4" class="dbt-empty">Labour ki entry nahi</td></tr>']))+
-                  (dbS(r,12)?'<div class="dbn-note">📝 '+dbEsc(dbS(r,12))+'</div>':''), {cls:'dbn-leaf'});
-              }).join('');
-            });
-          }).join('');
-        });
-      }).join('');
+      let tp = 0, tt = 0, tl = 0;
+      const rows = seed.slice().sort(byDate).map(function(r){
+        const labs = seedLab.filter(function(l){ return l._d===r._d && dbS(l,1)===dbS(r,1) && dbS(l,2)===dbS(r,2) && dbS(l,3)===dbS(r,4) && dbS(l,4)===dbS(r,5) && dbS(l,5)===dbS(r,6); });
+        tp += dbNum(r,7); tt += dbNum(r,8); tl += labs.length;
+        const lab = labs.length ? labs.map(function(l){ return dbEsc(dbS(l,6))+' <span class="dbt-s">('+dbNum(l,7)+' pkt / '+dbNum(l,8)+' tray)</span>'; }).join('<br>') : '<span class="dbt-s">—</span>';
+        return '<tr>'+td(dt(r._d))+td(dbEsc(dbS(r,1)))+td(dbEsc(dbS(r,2)))+td(dbEsc(dbS(r,4)))+td('<b>'+dbEsc(dbS(r,5))+'</b>')+td(dbEsc(dbS(r,6)))+
+          tdr(dbNum(r,7))+tdr(dbNum(r,8))+tdr(dbNum(r,9))+tdr('<b>'+dbN(dbNum(r,11))+'</b>')+td(lab)+td(dbEsc(dbS(r,12)))+'</tr>';
+      });
+      return dbTbl(['Date','Supervisor','Zone','Crop','Variety','Lot',{t:'PKT',r:1},{t:'Tray',r:1},{t:'Cup',r:1},{t:'Plant',r:1},'Labour (pkt / tray)','Remarks'], rows,
+        td('TOTAL')+td('')+td('')+td('')+td('')+td('')+tdr(dbN(tp))+tdr(dbN(tt))+td('')+tdr(dbN(T.sow))+td(tl+' labour')+td(''));
     }, {cls:'dbn-sec', sec:'sow', icon:'🌱', color:'#e8f5e9'});
   }
 
-  // ── 3. SHIFTING: Crop → Variety → (Date • Area) → Labour ──
+  // ── 3. SHIFTING: har labour ki ek line ──
   if(shf.length){
-    const byC = dbGrp(shf, function(r){ return dbS(r,3); });
     h += dbNode('Shifting', shf.length+' labour entry', dbN(T.shf)+' <small>tray</small>', function(){
-      return dbSorted(byC, function(a){ return dbSum(a,function(r){return dbNum(r,6);}); }).map(function(e){
-        const byV = dbGrp(e[1], function(r){ return dbS(r,4); });
-        return dbNode(dbEsc(e[0]), byV.size+' variety', dbN(dbSum(e[1],function(r){return dbNum(r,6);})), function(){
-          return dbSorted(byV, function(a){ return dbSum(a,function(r){return dbNum(r,6);}); }).map(function(v){
-            const byD = dbGrp(v[1], function(r){ return r._d+'|'+dbS(r,2)+'|'+dbS(r,1); });
-            return dbNode(dbEsc(v[0]), byD.size+' din/area', dbN(dbSum(v[1],function(r){return dbNum(r,6);})), function(){
-              return Array.from(byD.entries()).sort(function(a,b){ return a[0]<b[0]?1:-1; }).map(function(d){
-                const p = d[0].split('|');
-                return dbNode('📅 '+dbFD(p[0])+' • '+dbEsc(p[1]), '👷 '+dbEsc(p[2])+' • '+d[1].length+' labour', dbN(dbSum(d[1],function(r){return dbNum(r,6);})),
-                  dbTbl(['Labour',{t:'Tray',r:1}], d[1].map(function(r){ return '<tr><td>'+dbEsc(dbS(r,5))+'</td><td class="r">'+dbN(dbNum(r,6))+'</td></tr>'; })), {cls:'dbn-leaf'});
-              }).join('');
-            });
-          }).join('');
-        });
-      }).join('');
+      const rows = shf.slice().sort(byDate).map(function(r){
+        return '<tr>'+td(dt(r._d))+td(dbEsc(dbS(r,1)))+td(dbEsc(dbS(r,2)))+td(dbEsc(dbS(r,3)))+td('<b>'+dbEsc(dbS(r,4))+'</b>')+td(dbEsc(dbS(r,5)))+tdr('<b>'+dbN(dbNum(r,6))+'</b>')+'</tr>';
+      });
+      return dbTbl(['Date','Supervisor','Area','Crop','Variety','Labour',{t:'Tray',r:1}], rows, td('TOTAL')+td('')+td('')+td('')+td('')+td(shf.length+' entry')+tdr(dbN(T.shf)));
     }, {cls:'dbn-sec', sec:'shf', icon:'🔄', color:'#fff3e0'});
   }
 
-  // ── 4. DISPATCH: Date → Gaadi → Lines ──
+  // ── 4. DISPATCH: har line ──
   if(dsp.length){
-    const byD = dbGrp(dsp, function(r){ return r._d; });
-    h += dbNode('Dispatch', byD.size+' din • '+dsp.length+' line', dbN(T.dsp)+' <small>plant</small>', function(){
-      return Array.from(byD.entries()).sort(function(a,b){ return a[0]<b[0]?1:-1; }).map(function(d){
-        const byG = dbGrp(d[1], function(r){ return dbS(r,3)+'|'+dbS(r,4)+'|'+dbS(r,2); });
-        return dbNode('📅 '+dbFD(d[0]), byG.size+' gaadi', dbN(dbSum(d[1],function(r){return dbNum(r,12);})), function(){
-          return Array.from(byG.entries()).map(function(g){
-            const p = g[0].split('|');
-            return dbNode('🚙 '+dbEsc(p[0]||'—'), '👨 '+dbEsc(p[1]||'—')+' • 👷 '+dbEsc(p[2])+' • Meter '+dbEsc(dbS(g[1][0],5)), dbN(dbSum(g[1],function(r){return dbNum(r,12);})),
-              dbTbl(['Crop – Variety','Area',{t:'Carret × Plant',r:1},{t:'Direct',r:1},{t:'Total',r:1},'Sowing'], g[1].map(function(r){
-                return '<tr><td><b>'+dbEsc(dbS(r,6))+'</b> – '+dbEsc(dbS(r,7))+'</td><td>'+dbEsc(dbS(r,1))+'</td><td class="r">'+dbNum(r,9)+' × '+dbNum(r,10)+'</td><td class="r">'+dbN(dbNum(r,11))+'</td><td class="r"><b>'+dbN(dbNum(r,12))+'</b></td><td>'+(dbS(r,13)==='YES'?dbBadge('✓ Match','badge-green'):dbBadge('Check','badge-red'))+'</td></tr>';
-              })), {cls:'dbn-leaf'});
-          }).join('');
-        });
-      }).join('');
+    const gaadi = new Set(dsp.map(function(r){ return r._d+'|'+dbS(r,3); })).size;
+    h += dbNode('Dispatch', new Set(dsp.map(function(r){ return r._d; })).size+' din • '+dsp.length+' line', dbN(T.dsp)+' <small>plant</small>', function(){
+      let tc = 0, tdct = 0;
+      const rows = dsp.slice().sort(byDate).map(function(r){
+        tc += dbNum(r,9); tdct += dbNum(r,11);
+        return '<tr>'+td(dt(r._d))+td(dbEsc(dbS(r,3)||'—'))+td(dbEsc(dbS(r,4)))+td(dbEsc(dbS(r,2)))+td(dbEsc(dbS(r,1)))+td(dbEsc(dbS(r,6)))+td('<b>'+dbEsc(dbS(r,7))+'</b>')+
+          tdr(dbNum(r,9)+' × '+dbNum(r,10))+tdr(dbN(dbNum(r,11)))+tdr('<b>'+dbN(dbNum(r,12))+'</b>')+td(dbS(r,13)==='YES'?dbBadge('✓ Match','badge-green'):dbBadge('Check','badge-red'))+'</tr>';
+      });
+      return dbTbl(['Date','Gaadi','Driver','Supervisor','Area','Crop','Variety',{t:'Carret × Plant',r:1},{t:'Direct',r:1},{t:'Total',r:1},'Sowing'], rows,
+        td('TOTAL')+td(gaadi+' gaadi')+td('')+td('')+td('')+td('')+td('')+tdr(dbN(tc)+' carret')+tdr(dbN(tdct))+tdr(dbN(T.dsp))+td(''));
     }, {cls:'dbn-sec', sec:'dsp', icon:'🚚', color:'#eceff1'});
   }
 
-  // ── 5. BOOKING: Crop → Variety → Kisan → Detail ──
+  // ── 5. BOOKING: har variety ki line; payment booking ki pehli line par ──
   if(bk.length){
-    const byC = dbGrp(bk, function(r){ return dbS(r,6); });
     const bkMap = dbGrp(bkAll, function(r){ return dbS(r,23); });
     h += dbNode('Booking', T.bkCnt+' booking • Order ₹'+dbN(T.bkVal), dbN(T.bkPl)+' <small>plant</small>', function(){
-      return dbSorted(byC, function(a){ return dbSum(a,function(r){return dbNum(r,8);}); }).map(function(e){
-        const byV = dbGrp(e[1], function(r){ return dbS(r,7); });
-        return dbNode(dbEsc(e[0]), byV.size+' variety • '+e[1].length+' booking', dbN(dbSum(e[1],function(r){return dbNum(r,8);})), function(){
-          return dbSorted(byV, function(a){ return dbSum(a,function(r){return dbNum(r,8);}); }).map(function(v){
-            return dbNode(dbEsc(v[0]), v[1].length+' kisan', dbN(dbSum(v[1],function(r){return dbNum(r,8);})), function(){
-              return v[1].sort(function(a,b){ return a._d<b._d?1:-1; }).map(function(r){
-                const st = dbS(r,21)||'Pending';
-                const all = bkMap.get(dbS(r,23)) || [r], f = all[0];
-                const lines = all.map(function(x){ return '<tr><td>'+dbEsc(dbS(x,6))+' – '+dbEsc(dbS(x,7))+'</td><td class="r">'+dbN(dbNum(x,8))+' × ₹'+dbNum(x,9)+'</td><td>'+dbFD(dbD(dbV(x,10)))+'</td><td class="r">'+dbN(dbNum(x,25))+'</td><td>'+dbBadge(dbS(x,21)||'Pending', dbS(x,21)==='Delivered'?'badge-green':dbS(x,21)==='Partial'?'badge-orange':'badge-gray')+'</td></tr>'; });
-                return dbNode('👨 '+dbEsc(dbS(r,1))+' '+dbBadge(st, st==='Delivered'?'badge-green':st==='Partial'?'badge-orange':'badge-gray'),
-                  dbEsc(dbS(r,2))+' • '+dbN(dbNum(r,8))+' × ₹'+dbNum(r,9)+' • 📅 '+dbFD(r._d), '₹'+dbN(dbNum(r,8)*dbNum(r,9)),
-                  '<div class="dbn-info">🆔 '+dbEsc(dbS(r,23))+' • 📱 '+dbEsc(dbS(f,5))+' • 🏛️ '+dbEsc(dbS(f,3))+', '+dbEsc(dbS(f,4))+(dbS(f,24)?' • 📣 '+dbEsc(dbS(f,24)):'')+'</div>'+
-                  dbTbl(['Crop – Variety',{t:'Plant × Rate',r:1},'Delivery',{t:'Diya',r:1},'Status'], lines)+
-                  '<div class="dbn-info">💰 1st: <b>₹'+dbN(dbNum(f,11))+'</b> '+dbEsc(dbS(f,12))+(dbNum(f,15)?' • 2nd: <b>₹'+dbN(dbNum(f,15))+'</b> '+dbEsc(dbS(f,16)):'')+' • Total: <b>₹'+dbN(dbNum(f,19))+'</b></div>'+
-                  '<div class="dbn-acts"><button class="bk-abtn bk-slip" onclick="event.stopPropagation();dbSlip(\''+dbEsc(dbS(r,23))+'\')"><i class="ti ti-file-download"></i> Slip</button></div>',
-                  {cls:'dbn-leaf'});
-              }).join('');
-            });
-          }).join('');
-        });
-      }).join('');
+      const seen = {}; let tRec = 0, tDel = 0;
+      const rows = bk.slice().sort(function(a,b){ return a._d<b._d?1:a._d>b._d?-1:(dbS(a,23)<dbS(b,23)?-1:1); }).map(function(r){
+        const bid = dbS(r,23), first = !seen[bid]; seen[bid] = 1;
+        const f = (bkMap.get(bid) || [r])[0];
+        const st = dbS(r,21)||'Pending';
+        if(first) tRec += dbNum(f,19);
+        tDel += dbNum(r,25);
+        return '<tr'+(first?' class="dbt-first"':'')+'>'+td(dt(r._d))+td(first?dbEsc(bid):'')+td('<b>'+dbEsc(dbS(r,1))+'</b>')+td(dbEsc(dbS(r,2)))+td(first?dbEsc(dbS(f,5)):'')+
+          td(dbEsc(dbS(r,6)))+td('<b>'+dbEsc(dbS(r,7))+'</b>')+tdr(dbN(dbNum(r,8)))+tdr('₹'+dbNum(r,9))+tdr('₹'+dbN(dbNum(r,8)*dbNum(r,9)))+td(dt(dbD(dbV(r,10))))+
+          tdr(dbN(dbNum(r,25)))+td(dbBadge(st, st==='Delivered'?'badge-green':st==='Partial'?'badge-orange':'badge-gray'))+
+          tdr(first?'<b>₹'+dbN(dbNum(f,19))+'</b>':'')+td(dbEsc(dbS(f,24)))+
+          td(first?'<button class="bk-abtn bk-slip" onclick="event.stopPropagation();dbSlip(\''+dbEsc(bid)+'\')"><i class="ti ti-file-download"></i> Slip</button>':'')+'</tr>';
+      });
+      return dbTbl(['Date','Booking ID','Kisan','Gaon','Mobile','Crop','Variety',{t:'Plant',r:1},{t:'Rate',r:1},{t:'Amount',r:1},'Delivery',{t:'Diya',r:1},'Status',{t:'Received',r:1},'Marketing',''], rows,
+        td('TOTAL')+td(T.bkCnt+' booking')+td('')+td('')+td('')+td('')+td('')+tdr(dbN(T.bkPl))+td('')+tdr('₹'+dbN(T.bkVal))+td('')+tdr(dbN(tDel))+td('')+tdr('₹'+dbN(tRec))+td('')+td(''));
     }, {cls:'dbn-sec', sec:'bk', icon:'📝', color:'#e3f2fd'});
   }
 
-  // ── 6. PAYMENT: Date → Mode → Kisan ──
+  // ── 6. PAYMENT: har payment ki ek line ──
   if(pays.length){
-    const byD = dbGrp(pays, function(p){ return p.d; });
     h += dbNode('Payment Aaya', pays.length+' payment', '₹'+dbN(T.pay), function(){
-      return Array.from(byD.entries()).sort(function(a,b){ return a[0]<b[0]?1:-1; }).map(function(d){
-        const byM = dbGrp(d[1], function(p){ return /bank|icici|phone/i.test(p.mode+' '+p.bank) ? (/cash/i.test(p.mode)?'Cash + Bank':'Bank') : 'Cash'; });
-        return dbNode('📅 '+dbFD(d[0]), d[1].length+' payment', '₹'+dbN(dbSum(d[1],function(p){return p.amt;})), function(){
-          return Array.from(byM.entries()).map(function(m){
-            return dbNode((m[0]==='Cash'?'💵 ':'🏦 ')+m[0], m[1].length+' payment', '₹'+dbN(dbSum(m[1],function(p){return p.amt;})),
-              dbTbl(['Kisan','Booking','Kaunsa','Mode / Bank',{t:'Rakam',r:1}], m[1].map(function(p){ return '<tr><td><b>'+dbEsc(dbS(p.f,1))+'</b><div class="dbt-s">'+dbEsc(dbS(p.f,2))+'</div></td><td>'+dbEsc(p.bid)+'</td><td>'+p.which+'</td><td>'+dbEsc(p.mode)+(p.bank?' • '+dbEsc(p.bank):'')+'</td><td class="r"><b>₹'+dbN(p.amt)+'</b></td></tr>'; })), {cls:'dbn-leaf'});
-          }).join('');
-        });
-      }).join('');
+      const rows = pays.slice().sort(function(a,b){ return a.d<b.d?1:a.d>b.d?-1:0; }).map(function(p){
+        return '<tr>'+td(dt(p.d))+td('<b>'+dbEsc(dbS(p.f,1))+'</b>')+td(dbEsc(dbS(p.f,2)))+td(dbEsc(p.bid))+td(p.which)+td(dbEsc(p.mode))+td(dbEsc(p.bank))+tdr('<b>₹'+dbN(p.amt)+'</b>')+'</tr>';
+      });
+      return dbTbl(['Date','Kisan','Gaon','Booking','Kaunsa','Mode','Bank',{t:'Rakam',r:1}], rows, td('TOTAL')+td(pays.length+' payment')+td('')+td('')+td('')+td('')+td('')+tdr('₹'+dbN(T.pay)));
     }, {cls:'dbn-sec', sec:'pay', icon:'💰', color:'#e8f5e9'});
   }
 
-  // ── 7. ATTENDANCE: Date → Status → Labour ──
+  // ── 7. ATTENDANCE: har labour ki ek line ──
   if(att.length){
-    const byD = dbGrp(att, function(r){ return r._d; });
-    h += dbNode('Attendance', byD.size+' din • '+att.length+' entry • ₹'+dbN(T.wage)+' wage', dbN(T.attP)+' <small>present</small>', function(){
-      return Array.from(byD.entries()).sort(function(a,b){ return a[0]<b[0]?1:-1; }).map(function(d){
-        const byS = dbGrp(d[1], function(r){ return dbS(r,5); });
-        const pc = (byS.get('Present')||[]).length, hc = (byS.get('Half Day')||[]).length, ac = (byS.get('Absent')||[]).length;
-        return dbNode('📅 '+dbFD(d[0]), '✅ '+pc+' • ½ '+hc+' • ❌ '+ac, '₹'+dbN(dbSum(d[1],function(r){return dbNum(r,7)+dbNum(r,9);})), function(){
-          return ['Present','Half Day','Absent'].concat(Array.from(byS.keys()).filter(function(k){ return ['Present','Half Day','Absent'].indexOf(k)===-1; })).filter(function(k){ return byS.has(k); }).map(function(k){
-            const rs = byS.get(k);
-            return dbNode(dbBadge(k, k==='Present'?'badge-green':k==='Half Day'?'badge-orange':'badge-red'), rs.length+' labour', '₹'+dbN(dbSum(rs,function(r){return dbNum(r,7)+dbNum(r,9);})),
-              dbTbl(['Labour','Kaam',{t:'Wage',r:1},{t:'OT',r:1},'Entry by'], rs.map(function(r){ return '<tr><td><b>'+dbEsc(dbS(r,4))+'</b></td><td>'+dbEsc(dbS(r,3))+'</td><td class="r">₹'+dbN(dbNum(r,7))+'</td><td class="r">'+(dbNum(r,8)?dbNum(r,8)+'h • ₹'+dbN(dbNum(r,9)):'—')+'</td><td>'+dbEsc(dbS(r,1))+'</td></tr>'; })), {cls:'dbn-leaf'});
-          }).join('');
-        });
-      }).join('');
+    h += dbNode('Attendance', new Set(att.map(function(r){ return r._d; })).size+' din • '+att.length+' entry • ₹'+dbN(T.wage)+' wage', dbN(T.attP)+' <small>present</small>', function(){
+      let w = 0, ot = 0;
+      const rows = att.slice().sort(function(a,b){ return a._d<b._d?1:a._d>b._d?-1:(dbS(a,4)<dbS(b,4)?-1:1); }).map(function(r){
+        const k = dbS(r,5); w += dbNum(r,7); ot += dbNum(r,9);
+        return '<tr>'+td(dt(r._d))+td('<b>'+dbEsc(dbS(r,4))+'</b>')+td(dbEsc(dbS(r,3)))+td(dbBadge(k, k==='Present'?'badge-green':k==='Half Day'?'badge-orange':'badge-red'))+
+          tdr('₹'+dbN(dbNum(r,7)))+tdr(dbNum(r,8)?dbNum(r,8)+'h • ₹'+dbN(dbNum(r,9)):'—')+tdr('<b>₹'+dbN(dbNum(r,7)+dbNum(r,9))+'</b>')+td(dbEsc(dbS(r,1)))+'</tr>';
+      });
+      return dbTbl(['Date','Labour','Kaam','Haazri',{t:'Wage',r:1},{t:'OT',r:1},{t:'Kul',r:1},'Entry by'], rows,
+        td('TOTAL')+td(att.length+' entry')+td('')+td(dbN(T.attP)+' present')+tdr('₹'+dbN(w))+tdr('₹'+dbN(ot))+tdr('₹'+dbN(w+ot))+td(''));
     }, {cls:'dbn-sec', sec:'att', icon:'👷', color:'#f3e5f5'});
   }
 
-  // ── 8. PANI / SPRAY: Area → Date → Dawai + Labour ──
+  // ── 8. PANI / SPRAY: har entry ek line (pani + dawai), us din-area ke labour saath ──
   if(wat.length || chem.length || spr.length){
-    const areas = dbGrp(wat.concat(spr, chem), function(r){ return dbS(r,2); });
+    const areas = new Set(wat.concat(spr, chem).map(function(r){ return dbS(r,2); }));
     h += dbNode('Pani / Spray', wat.length+' pani • '+chem.length+' dawai', areas.size+' <small>area</small>', function(){
-      return Array.from(areas.keys()).sort().map(function(a){
-        const w = wat.filter(function(r){ return dbS(r,2)===a; }), c = chem.filter(function(r){ return dbS(r,2)===a; }), s = spr.filter(function(r){ return dbS(r,2)===a; });
-        const days = Array.from(new Set(w.concat(c,s).map(function(r){ return r._d; }))).sort().reverse();
-        return dbNode('📍 '+dbEsc(a), days.length+' din', (w.length?'💧'+w.length+' ':'')+(c.length?'🧪'+c.length:''), function(){
-          return days.map(function(d){
-            const wd = w.filter(function(r){ return r._d===d; }), cd = c.filter(function(r){ return r._d===d; }), sd = s.filter(function(r){ return r._d===d; });
-            const labs = R.wsl.filter(function(l){ return l._d===d && dbS(l,2)===a; });
-            let body = '';
-            if(wd.length) body += dbTbl(['💧 Pani','Method',{t:'Litre',r:1},'Samay'], wd.map(function(r){ return '<tr><td>'+dbEsc(dbS(r,1))+'</td><td>'+dbEsc(dbS(r,6))+'</td><td class="r">'+dbN(dbNum(r,7))+'</td><td>'+(typeof djTime==='function'?djTime(r,4)+' – '+djTime(r,5):'')+'</td></tr>'; }));
-            if(cd.length) body += dbTbl(['🧪 Dawai','Kya kiya',{t:'Matra',r:1},'Crop – Variety'], cd.map(function(r){ return '<tr><td><b>'+dbEsc(dbS(r,5))+'</b></td><td>'+dbEsc(dbS(r,6)||'Spray')+'</td><td class="r">'+dbNum(r,7)+' '+dbEsc(dbS(r,8))+'</td><td>'+dbEsc([dbS(r,3),dbS(r,4)].filter(Boolean).join(' – ')||'Poora area')+'</td></tr>'; }));
-            if(labs.length) body += dbTbl(['👷 Labour','Kaam',{t:'Ghante',r:1},{t:'Pump',r:1}], labs.map(function(l){ return '<tr><td>'+dbEsc(dbS(l,4))+'</td><td>'+(dbS(l,3)==='spray'?'Spray':'Pani')+'</td><td class="r">'+(dbNum(l,5)||'—')+'</td><td class="r">'+(dbNum(l,6)||'—')+'</td></tr>'; }));
-            return dbNode('📅 '+dbFD(d), (wd.length?wd.length+' pani ':'')+(cd.length?cd.length+' dawai ':'')+(sd.length?'• '+dbSum(sd,function(r){return dbNum(r,9);})+' pump':''), labs.length+' labour', body, {cls:'dbn-leaf'});
-          }).join('');
-        });
-      }).join('');
+      const labOf = function(d, a){ return R.wsl.filter(function(l){ return l._d===d && dbS(l,2)===a; }).map(function(l){ return dbEsc(dbS(l,4))+(dbNum(l,6)?' <span class="dbt-s">('+dbNum(l,6)+' pump)</span>':(dbNum(l,5)?' <span class="dbt-s">('+dbNum(l,5)+'h)</span>':'')); }).join(', '); };
+      const list = [];
+      wat.forEach(function(r){ list.push({d:r._d, a:dbS(r,2), k:'💧 Pani', x:dbEsc(dbS(r,6)), m:dbN(dbNum(r,7))+' ltr', cv:'Poora area', s:dbS(r,1), t:(typeof djTime==='function'?djTime(r,4)+' – '+djTime(r,5):'')}); });
+      chem.forEach(function(r){ list.push({d:r._d, a:dbS(r,2), k:'🧪 '+dbEsc(dbS(r,6)||'Spray'), x:'<b>'+dbEsc(dbS(r,5))+'</b>', m:dbNum(r,7)+' '+dbEsc(dbS(r,8)), cv:dbEsc([dbS(r,3),dbS(r,4)].filter(Boolean).join(' – ')||'Poora area'), s:dbS(r,1), t:''}); });
+      list.sort(function(a,b){ return a.d<b.d?1:a.d>b.d?-1:(a.a<b.a?-1:a.a>b.a?1:0); });
+      const shown = {};
+      const rows = list.map(function(e){
+        const key = e.d+'|'+e.a, first = !shown[key]; shown[key] = 1;
+        return '<tr'+(first?' class="dbt-first"':'')+'>'+td(dt(e.d))+td('<b>'+dbEsc(e.a)+'</b>')+td(e.k)+td(e.x)+tdr(e.m)+td(e.cv)+td(dbEsc(e.s))+td(e.t)+td(first?labOf(e.d, e.a):'')+'</tr>';
+      });
+      return dbTbl(['Date','Area','Kya kiya','Dawai / Method',{t:'Matra',r:1},'Crop – Variety','Supervisor','Samay','Labour'], rows);
     }, {cls:'dbn-sec', sec:'spr', icon:'🌿', color:'#f3e5f5'});
   }
 
-  // ── 9. MORNING ASSIGNMENT: Date → Area ──
+  // ── 9. MORNING ASSIGNMENT ──
   if(ma.length){
-    const byD = dbGrp(ma, function(r){ return r._d; });
-    h += dbNode('Morning Assignment', byD.size+' din • '+ma.length+' kaam', dbN(dbSum(ma,function(r){return dbNum(r,5);}))+' <small>labour</small>', function(){
-      return Array.from(byD.entries()).sort(function(a,b){ return a[0]<b[0]?1:-1; }).map(function(d){
-        return dbNode('📅 '+dbFD(d[0]), d[1].length+' kaam', dbN(dbSum(d[1],function(r){return dbNum(r,5);}))+' labour',
-          dbTbl(['Supervisor','Area','Kaam','Labour'], d[1].map(function(r){ return '<tr><td>'+dbEsc(dbS(r,1))+'</td><td>'+dbEsc(dbS(r,2))+'</td><td><b>'+dbEsc(dbS(r,3))+'</b></td><td>'+dbEsc(dbS(r,4))+' <span class="dbt-s">('+dbNum(r,5)+')</span></td></tr>'; })), {cls:'dbn-leaf'});
-      }).join('');
+    const tLab = dbSum(ma,function(r){return dbNum(r,5);});
+    h += dbNode('Morning Assignment', new Set(ma.map(function(r){ return r._d; })).size+' din • '+ma.length+' kaam', dbN(tLab)+' <small>labour</small>', function(){
+      const rows = ma.slice().sort(byDate).map(function(r){
+        return '<tr>'+td(dt(r._d))+td(dbEsc(dbS(r,1)))+td(dbEsc(dbS(r,2)))+td('<b>'+dbEsc(dbS(r,3))+'</b>')+td(dbEsc(dbS(r,4)))+tdr(dbNum(r,5))+'</tr>';
+      });
+      return dbTbl(['Date','Supervisor','Area','Kaam','Labour',{t:'Ginti',r:1}], rows, td('TOTAL')+td('')+td('')+td(ma.length+' kaam')+td('')+tdr(dbN(tLab)));
     }, {cls:'dbn-sec', sec:'ma', icon:'📋', color:'#fff3e0'});
   }
 
-  // ── 10. LABOUR-WISE: Labour → Date → kya kiya ──
+  // ── 10. LABOUR-WISE: Labour | Date | kya kiya ──
   const LW = {};
   const lwAdd = function(n, d, txt){ n = String(n||'').trim(); if(!n) return; if(!LW[n]) LW[n] = {}; if(!LW[n][d]) LW[n][d] = []; LW[n][d].push(txt); };
   seedLab.filter(function(l){ return inR(l._d) && (!supF || dbS(l,1)===supF) && (!q || l._t.indexOf(q)>-1); }).forEach(function(l){ lwAdd(dbS(l,6), l._d, '🌱 Sowing '+dbS(l,4)+' — '+dbNum(l,7)+' PKT / '+dbNum(l,8)+' tray'); });
@@ -6964,11 +6937,13 @@ function dbRender(){
   const lwNames = Object.keys(LW);
   if(lwNames.length){
     h += dbNode('Labour-wise', 'Kis labour ne kis din kya kiya', lwNames.length+' <small>labour</small>', function(){
-      return lwNames.sort().map(function(n){
-        const days = Object.keys(LW[n]).sort().reverse();
-        return dbNode('👤 '+dbEsc(n), days.length+' din', Object.values(LW[n]).reduce(function(s,a){ return s+a.length; },0)+' kaam',
-          dbTbl(['Date','Kya kiya'], days.map(function(d){ return '<tr><td style="white-space:nowrap;">'+dbFD(d)+'</td><td>'+LW[n][d].map(dbEsc).join('<br>')+'</td></tr>'; })), {cls:'dbn-leaf'});
-      }).join('');
+      const rows = [];
+      lwNames.sort().forEach(function(n){
+        Object.keys(LW[n]).sort().reverse().forEach(function(d, i){
+          rows.push('<tr'+(i===0?' class="dbt-first"':'')+'>'+td(i===0?'<b>'+dbEsc(n)+'</b>':'')+td(dt(d))+td(LW[n][d].map(dbEsc).join('<br>'))+'</tr>');
+        });
+      });
+      return dbTbl(['Labour','Date','Kya kiya'], rows);
     }, {cls:'dbn-sec', sec:'lw', icon:'👤', color:'#e0f2f1'});
   }
 
