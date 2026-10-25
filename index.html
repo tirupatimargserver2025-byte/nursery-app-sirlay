@@ -2019,7 +2019,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261025-1330';
+const APP_VERSION = '20261025-1345';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -5104,17 +5104,17 @@ function loadBookingReport(){
         let gAmt = 0, gPay = 0, gBk = 0;
         let sumHtml = '<div class="rep-card"><div class="rep-title">📊 Crop / Variety Summary</div>'+
           '<div style="overflow-x:auto;"><table class="att-table bk-sum">'+
-          '<thead><tr><th>Vegetable</th><th>Variety</th><th>Booking</th><th>Booked Plant</th><th>Booking Amount</th></tr></thead><tbody>';
+          '<thead><tr><th>Vegetable</th><th>Variety</th><th>Booking</th><th>Booked Plant</th><th>Received</th></tr></thead><tbody>';
         cropList.forEach(cp => {
           const vlist = Object.values(cp.vars).sort((a,b)=> b.plants - a.plants);
           const nb = Object.keys(cp.bids).length;
           gAmt += cp.amt; gPay += cp.pay; gBk += nb;
-          sumHtml += '<tr class="bks-crop"><td>'+cp.crop+'</td><td>'+vlist.length+' variety</td><td>'+nb+'</td><td>'+cp.plants.toLocaleString('en-IN')+'</td><td>'+rs(cp.amt)+'</td></tr>';
+          sumHtml += '<tr class="bks-crop"><td>'+cp.crop+'</td><td>'+vlist.length+' variety</td><td>'+nb+'</td><td>'+cp.plants.toLocaleString('en-IN')+'</td><td>'+rs(cp.pay)+'</td></tr>';
           vlist.forEach(v => {
-            sumHtml += '<tr><td class="bks-arrow">↳</td><td style="text-align:left;">'+v.variety+'</td><td>'+Object.keys(v.bids).length+'</td><td>'+v.plants.toLocaleString('en-IN')+'</td><td>'+rs(v.amt)+'</td></tr>';
+            sumHtml += '<tr><td class="bks-arrow">↳</td><td style="text-align:left;">'+v.variety+'</td><td>'+Object.keys(v.bids).length+'</td><td>'+v.plants.toLocaleString('en-IN')+'</td><td>'+rs(v.pay)+'</td></tr>';
           });
         });
-        sumHtml += '<tr class="bks-tot"><td colspan="2">GRAND TOTAL</td><td>'+glist.length+'</td><td>'+totalPlant.toLocaleString('en-IN')+'</td><td>'+rs(gAmt)+'</td></tr>';
+        sumHtml += '<tr class="bks-tot"><td colspan="2">GRAND TOTAL</td><td>'+glist.length+'</td><td>'+totalPlant.toLocaleString('en-IN')+'</td><td>'+rs(totalRec)+'</td></tr>';
         sumHtml += '</tbody></table></div></div>';
         html += sumHtml;
 
@@ -7281,12 +7281,14 @@ function expPdf(meta, secs){
     t.appendChild(document.createElement('tbody'));
     return t;
   };
-  const mkRow = function(r){
+  const mkRow = function(r, s){
     const tr = document.createElement('tr');
+    const hd = (s && s.head && s.head[s.head.length-1]) || [];
+    const txtCol = hd.map(function(c){ return /variety|naam|name|kisan|farmer|gaon|village|lot|mobile|booking id|gaadi|driver|labour|zone|area|supervisor|crop|vegetable|paudha/i.test(String(c.t||'')); });
     const first = String(r[0] && r[0].t || '');
     if(/\btotal\b/i.test(first)) tr.className = 'ep-tot';
     else if(r.bold) tr.className = 'ep-bold';
-    tr.innerHTML = r.map(function(c){ const isN = (typeof c.t==='number') || expNum(c.t)!==null;
+    tr.innerHTML = r.map(function(c, ci){ const isN = !txtCol[ci] && ((typeof c.t==='number') || expNum(c.t)!==null);
       return '<td'+(c.span>1?' colspan="'+c.span+'"':'')+(isN?' class="n"':'')+'>'+expEsc(typeof c.t==='number'?c.t.toLocaleString('en-IN'):c.t)+'</td>'; }).join('');
     return tr;
   };
@@ -7302,7 +7304,7 @@ function expPdf(meta, secs){
     }
     let tb = t.querySelector('tbody'), cnt = 0;
     s.rows.forEach(function(r){
-      const tr = mkRow(r); tb.appendChild(tr); cnt++;
+      const tr = mkRow(r, s); tb.appendChild(tr); cnt++;
       if(over()){
         tb.removeChild(tr);
         if(cnt === 1){ body.removeChild(t); if(ttl && ttl.parentNode===body) body.removeChild(ttl); }
