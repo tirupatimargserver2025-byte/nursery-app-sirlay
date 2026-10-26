@@ -2098,7 +2098,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261026-1530';
+const APP_VERSION = '20261026-1645';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -8111,6 +8111,29 @@ function mrBoot(){
 .pv-t td.tg::before{content:'▾ ';color:#2d7a4f;}
 .pv-t td.tg.cl::before{content:'▸ ';}
 .pv-t th.cg{text-align:center;background:#d7e8dd;border-left:2px solid #fff;}
+.pv-hf{display:inline-block;margin-left:6px;padding:0 5px;border:1px solid #b9d3c2;border-radius:4px;background:#fff;color:#2d7a4f;font-size:10px;line-height:16px;cursor:pointer;vertical-align:middle;user-select:none;}
+.pv-hf:hover{background:#e3efe7;}
+.pv-hf.on{background:#2d7a4f;color:#fff;border-color:#2d7a4f;}
+.pv-hf-sep{color:#9bb5a5;margin:0 4px;}
+#pvHfPop{position:fixed;z-index:9999;width:280px;max-width:calc(100vw - 16px);background:#fff;border:1px solid #c9dcd0;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.18);display:none;flex-direction:column;font-size:13px;}
+#pvHfPop .hd{padding:10px 12px 6px;font-weight:800;color:#1f5137;}
+#pvHfPop .q{width:auto !important;box-sizing:border-box;align-self:stretch;margin:0 12px 6px;padding:7px 9px;border:1px solid #cfdcd3;border-radius:6px;font-size:13px;}
+#pvHfPop .lst{overflow:auto;padding:2px 6px;border-top:1px solid #edf2ee;border-bottom:1px solid #edf2ee;}
+#pvHfPop label{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:5px;cursor:pointer;}
+#pvHfPop label:hover{background:#f0f6f2;}
+#pvHfPop label,#pvHfPop label span{text-transform:none !important;letter-spacing:0 !important;font-size:13px !important;font-weight:500;color:#223 !important;margin:0 !important;}
+#pvHfPop label.all,#pvHfPop label.all span{font-weight:700;}
+#pvHfPop input[type=checkbox]{-webkit-appearance:checkbox !important;appearance:auto !important;width:16px !important;height:16px !important;min-width:16px;padding:0 !important;margin:0 !important;flex:none;box-shadow:none !important;border:none;accent-color:#2d7a4f;}
+#pvHfPop label .c{color:#8a9a90 !important;font-size:11px !important;}
+#pvHfPop label .c{margin-left:auto;color:#8a9a90;font-size:11px;}
+#pvHfPop label.all{font-weight:700;margin:0 6px;}
+#pvHfPop .ft{display:flex;gap:6px;padding:8px 10px;justify-content:flex-end;}
+#pvHfPop .ft button{border:1px solid #cfdcd3;background:#fff;border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;}
+#pvHfPop .ft button.ok{background:#2d7a4f;color:#fff;border-color:#2d7a4f;font-weight:700;}
+#pvHfPop .ft button.clr{margin-right:auto;color:#b23a3a;}
+.pv-hfl{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.pv-hfl span{background:#e3efe7;border-radius:12px;padding:3px 8px;font-size:11.5px;color:#1f5137;}
+.pv-hfl span b{cursor:pointer;color:#b23a3a;margin-left:4px;}
 .pv-t th.r,.pv-t td.n{text-align:right;}
 .pv-t td.c-red{background:#fde2df!important;color:#a3261c;font-weight:800;}
 .pv-t td.c-green{background:#dcf3e2!important;color:#14632f;font-weight:800;}
@@ -8282,7 +8305,7 @@ function pvCompile(src){
 function pvOut(v){ if(typeof v==='number' && !isFinite(v)) return ''; if(v===true) return 'TRUE'; if(v===false) return 'FALSE'; return v==null ? '' : v; }
 
 // ════════ DATA: chuni hui reports ek saath ════════
-function pvVeg(s){ return String(s==null?'':s).replace(/[^\p{L}\p{M}\p{N}\s\-\.\/]/gu, '').replace(/\s+/g,' ').trim().toUpperCase(); }
+function pvVeg(s){ return String(s==null?'':s).replace(/[\uFE00-\uFE0F\u200D]/g, '').replace(/[^\p{L}\p{M}\p{N}\s\-\.\/]/gu, '').replace(/\s+/g,' ').trim().toUpperCase(); }
 function pvMonth(iso){ const m = String(iso||'').match(/^(\d{4})-(\d{2})/); if(!m) return ''; return m[1]+'-'+m[2]+' ('+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[2]-1]+')'; }
 function pvWeek(iso){ const m = String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})/); if(!m) return ''; const d = new Date(+m[1], +m[2]-1, +m[3]); d.setDate(d.getDate() - (d.getDay()+6)%7); return localISO(d)+' se'; }
 const PV_COMMON = [
@@ -8334,6 +8357,7 @@ function pvFieldBy(fields, name){
 }
 
 // ════════ PIVOT CALCULATION ════════
+function pvDisp(f, v){ if(v==='' || v==null) return '—'; return f.type==='date' ? fmtDate(v) : String(v).trim() || '—'; }
 function pvCalc(cfg, data){
   const fields = data.fields.slice();
   let rows = data.rows;
@@ -8363,6 +8387,11 @@ function pvCalc(cfg, data){
     else rows = rows.filter(function(r){ return mrTxtOk(r[f.id], q); });
   });
   const F = function(id){ return fields.filter(function(x){ return x.id===id; })[0]; };
+  // 2b) header ▼ se hatayi values (Excel jaisa) — sirf Rows wale field par
+  const hideBase = rows, hide = cfg.hide || {};
+  const hideOn = (cfg.rows||[]).filter(function(id, k, a){ return a.indexOf(id)===k && hide[id] && hide[id].length && F(id); });
+  hideOn.forEach(function(id){ const f = F(id), set = {}; hide[id].forEach(function(v){ set[v] = 1; });
+    rows = rows.filter(function(r){ return !set[pvDisp(f, r[id])]; }); });
   const rowF = (cfg.rows||[]).map(F).filter(Boolean);
   const colF = cfg.col ? F(cfg.col) : null;
   const vals = (cfg.vals||[]).filter(function(v){ return v.f==='#' || F(v.f); }).map(function(v){
@@ -8370,7 +8399,7 @@ function pvCalc(cfg, data){
     const agg = v.f==='#' ? 'count' : (v.agg||'sum');
     return {f:f, agg:agg, name:(v.name||'').trim() || (v.f==='#' ? 'Entries' : PV_AGG_SHORT[agg]+' '+f.label)};
   });
-  const disp = function(f, v){ if(v==='' || v==null) return '—'; return f.type==='date' ? fmtDate(v) : String(v).trim() || '—'; };
+  const disp = pvDisp;
   const SEP = '\u0001', ALL = '\u0003';
   const acc = {};
   const getA = function(k){ return acc[k] || (acc[k] = vals.map(function(){ return {s:0, n:0, mn:Infinity, mx:-Infinity, u:{}}; })); };
@@ -8460,7 +8489,7 @@ function pvCalc(cfg, data){
   };
   if(rowF.length) walk(0, '');
   const grand = {cells:colKeys.map(function(c){ return cell(0, '', c); }), total:cell(0, '', ALL)};
-  return {rowF:rowF, colF:colF, colKeys:colKeys, vnames:vnames, nv:vals.length, lines:out, grand:grand, fields:fields, nrows:rows.length, errs:errs, allRows:rows};
+  return {rowF:rowF, colF:colF, colKeys:colKeys, vnames:vnames, nv:vals.length, lines:out, grand:grand, fields:fields, nrows:rows.length, errs:errs, allRows:rows, hideBase:hideBase, hideOn:hideOn};
 }
 
 // ════════ BUILDER (Rows / Columns / Values ...) ════════
@@ -8528,6 +8557,7 @@ function pvBuilder(res){
       '<input class="grow'+(er.filters[i]?' err':'')+'" list="pvdl'+i+'" placeholder="'+ph+'" value="'+mrEsc(fl.q||'')+'" onchange="pvSetF('+i+',\'q\',this.value)">'+dl+'</div>';
   });
   h += '<button class="pv-add" onclick="pvAdd(\'filters\')">+ Filter jodo</button>';
+  h += pvHfList(fields);
   h += '<div class="pv-h" style="margin-top:10px;">Dikhawat</div><div class="pv-opt">'+
     '<label><input type="checkbox" '+(cfg.sub!==false?'checked':'')+' onchange="MR.pv.sub=this.checked;MR.pv.subLv=[];pvRun()"> Subtotal (sab)</label>'+
     '<label>Layout <select onchange="MR.pv.layout=this.value;pvRun()"><option value="tree"'+(cfg.layout!=='flat'?' selected':'')+'>🌳 Tree (khulne wala)</option><option value="flat"'+(cfg.layout==='flat'?' selected':'')+'>📄 Flat (table jaisa)</option></select></label>'+
@@ -8654,12 +8684,12 @@ function pvRender(res){
   vn.slice(0, 6).forEach(function(n, i){ h += '<div class="mr-k"><div class="l">'+mrEsc(n)+'</div><div class="v">'+mrEsc(pvF(res.grand.total[i]))+'</div></div>'; });
   h += '</div><div class="mr-wrap"><table class="mr-t pv-t"><thead>';
   if(multiCol){
-    h += '<tr><th rowspan="2" style="cursor:default">'+mrEsc(rowLabel)+'</th>'+res.colKeys.map(function(c){ return '<th class="cg" colspan="'+vn.length+'">'+mrEsc(res.colF.label)+': '+mrEsc(c)+'</th>'; }).join('')+
+    h += '<tr><th rowspan="2" style="cursor:default">'+pvHfHead(res.rowF)+'</th>'+res.colKeys.map(function(c){ return '<th class="cg" colspan="'+vn.length+'">'+mrEsc(res.colF.label)+': '+mrEsc(c)+'</th>'; }).join('')+
       '<th class="cg" colspan="'+vn.length+'">TOTAL</th></tr><tr>';
     res.colKeys.concat(['T']).forEach(function(){ vn.forEach(function(n){ h += '<th class="r" style="cursor:default;top:30px">'+mrEsc(n)+'</th>'; }); });
     h += '</tr>';
   } else {
-    h += '<tr><th style="cursor:default">'+mrEsc(rowLabel)+'</th>'+vn.map(function(n){ return '<th class="r" style="cursor:default">'+mrEsc(n)+'</th>'; }).join('')+'</tr>';
+    h += '<tr><th style="cursor:default">'+pvHfHead(res.rowF)+'</th>'+vn.map(function(n){ return '<th class="r" style="cursor:default">'+mrEsc(n)+'</th>'; }).join('')+'</tr>';
   }
   h += '</thead><tbody>';
   const nL = res.rowF.length;
@@ -8694,13 +8724,13 @@ function pvRenderFlat(res){
   vn.slice(0, 6).forEach(function(n, i){ h += '<div class="mr-k"><div class="l">'+mrEsc(n)+'</div><div class="v">'+mrEsc(pvF(res.grand.total[i]))+'</div></div>'; });
   h += '</div><div class="mr-wrap"><table class="mr-t pv-t pv-flat"><thead>';
   if(multiCol){
-    h += '<tr>'+res.rowF.map(function(f){ return '<th rowspan="2" style="cursor:default">'+mrEsc(f.label)+'</th>'; }).join('')+
+    h += '<tr>'+res.rowF.map(function(f){ return '<th rowspan="2" style="cursor:default">'+mrEsc(f.label)+pvHfBtn(f)+'</th>'; }).join('')+
       res.colKeys.map(function(c){ return '<th class="cg" colspan="'+vn.length+'">'+mrEsc(res.colF.label)+': '+mrEsc(c)+'</th>'; }).join('')+
       '<th class="cg" colspan="'+vn.length+'">TOTAL</th></tr><tr>';
     res.colKeys.concat(['T']).forEach(function(){ vn.forEach(function(n){ h += '<th class="r" style="cursor:default;top:30px">'+mrEsc(n)+'</th>'; }); });
     h += '</tr>';
   } else {
-    h += '<tr>'+res.rowF.map(function(f){ return '<th style="cursor:default">'+mrEsc(f.label)+'</th>'; }).join('')+vn.map(function(n){ return '<th class="r" style="cursor:default">'+mrEsc(n)+'</th>'; }).join('')+'</tr>';
+    h += '<tr>'+res.rowF.map(function(f){ return '<th style="cursor:default">'+mrEsc(f.label)+pvHfBtn(f)+'</th>'; }).join('')+vn.map(function(n){ return '<th class="r" style="cursor:default">'+mrEsc(n)+'</th>'; }).join('')+'</tr>';
   }
   h += '</thead><tbody>';
   const tds = function(line){
@@ -8718,6 +8748,105 @@ function pvRenderFlat(res){
   h += '<tr class="gt"><td class="lbl" colspan="'+nL+'">GRAND TOTAL</td>'+tds(res.grand)+'</tr></tbody></table></div>';
   if(res.nrows===0) h = '<div class="mr-msg">Is tarikh / filter me koi data nahi mila</div>' + h;
   out.innerHTML = h;
+}
+// ════════ HEADER ▼ FILTER (Excel jaisa checkbox) ════════
+let PV_HF = null;
+function pvHfBtn(f){
+  const h = MR.pv && MR.pv.hide && MR.pv.hide[f.id], on = !!(h && h.length);
+  return '<span class="pv-hf'+(on?' on':'')+'" data-f="'+mrEsc(f.id)+'" onclick="pvHfOpen(event,this)" title="'+(on?h.length+' value hatayi gayi — badlo':'Values chuno / hatao')+'">▼</span>';
+}
+function pvHfHead(rowF){ return rowF.map(function(f){ return mrEsc(f.label)+pvHfBtn(f); }).join('<span class="pv-hf-sep">/</span>') || ' '; }
+function pvHfLabel(v){ return v==='—' ? '— (Khaali)' : v; }
+function pvHfSort(a, b){
+  if(a==='—') return -1; if(b==='—') return 1;
+  const da = a.match(/^(\d{2})\/(\d{2})\/(\d{4})$/), db = b.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if(da && db){ const x = da[3]+da[2]+da[1], y = db[3]+db[2]+db[1]; return x<y?-1:x>y?1:0; }
+  const x = Number(a.replace(/,/g,'')), y = Number(b.replace(/,/g,''));
+  if(a.trim()!=='' && b.trim()!=='' && !isNaN(x) && !isNaN(y)) return x-y;
+  return a.toLowerCase()<b.toLowerCase()?-1:a.toLowerCase()>b.toLowerCase()?1:0;
+}
+// Is field ki values (baaki header-filter lagne ke baad, is field ka chhod kar)
+function pvHfValues(res, id){
+  const F = function(x){ return res.fields.filter(function(f){ return f.id===x; })[0]; };
+  const f = F(id); if(!f) return [];
+  const hide = (MR.pv && MR.pv.hide) || {};
+  let rows = res.hideBase || [];
+  (res.hideOn||[]).forEach(function(o){ if(o===id) return; const of = F(o), set = {}; hide[o].forEach(function(v){ set[v] = 1; });
+    rows = rows.filter(function(r){ return !set[pvDisp(of, r[o])]; }); });
+  const cnt = {};
+  rows.forEach(function(r){ const v = pvDisp(f, r[id]); cnt[v] = (cnt[v]||0) + 1; });
+  return Object.keys(cnt).sort(pvHfSort).map(function(v){ return {v:v, n:cnt[v]}; });
+}
+function pvHfOpen(ev, el){
+  ev.stopPropagation();
+  const res = PV_LAST; if(!res) return;
+  const id = el.getAttribute('data-f');
+  const f = res.fields.filter(function(x){ return x.id===id; })[0]; if(!f) return;
+  const old = (MR.pv.hide && MR.pv.hide[id]) || [];
+  const chk = {}; old.forEach(function(v){ chk[v] = false; });
+  const vals = pvHfValues(res, id);
+  vals.forEach(function(o){ if(chk[o.v]!==false) chk[o.v] = true; });
+  PV_HF = {id:id, label:f.label, vals:vals, chk:chk, q:''};
+  let pop = document.getElementById('pvHfPop');
+  if(!pop){
+    pop = document.createElement('div'); pop.id = 'pvHfPop'; document.body.appendChild(pop);
+    document.addEventListener('mousedown', function(e){ const p = document.getElementById('pvHfPop');
+      if(p && p.style.display!=='none' && !p.contains(e.target) && !(e.target.classList && e.target.classList.contains('pv-hf'))) pvHfClose(); });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') pvHfClose(); });
+  }
+  pop.innerHTML = '<div class="hd">'+mrEsc(f.label)+'</div>'+
+    '<input class="q" placeholder="🔍 Khojo..." oninput="pvHfSearch(this.value)">'+
+    '<label class="all"><input type="checkbox" id="pvHfAll" onchange="pvHfAll(this.checked)"> (Sab chuno)</label>'+
+    '<div class="lst" id="pvHfLst"></div>'+
+    '<div class="ft"><button class="clr" onclick="pvHfClear()">Filter hatao</button><button onclick="pvHfClose()">Cancel</button><button class="ok" onclick="pvHfOk()">OK</button></div>';
+  pop.style.display = 'flex';
+  const r = el.getBoundingClientRect(), W = window.innerWidth, H = window.innerHeight, pw = Math.min(280, W - 16);
+  pop.style.left = Math.max(8, Math.min(r.left, W - pw - 8)) + 'px';
+  let top = r.bottom + 4; if(top > H - 260) top = Math.max(8, H - 420);
+  pop.style.top = top + 'px';
+  document.getElementById('pvHfLst').style.maxHeight = Math.max(140, Math.min(320, H - top - 150)) + 'px';
+  pvHfDraw();
+  const q = pop.querySelector('.q'); if(q && W > 700) q.focus();
+}
+function pvHfShown(){ const q = PV_HF.q.toLowerCase(); return PV_HF.vals.map(function(o, i){ return i; }).filter(function(i){ return !q || pvHfLabel(PV_HF.vals[i].v).toLowerCase().indexOf(q)>=0; }); }
+function pvHfDraw(){
+  const lst = document.getElementById('pvHfLst'); if(!lst || !PV_HF) return;
+  const sh = pvHfShown();
+  lst.innerHTML = sh.length ? sh.slice(0, 3000).map(function(i){ const o = PV_HF.vals[i];
+    return '<label><input type="checkbox" data-i="'+i+'"'+(PV_HF.chk[o.v]?' checked':'')+' onchange="pvHfTick(this)"> <span>'+mrEsc(pvHfLabel(o.v))+'</span><span class="c">'+o.n.toLocaleString('en-IN')+'</span></label>'; }).join('')
+    : '<div style="padding:10px;color:#8a9a90">Kuch nahi mila</div>';
+  const all = document.getElementById('pvHfAll');
+  if(all){ const on = sh.filter(function(i){ return PV_HF.chk[PV_HF.vals[i].v]; }).length; all.checked = sh.length>0 && on===sh.length; all.indeterminate = on>0 && on<sh.length; }
+}
+function pvHfTick(cb){ PV_HF.chk[PV_HF.vals[+cb.getAttribute('data-i')].v] = cb.checked; pvHfDraw(); }
+function pvHfAll(on){ pvHfShown().forEach(function(i){ PV_HF.chk[PV_HF.vals[i].v] = on; }); pvHfDraw(); }
+function pvHfSearch(q){ PV_HF.q = q.trim(); pvHfDraw(); }
+function pvHfClose(){ const p = document.getElementById('pvHfPop'); if(p) p.style.display = 'none'; PV_HF = null; }
+function pvHfSet(id, list){
+  if(!MR.pv.hide) MR.pv.hide = {};
+  if(list && list.length) MR.pv.hide[id] = list; else delete MR.pv.hide[id];
+  pvRun();
+}
+function pvHfOk(){
+  if(!PV_HF) return;
+  const st = PV_HF, here = {};
+  st.vals.forEach(function(o){ here[o.v] = 1; });
+  if(st.vals.length && !st.vals.some(function(o){ return st.chk[o.v]; })){ toast('❗ Kam se kam ek value chuno','error'); return; }
+  // jo value abhi list me nahi (dusri tarikh) unka purana haal rakho
+  const list = Object.keys(st.chk).filter(function(v){ return st.chk[v]===false; });
+  pvHfClose();
+  pvHfSet(st.id, list);
+}
+function pvHfClear(){ if(!PV_HF) return; const id = PV_HF.id; pvHfClose(); pvHfSet(id, []); }
+// Builder ke Filter dabbe me: kaun se header filter lage hain
+function pvHfList(fields){
+  const hide = (MR.pv && MR.pv.hide) || {}, ids = Object.keys(hide).filter(function(id){ return hide[id] && hide[id].length && (MR.pv.rows||[]).indexOf(id)>=0; });
+  let h = '<div class="pv-help" style="margin-top:8px">Table ke header par <b>▼</b> dabakar bhi values hata sakte ho (Excel jaisa).</div>';
+  if(!ids.length) return h;
+  return h + '<div class="pv-hfl">'+ids.map(function(id){ const f = fields.filter(function(x){ return x.id===id; })[0];
+    const vs = hide[id].map(pvHfLabel);
+    return '<span title="Hatayi: '+mrEsc(vs.join(', '))+'">▼ '+mrEsc(f ? f.label : id)+': '+vs.length+' hatayi'+
+      (vs.length<=2 ? ' ('+mrEsc(vs.join(', '))+')' : '')+'<b data-f="'+mrEsc(id)+'" onclick="pvHfSet(this.getAttribute(\'data-f\'),[])">✕</b></span>'; }).join('')+'</div>';
 }
 function pvTog(td){ const pk = td.getAttribute('data-pk'); MR.pvClosed[pk] = !MR.pvClosed[pk]; pvRender(PV_LAST); }
 
