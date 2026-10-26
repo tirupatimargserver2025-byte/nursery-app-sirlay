@@ -673,6 +673,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
 .dbt tr.dbt-first td{border-top:2px solid #cfe3d6;}
 .dbt tr.dbt-sub td{background:#eef6f1;font-weight:700;}
 .dbt td{color:#1b2a22;}
+.cl-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.cl-badge{display:inline-block;padding:2px 9px;border-radius:12px;color:#fff;font-size:11.5px;font-weight:700;letter-spacing:.2px;white-space:nowrap;}
+.cl-btns{display:flex;gap:8px;margin-top:4px;}
+.cl-b{flex:1;padding:11px;background:#fff;color:var(--gm);border:1.5px solid var(--gm);border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;}
+.cl-b2{background:var(--gm);color:#fff;}
+.cl-b:disabled{opacity:.6;cursor:wait;}
+.cl-status{font-size:12px;color:var(--g5);margin-top:6px;min-height:14px;}
 .dbt tbody tr.dbt-tot td{background:#e3f5ea;}
 .dbt tbody tr.dbt-sub td{background:#eef6f1;}
 .dbt-s{font-size:11px;color:#6b7c75;}
@@ -833,7 +840,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div class="dsc">Present / Half Day / Absent + OT</div>
         </div>
       </div></div></div>
-      <div class="msec-acc" data-open="0"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-clipboard-list"></i>Reports</div><div class="mh-right"><span class="msec-count">11</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
+      <div class="msec-acc" data-open="0"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-clipboard-list"></i>Reports</div><div class="mh-right"><span class="msec-count">12</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard report" onclick="openMod('report')">
           <div class="ico"><i class="ti ti-chart-line"></i></div><div class="ttl">Daily Report</div>
           <div class="dsc">Aaj ka poora kaam</div>
@@ -873,6 +880,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
         <div class="mcard admin-c" onclick="openSupActivity()">
           <div class="ico"><i class="ti ti-plant-2"></i></div><div class="ttl">Supervisor Activity</div>
           <div class="dsc">Kaun kya kar raha hai</div>
+        </div>
+        <div class="mcard report" onclick="openCallsReport()">
+          <div class="ico"><i class="ti ti-phone-call"></i></div><div class="ttl">Marketing Calls</div>
+          <div class="dsc">Calls, missed, notes — TGH Calls app</div>
         </div>
         <div class="mcard entry" onclick="openPayDeliv()">
           <div class="ico"><i class="ti ti-coin"></i></div><div class="ttl">Payment &amp; Delivery</div>
@@ -893,7 +904,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div class="ico"><i class="ti ti-table"></i></div><div class="ttl" style="color:white;">📊 Master Report</div>
           <div class="dsc" style="color:rgba(255,255,255,0.85);">Koi bhi report — column chuno, har column par filter, Excel / PDF</div>
         </div></div>
-      <div class="msec-acc" data-open="1"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-clipboard-list"></i>Reports</div><div class="mh-right"><span class="msec-count">11</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
+      <div class="msec-acc" data-open="1"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-clipboard-list"></i>Reports</div><div class="mh-right"><span class="msec-count">12</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard report" onclick="openMod('report')">
           <div class="ico"><i class="ti ti-chart-line"></i></div><div class="ttl">Daily Report</div>
           <div class="dsc">Aaj ka poora kaam</div>
@@ -933,6 +944,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
         <div class="mcard admin-c" onclick="openSupActivity()">
           <div class="ico"><i class="ti ti-plant-2"></i></div><div class="ttl">Supervisor Activity</div>
           <div class="dsc">Kaun kya kar raha hai</div>
+        </div>
+        <div class="mcard report" onclick="openCallsReport()">
+          <div class="ico"><i class="ti ti-phone-call"></i></div><div class="ttl">Marketing Calls</div>
+          <div class="dsc">Calls, missed, notes — TGH Calls app</div>
         </div>
         <div class="mcard entry" onclick="openPayDeliv()">
           <div class="ico"><i class="ti ti-coin"></i></div><div class="ttl">Payment &amp; Delivery</div>
@@ -977,7 +992,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
           <div class="dsc">Aaj ki booking — WhatsApp par</div>
         </div>
       </div></div></div>
-      <div class="msec-acc" data-open="0"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-clipboard-list"></i>Reports</div><div class="mh-right"><span class="msec-count">10</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
+      <div class="msec-acc" data-open="0"><div class="msec-head" onclick="togSec(this)"><div class="mh-left"><i class="ti ti-clipboard-list"></i>Reports</div><div class="mh-right"><span class="msec-count">11</span><i class="ti ti-chevron-down msec-chev"></i></div></div><div class="msec-body"><div class="mgrid">
         <div class="mcard report" onclick="openBookingReport()">
           <div class="ico"><i class="ti ti-clipboard-list"></i></div><div class="ttl">Booking Report</div>
           <div class="dsc">Saari bookings — filter</div>
@@ -1013,6 +1028,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
         <div class="mcard admin-c" onclick="openSupActivity()">
           <div class="ico"><i class="ti ti-plant-2"></i></div><div class="ttl">Supervisor Activity</div>
           <div class="dsc">Kaun kya kar raha hai</div>
+        </div>
+        <div class="mcard report" onclick="openCallsReport()">
+          <div class="ico"><i class="ti ti-phone-call"></i></div><div class="ttl">Marketing Calls</div>
+          <div class="dsc">Calls, missed, notes — TGH Calls app</div>
         </div>
         <div class="mcard entry" onclick="openPayDeliv()">
           <div class="ico"><i class="ti ti-coin"></i></div><div class="ttl">Payment & Delivery</div>
@@ -1554,6 +1573,41 @@ input:focus,select:focus,textarea:focus{border-color:var(--gl);background:white;
   </div>
 </div>
 
+<!-- ════ MARKETING CALLS (TGH Calls app → Supabase → "Calls" sheet) ════ -->
+<div class="screen" id="callsScreen">
+  <div class="hdr">
+    <div class="htop"><div class="hico" style="background:#0f6b5c;">📞</div>
+      <h1>Marketing Calls <span>From TGH Calls app • auto-updates every 10 min</span></h1></div>
+    <div class="sbar">
+      <button class="backbtn" onclick="goMenu()">← Menu</button></div>
+  </div>
+  <div class="wrap">
+    <div class="card">
+      <div class="ctitle">🔍 Filters</div>
+      <div class="cl-chips">
+        <button type="button" class="db-chip" data-cr="today" onclick="clRange('today')">Today</button>
+        <button type="button" class="db-chip" data-cr="yest" onclick="clRange('yest')">Yesterday</button>
+        <button type="button" class="db-chip" data-cr="7" onclick="clRange('7')">7 Days</button>
+        <button type="button" class="db-chip" data-cr="month" onclick="clRange('month')">This Month</button>
+      </div>
+      <div class="g2">
+        <div><label>📅 From</label><input type="date" id="clFrom" onchange="clRange('custom')"></div>
+        <div><label>📅 To</label><input type="date" id="clTo" onchange="clRange('custom')"></div>
+      </div>
+      <div class="g2">
+        <div id="clStaffWrap"><label>📣 Marketing</label><select id="clStaff" onchange="clRender()"><option value="">All</option></select></div>
+        <div><label>📋 Outcome</label><select id="clOutcome" onchange="clRender()">
+          <option value="">All</option><option>Booking done</option><option>Call back later</option><option>Not interested</option>
+          <option>Wrong number</option><option>Other</option><option value="__none">No note added</option></select></div>
+      </div>
+      <div class="fr"><label>🔍 Search</label><input type="text" id="clSearch" placeholder="Farmer, village, number, note…" oninput="clRender()"></div>
+      <div class="cl-btns"><button type="button" onclick="loadCallsReport()" class="cl-b cl-b2">Show Report</button><button type="button" id="clRefreshBtn" onclick="clRefreshNow()" class="cl-b">🔄 Refresh now</button></div>
+      <div id="clStatus" class="cl-status"></div>
+    </div>
+    <div id="callsContent"></div>
+  </div>
+</div>
+
 <!-- DISPATCH FORM SCREEN -->
 <div class="screen" id="dispatchScreen">
   <div class="hdr">
@@ -2044,7 +2098,7 @@ function formatDate(dateStr) {
 }
 // ═══ AUTO-UPDATE: naya version aate hi app khud refresh ho jayega ═══
 // Deploy karte waqt ye number badal jata hai -> purana app khud naya version le lega
-const APP_VERSION = '20261025-2115';
+const APP_VERSION = '20261026-1530';
 (function autoUpdateCheck(){
   // Loop guard: abhi abhi update hua hai to dobara check mat karo
   if(location.search.indexOf('v=') !== -1) return;
@@ -6995,13 +7049,180 @@ function dbSlip(bid){
 
 
 // ════════════════════════════════════════════════════════════════
+// MARKETING CALLS — "Calls" + "Call Devices" sheet (GS fills from Supabase every 10 min, or on "Refresh now")
+// Admin / Manager: all calls • Marketing: only own
+// ════════════════════════════════════════════════════════════════
+let CL_ROWS = null, CL_DEV = [];
+const CL_TYPE = { 'Ki':'Outgoing', 'Aayi':'Incoming', 'Kaati':'Rejected' };   // purani sheet ki likhawat
+const CL_COLOR = { Incoming:'#1565c0', Outgoing:'#2e7d32', Missed:'#c62828', Rejected:'#e65100', Other:'#607d8b' };
+function clMine(){ return curUser && curUser.role === 'Marketing'; }
+function clSec(n){ n = Math.round(n||0); if(n < 60) return n+'s'; if(n < 3600) return Math.floor(n/60)+'m '+(n%60)+'s'; return Math.floor(n/3600)+'h '+Math.floor((n%3600)/60)+'m'; }
+function clEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function clBadge(t){ return '<span class="cl-badge" style="background:'+(CL_COLOR[t]||'#607d8b')+';">'+clEsc(t)+'</span>'; }
+function clIsMissed(t){ return t==='Missed' || t==='Rejected'; }
+function openCallsReport(){
+  const sel = document.getElementById('clStaff');
+  sel.innerHTML = '<option value="">All</option>' + Object.keys(SUP_DATA).filter(function(n){ return SUP_DATA[n] && SUP_DATA[n].role === 'Marketing'; })
+    .map(function(n){ return '<option value="'+clEsc(n)+'">'+clEsc(n)+'</option>'; }).join('');
+  document.getElementById('clStaffWrap').style.display = clMine() ? 'none' : '';
+  document.getElementById('clOutcome').value = '';
+  document.getElementById('clSearch').value = '';
+  document.getElementById('clStatus').textContent = '';
+  clRange('today', true);
+  show('callsScreen');
+  loadCallsReport();
+}
+function clRange(k, silent){
+  const t = new Date(), f = new Date();
+  if(k==='yest'){ t.setDate(t.getDate()-1); f.setDate(f.getDate()-1); }
+  else if(k==='7'){ f.setDate(f.getDate()-6); }
+  else if(k==='month'){ f.setDate(1); }
+  if(k !== 'custom'){ document.getElementById('clFrom').value = localISO(f); document.getElementById('clTo').value = localISO(t); }
+  document.querySelectorAll('#callsScreen .db-chip').forEach(function(c){ c.classList.toggle('on', c.getAttribute('data-cr')===k); });
+  if(!silent && CL_ROWS) clRender();
+}
+// "Refresh now": GS se turant Supabase → sheet, phir report dobara
+function clRefreshNow(){
+  const btn = document.getElementById('clRefreshBtn'), st = document.getElementById('clStatus');
+  btn.disabled = true; btn.textContent = '⏳ Refreshing…';
+  st.textContent = 'Fetching the latest calls from phones…';
+  const done = function(){ btn.disabled = false; btn.textContent = '🔄 Refresh now'; };
+  fetch(API, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body: JSON.stringify({module:'pullCalls'})})
+    .then(function(){ st.textContent = 'Updated at ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'}); loadCallsReport(); done(); })
+    .catch(function(){ st.textContent = 'Could not refresh — check internet'; done(); });
+}
+function clTime(r){ const c = r.c && r.c[1]; if(!c) return ''; if(c.f) { const m = String(c.f).match(/(\d{1,2}):(\d{2})/); if(m) return m[1].padStart(2,'0')+':'+m[2]; } if(Array.isArray(c.v)) return String(c.v[0]).padStart(2,'0')+':'+String(c.v[1]).padStart(2,'0'); return String(c.v||''); }
+function loadCallsReport(){
+  const con = document.getElementById('callsContent');
+  if(!CL_ROWS) con.innerHTML = '<div class="card" style="text-align:center;padding:20px;"><div style="font-size:30px;">⏳</div><div style="font-weight:700;color:var(--gd);">Loading calls…</div></div>';
+  const ts = Date.now();
+  const S = function(n){ return fetch('https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&headers=1&sheet='+encodeURIComponent(n)+'&t='+ts).then(function(r){ return r.text(); }).catch(function(){ return ''; }); };
+  Promise.all([S('Calls'), S('Call Devices')]).then(function(T){
+    CL_ROWS = dashParse(T[0]).map(function(r){
+      const g = function(i){ const c = r.c[i]; return c && c.v!=null ? c.v : ''; };
+      const ty = String(g(6)).trim();
+      return { d: djISO(g(0)), t: clTime(r), staff: String(g(2)).trim(), num: String(g(3)).trim(), kisan: String(g(4)).trim(), gaon: String(g(5)).trim(),
+        type: CL_TYPE[ty] || ty, dur: parseFloat(g(7))||0, outcome: String(g(8)).trim(), note: String(g(9)).trim(), contact: String(g(11)).trim(), id: g(13) };
+    });
+    CL_DEV = dashParse(T[1]).map(function(r){
+      const g = function(i){ const c = r.c[i]; return c && c.v!=null ? (c.f || c.v) : ''; };
+      return { staff: String(g(0)).trim(), phone: g(1), ver: g(3), sim: g(4), sync: String(r.c[5] && r.c[5].v!=null ? r.c[5].v : ''), today: g(6), perm: String(g(7)) };
+    });
+    clRender();
+  }).catch(function(){ con.innerHTML = '<div class="card" style="color:var(--rd);text-align:center;">⚠️ Could not load — check internet</div>'; });
+}
+function clN10(n){ return String(n||'').replace(/\D/g,'').slice(-10); }
+function clRender(){
+  const con = document.getElementById('callsContent');
+  if(!CL_ROWS){ return; }
+  if(!CL_ROWS.length && !CL_DEV.length){
+    con.innerHTML = '<div class="card" style="text-align:center;padding:20px;color:var(--g5);">No calls yet.<br>Make sure the <b>TGH Calls</b> app is set up on the marketing phones and <b>setupCallsSync</b> has been run once in Apps Script.</div>';
+    return;
+  }
+  const from = document.getElementById('clFrom').value, to = document.getElementById('clTo').value;
+  const staff = clMine() ? curUser.name : document.getElementById('clStaff').value;
+  const oc = document.getElementById('clOutcome').value;
+  const q = (document.getElementById('clSearch').value||'').trim().toLowerCase();
+  const same = function(a, b){ return String(a).trim().toLowerCase() === String(b).trim().toLowerCase(); };
+  const talked = function(r){ return r.type==='Outgoing' || (r.type==='Incoming' && r.dur > 0); };
+  let rows = CL_ROWS.filter(function(r){
+    if(!r.d || (from && r.d < from) || (to && r.d > to)) return false;
+    if(staff && !same(r.staff, staff)) return false;
+    return true;
+  });
+  // Pending call-backs: missed/rejected with no later outgoing (or answered incoming) to that number by the same person
+  const pend = {};
+  rows.slice().sort(function(a,b){ return (a.d+a.t) < (b.d+b.t) ? -1 : 1; }).forEach(function(r){
+    const k = r.staff+'|'+clN10(r.num);
+    if(clIsMissed(r.type)) pend[k] = r;
+    else if(talked(r)) delete pend[k];
+  });
+  const pendList = Object.keys(pend).map(function(k){ return pend[k]; });
+  const blank = function(){ return {out:0, inc:0, missed:0, talk:0, farmer:0, noted:0, talkCalls:0, pend:0}; };
+  const by = {};
+  const names = clMine() ? [curUser.name] : Object.keys(SUP_DATA).filter(function(n){ return SUP_DATA[n] && SUP_DATA[n].role==='Marketing'; });
+  names.forEach(function(n){ if(!staff || same(n, staff)) by[n] = blank(); });
+  const keyOf = function(n){ return Object.keys(by).filter(function(x){ return same(x, n); })[0]; };
+  rows.forEach(function(r){
+    const k = keyOf(r.staff) || r.staff;
+    const s = by[k] = by[k] || blank();
+    if(r.type==='Outgoing') s.out++; else if(r.type==='Incoming') s.inc++; else if(clIsMissed(r.type)) s.missed++;
+    s.talk += r.dur; if(r.kisan) s.farmer++;
+    if(talked(r)){ s.talkCalls++; if(r.outcome || r.note) s.noted++; }
+  });
+  pendList.forEach(function(r){ const k = keyOf(r.staff); if(k) by[k].pend++; });
+  const devOf = function(n){ return CL_DEV.filter(function(d){ return same(d.staff, n); })[0]; };
+  const now = Date.now();
+  const T = {out:0, inc:0, missed:0, talk:0};
+  rows.forEach(function(r){ if(r.type==='Outgoing') T.out++; else if(r.type==='Incoming') T.inc++; else if(clIsMissed(r.type)) T.missed++; T.talk += r.dur; });
+  const tile = function(v, l, c){ return '<div class="stat-item"><span class="sv"'+(c?' style="color:'+c+'"':'')+'>'+v+'</span><div class="sl">'+l+'</div></div>'; };
+  let h = '<div class="rep-card" style="margin-top:10px;"><div class="stat-grid cl-tiles">'+
+    tile(T.out, 'Outgoing', CL_COLOR.Outgoing) + tile(T.inc, 'Incoming', CL_COLOR.Incoming) + tile(T.missed, 'Missed', CL_COLOR.Missed) +
+    tile(pendList.length, 'Call-backs pending', pendList.length ? CL_COLOR.Missed : '') + tile(clSec(T.talk), 'Talk time') +
+    '</div></div>';
+  // Team summary
+  h += '<div class="rep-card"><div class="rep-title">📣 Team summary</div><div style="overflow-x:auto;"><table class="att-table">'+
+    '<thead><tr><th>Marketing</th><th>Outgoing</th><th>Incoming</th><th>Missed</th><th>Call-backs pending</th><th>Talk time</th><th>Farmer calls</th><th>Notes added</th><th>Phone sync</th></tr></thead><tbody>';
+  const tot = blank();
+  Object.keys(by).sort().forEach(function(n){
+    const s = by[n], d = devOf(n);
+    Object.keys(tot).forEach(function(k){ tot[k] += s[k]; });
+    let sync = '<span style="color:var(--rd);font-weight:700;">App not installed</span>';
+    if(d){
+      const m = String(d.sync).match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/) || String(d.sync).match(/^Date\((\d+),(\d+),(\d+),(\d+),(\d+)/);
+      let age = Infinity;
+      if(m){ const dt = /^Date/.test(d.sync) ? new Date(+m[1], +m[2], +m[3], +m[4], +m[5]) : new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5]); age = (now - dt.getTime())/60000; }
+      const lbl = age < 60 ? Math.max(0, Math.round(age))+' min ago' : age < 1440 ? Math.round(age/60)+' h ago' : age < Infinity ? Math.round(age/1440)+' days ago' : '?';
+      sync = '<span style="color:'+(age > 120 ? 'var(--rd)' : 'var(--gm)')+';font-weight:700;">'+lbl+'</span>'+(/NO-/.test(d.perm) ? '<div style="font-size:11px;color:var(--rd);">setup incomplete</div>' : '');
+    }
+    h += '<tr><td><b>'+clEsc(n)+'</b></td><td style="color:'+CL_COLOR.Outgoing+';font-weight:700;">'+s.out+'</td><td style="color:'+CL_COLOR.Incoming+';font-weight:700;">'+s.inc+'</td>'+
+      '<td style="color:'+CL_COLOR.Missed+';font-weight:700;">'+s.missed+'</td>'+
+      '<td'+(s.pend?' style="color:var(--rd);font-weight:700;"':'')+'>'+s.pend+'</td><td>'+clSec(s.talk)+'</td><td>'+s.farmer+'</td>'+
+      '<td>'+s.noted+' / '+s.talkCalls+'</td><td>'+sync+'</td></tr>';
+  });
+  h += '<tr style="background:var(--gd);color:white;font-weight:800;"><td>TOTAL</td><td>'+tot.out+'</td><td>'+tot.inc+'</td><td>'+tot.missed+'</td><td>'+tot.pend+'</td><td>'+clSec(tot.talk)+'</td><td>'+tot.farmer+'</td><td>'+tot.noted+' / '+tot.talkCalls+'</td><td></td></tr>';
+  h += '</tbody></table></div></div>';
+  // Outcomes
+  const ocs = {};
+  rows.forEach(function(r){ if(r.outcome) ocs[r.outcome] = (ocs[r.outcome]||0) + 1; });
+  const ok = Object.keys(ocs);
+  if(ok.length){
+    h += '<div class="rep-card"><div class="rep-title">📋 Call outcomes</div><div style="overflow-x:auto;"><table class="att-table"><thead><tr><th>Outcome</th><th>Calls</th></tr></thead><tbody>'+
+      ok.sort(function(a,b){ return ocs[b]-ocs[a]; }).map(function(k){ return '<tr><td><b>'+clEsc(k)+'</b></td><td>'+ocs[k]+'</td></tr>'; }).join('')+'</tbody></table></div></div>';
+  }
+  // All calls (filtered) — upar
+  let list = rows.filter(function(r){
+    if(oc === '__none'){ if(r.outcome || r.note || !talked(r)) return false; }
+    else if(oc && r.outcome !== oc) return false;
+    if(q && (r.kisan+' '+r.gaon+' '+r.num+' '+r.note+' '+r.contact+' '+r.staff).toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  }).sort(function(a,b){ return (b.d+b.t) < (a.d+a.t) ? -1 : 1; });
+  h += '<div class="rep-card"><div class="rep-title">🕘 All calls ('+list.length+')</div><div style="overflow-x:auto;"><table class="att-table">'+
+    '<thead><tr><th>Date</th><th>Time</th><th>Marketing</th><th>Farmer / Name</th><th>Village</th><th>Number</th><th>Type</th><th>Duration</th><th>Outcome</th><th>Note</th></tr></thead><tbody>';
+  list.slice(0, 800).forEach(function(r){
+    h += '<tr><td style="white-space:nowrap;">'+fmtDate(r.d)+'</td><td>'+clEsc(r.t)+'</td><td>'+clEsc(r.staff)+'</td><td><b>'+clEsc(r.kisan || r.contact || '—')+'</b></td><td>'+clEsc(r.gaon)+'</td>'+
+      '<td>'+clEsc(r.num)+'</td><td>'+clBadge(r.type)+'</td><td>'+clSec(r.dur)+'</td><td>'+clEsc(r.outcome)+'</td><td style="text-align:left;">'+clEsc(r.note)+'</td></tr>';
+  });
+  if(!list.length) h += '<tr><td colspan="10" style="text-align:center;color:var(--g5);padding:14px;">No calls for this filter</td></tr>';
+  h += '</tbody></table></div>'+(list.length > 800 ? '<div style="font-size:12px;color:var(--g5);padding:6px;">Showing first 800 — Excel has all</div>' : '')+'</div>';
+  // Call-backs pending — neeche
+  if(pendList.length){
+    h += '<div class="rep-card"><div class="rep-title">📞 Call-backs pending ('+pendList.length+')</div><div style="overflow-x:auto;"><table class="att-table"><thead><tr><th>Date</th><th>Time</th><th>Marketing</th><th>Farmer / Name</th><th>Number</th><th>Type</th></tr></thead><tbody>'+
+      pendList.sort(function(a,b){ return (b.d+b.t) < (a.d+a.t) ? -1 : 1; }).map(function(r){
+        return '<tr><td style="white-space:nowrap;">'+fmtDate(r.d)+'</td><td>'+clEsc(r.t)+'</td><td>'+clEsc(r.staff)+'</td><td><b>'+clEsc(r.kisan || r.contact || '—')+'</b>'+(r.gaon?' <span style="color:var(--g5);">'+clEsc(r.gaon)+'</span>':'')+'</td><td>'+clEsc(r.num)+'</td><td>'+clBadge(r.type)+'</td></tr>';
+      }).join('')+'</tbody></table></div></div>';
+  }
+  con.innerHTML = h;
+}
+
+// ════════════════════════════════════════════════════════════════
 // REPORT EXPORT — har report ki PDF (saaf table) aur Excel
 // ════════════════════════════════════════════════════════════════
 const EXP_MAP = {
   reportScreen:'reportContent', seedReportScreen:'seedReportContent', labourReportScreen:'labourReportContent',
   myReportScreen:'myReportContent', shiftingReportScreen:'shiftingReportContent', dispatchReportScreen:'dispatchReportContent',
   bookingReportScreen:'bookingReportContent', varietyReportScreen:'varietyReportContent', supActivityScreen:'supActivityContent',
-  payDelivScreen:'payDelivContent', fzReportScreen:'fzReportContent', dashScreen:'dashContent'
+  payDelivScreen:'payDelivContent', callsScreen:'callsContent', fzReportScreen:'fzReportContent', dashScreen:'dashContent'
 };
 let EXP_BUSY = false;
 function expInit(){
@@ -7416,7 +7637,8 @@ const MR_SOURCES = [
   {k:'wsl',     n:'👷 Watering-Spray — Labour',       s:'W-S Labour'},
   {k:'shift',   n:'🔄 Shifting',                      s:'Shifting Data'},
   {k:'disp',    n:'🚚 Dispatch',                      s:'Dispatch Data'},
-  {k:'ma',      n:'📝 Morning Assignment',            s:'Morning Assignment'}
+  {k:'ma',      n:'📝 Morning Assignment',            s:'Morning Assignment'},
+  {k:'calls',   n:'📞 Marketing Calls',               s:'Calls', noSup:true}
 ];
 const MR = {user:null, src:'all', cache:{}, cols:[], rows:[], vis:{}, f:{}, sort:null, from:'', to:'', dcol:'', grp:'', limit:300, preset:'month'};
 
@@ -7917,7 +8139,7 @@ function mrBoot(){
 // PIVOT — kai report milao, Rows/Columns/Values, formula (IF, AND...), rang
 // ════════════════════════════════════════════════════════════════
 const PV_SHORT = {booking:'Booking', seed:'Sowing', seedlab:'Sowing Labour', water:'Watering', spray:'Spraying', chem:'Dawai',
-  wsl:'WS Labour', shift:'Shifting', disp:'Dispatch', ma:'Assignment'};
+  wsl:'WS Labour', shift:'Shifting', disp:'Dispatch', ma:'Assignment', calls:'Calls'};
 const PV_AGG = [['sum','Jod (Sum)'],['count','Ginti (Count)'],['uniq','Alag-alag ginti'],['avg','Ausat (Avg)'],['min','Sabse kam (Min)'],['max','Sabse zyada (Max)'],['pct','% of total']];
 const PV_AGG_SHORT = {sum:'Sum', count:'Count', uniq:'Unique', avg:'Avg', min:'Min', max:'Max', pct:'%'};
 const PV_COLORS = [['red','🔴 Laal'],['green','🟢 Hara'],['orange','🟠 Narangi'],['yellow','🟡 Peela']];
@@ -8081,14 +8303,15 @@ function pvData(cfg){
       const src = it.src, one = mrBuildOne(src, it.raw);
       const find = function(re, not){ return one.cols.filter(function(c){ return re.test(c.label) && !(not && not.test(c.label)); })[0]; };
       const cd = one.cols.filter(function(c){ return c.type==='date'; })[0];
-      const cs = src.k==='booking' ? find(/marketing/i) : find(/^supervisor$/i);
+      const cs = (src.k==='booking' || src.k==='calls') ? find(/marketing/i) : find(/^supervisor$/i);
       const ca = src.k==='booking' ? null : find(/^area|^zone/i);
       // Faldar sheets: Category = Vegetable ki jagah, Plant (naam) = Variety ki jagah
       const cc = find(/^crop$|^vegetable$/i) || (src.fz ? find(/^category$/i) : null), cv = find(/^variety$/i) || (src.fz ? find(/^plant$/i) : null), cl = find(/^lot/i);
       const pre = multi ? PV_SHORT[src.k]+': ' : '';
       one.cols.forEach(function(c){ fields.push({id:src.k+'|'+c.label, label:pre+c.label, type:c.type, src:src.k}); });
       let list = one.rows;
-      if(MR.user.role==='Supervisor' && cs) list = list.filter(function(r){ return String(r[cs.id]).trim().toLowerCase() === MR.user.name.trim().toLowerCase(); });
+      // Supervisor sirf apni entry; Marketing ko Calls me sirf apni call
+      if(cs && (MR.user.role==='Supervisor' || (MR.user.role==='Marketing' && src.k==='calls'))) list = list.filter(function(r){ return String(r[cs.id]).trim().toLowerCase() === MR.user.name.trim().toLowerCase(); });
       list.forEach(function(r){
         const d = cd ? r[cd.id] : '';
         if((MR.from || MR.to) && (!d || (MR.from && d<MR.from) || (MR.to && d>MR.to))) return;
